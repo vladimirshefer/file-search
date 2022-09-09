@@ -26,7 +26,8 @@ class FileIndexer {
 
     private fun indexFile(file: File, analyzer: Analyzer, sink: (t: Token) -> Unit) {
         val tokenizer = analyzer.tokenizer()
-        val filePath = file.absolutePath
+        val directoryPath = file.parent
+        val fileName = file.name
         val reader = file.reader()
         var read = reader.read()
         var lineNum = 0
@@ -34,16 +35,15 @@ class FileIndexer {
         while (read != -1) {
             val char = read.toChar()
             if (char == '\n') {
-                lineNum++;
+                lineNum++
                 tokenIndex = 0
             }
             val token = tokenizer.next(char)
             if (token != null) {
-                sink(Token(token, filePath, lineNum, tokenIndex))
+                sink(Token(token, directoryPath, fileName, lineNum, tokenIndex))
                 tokenIndex++
             }
             read = reader.read()
         }
     }
-
 }
