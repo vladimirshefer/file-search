@@ -1,15 +1,31 @@
 package dev.shefer.searchengine.indexing
 
-import dev.shefer.searchengine.TOKEN_DELIM
+import dev.shefer.searchengine.Analyzer
+import dev.shefer.searchengine.EXTENSION_WHITELIST
 import dev.shefer.searchengine.Token
-import dev.shefer.searchengine.indexing.tokenizer.Tokenizer
 import java.io.File
-import java.util.*
-import java.util.function.Consumer
 
 class FileIndexer {
+    fun indexRecursively(
+        fileOrDirectory: File,
+        analyzer: Analyzer,
+        sink: (t: Token) -> Unit
+    ) {
+        if (fileOrDirectory.isFile) {
+            if (EXTENSION_WHITELIST.any { fileOrDirectory.name.endsWith(it) }) {
+                indexFile(fileOrDirectory, analyzer, sink)
+            }
+        }
 
-    fun indexFile(file: File, tokenizer: Tokenizer, sink: (t: Token) -> Unit) {
+        if (fileOrDirectory.isDirectory) {
+            for (listFile in fileOrDirectory.listFiles()) {
+                indexRecursively(listFile, analyzer, sink);
+            }
+        }
+    }
+
+    private fun indexFile(file: File, analyzer: Analyzer, sink: (t: Token) -> Unit) {
+        val tokenizer = analyzer.tokenizer()
         val filePath = file.absolutePath
         val reader = file.reader()
         var read = reader.read()
@@ -18,34 +34,16 @@ class FileIndexer {
         while (read != -1) {
             val char = read.toChar()
             if (char == '\n') {
-                lineNum ++;
+                lineNum++;
                 tokenIndex = 0
             }
             val token = tokenizer.next(char)
             if (token != null) {
                 sink(Token(token, filePath, lineNum, tokenIndex))
-                tokenIndex ++
+                tokenIndex++
             }
             read = reader.read()
         }
     }
 
-    fun indexFile(file: File, sink: (t: Token) -> Unit) {
-        var offset = 0
-        val lines = file.readLines()
-        lines.forEachIndexed { idx, line ->
-            indexString(line, idx, file.absolutePath, Consumer<Token>(sink))
-            offset += line.length
-        }
-    }
-
-    fun indexString(line: String, lineNum: Int, filePath: String, sink: Consumer<Token>) {
-        val tokenizer = StringTokenizer(line, TOKEN_DELIM)
-        var i = 0
-        while (tokenizer.hasMoreTokens()) {
-            val token = tokenizer.nextToken()
-            sink.accept(Token(token, filePath, lineNum, i))
-            i++
-        }
-    }
 }
