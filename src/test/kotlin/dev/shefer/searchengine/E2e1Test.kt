@@ -15,6 +15,9 @@ class E2e1Test : E2eBaseTest() {
     fun name() {
         searchEngine.rebuildIndex()
         verify()
+
+        verifySearch("gonna make")
     }
+
 
 }

@@ -19,7 +19,7 @@ class SearchEngine(
     private val fileSystemScanner = FileIndexer()
     private val tokenRepository = InMemoryTokenRepository()
     private val tokenService = TokenServiceImpl(tokenRepository)
-    private val searchService = SearchServiceImpl(tokenService, indexSettings.analyzer)
+    val searchService = SearchServiceImpl(tokenService, indexSettings.analyzer)
 
     fun rebuildIndex(): ProgressBar {
         val sink: (t: Token) -> Unit = { tl ->
