@@ -1,4 +1,4 @@
-package dev.shefer.searchengine.indexing.tokenizer
+package dev.shefer.searchengine.engine.tokenizer
 
 class TrigramTokenizer : Tokenizer {
 

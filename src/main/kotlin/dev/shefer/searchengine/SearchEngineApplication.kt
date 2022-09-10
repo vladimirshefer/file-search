@@ -4,11 +4,11 @@ import dev.shefer.searchengine.engine.analysis.Analyzer
 import dev.shefer.searchengine.engine.dto.FileLocation
 import dev.shefer.searchengine.engine.dto.LineLocation
 import dev.shefer.searchengine.engine.dto.TokenLocation
+import dev.shefer.searchengine.engine.filter.LowercaseTokenFilter
 import dev.shefer.searchengine.engine.repository.InMemoryTokenRepository
 import dev.shefer.searchengine.engine.service.TokenService
+import dev.shefer.searchengine.engine.tokenizer.TrigramTokenizer
 import dev.shefer.searchengine.indexing.FileIndexer
-import dev.shefer.searchengine.indexing.filter.LowercaseTokenFilter
-import dev.shefer.searchengine.indexing.tokenizer.TrigramTokenizer
 import dev.shefer.searchengine.search.SearchService
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
