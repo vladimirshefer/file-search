@@ -18,7 +18,8 @@ class FileIndexer {
         }
 
         if (fileOrDirectory.isDirectory) {
-            for (listFile in fileOrDirectory.listFiles()) {
+            val listFiles = fileOrDirectory.listFiles() ?: return
+            for (listFile in listFiles) {
                 indexRecursively(listFile, analyzer, sink)
             }
         }
