@@ -164,10 +164,11 @@ abstract class E2eBaseTest {
         val beforeStupidSearch = System.currentTimeMillis()
         val expected = stupidSearch(queryString)
         val stupidSearchTimeMillis = System.currentTimeMillis() - beforeStupidSearch
-        println(this.javaClass.simpleName +
-                ": Search `" + queryString + "` is " +
-                stupidSearchTimeMillis.toDouble() / searchTimeMillis +
-                " times faster (" + stupidSearchTimeMillis + "ms/" + searchTimeMillis + "ms)"
+        val speedupRate = stupidSearchTimeMillis.toDouble() / searchTimeMillis
+        println("${this.javaClass.simpleName}:" +
+                " Search `$queryString` is $speedupRate times faster" +
+                " (${stupidSearchTimeMillis}ms/${searchTimeMillis}ms)." +
+                " // ${expected.size} search results."
         )
         Assertions.assertEquals(expected, actual)
     }

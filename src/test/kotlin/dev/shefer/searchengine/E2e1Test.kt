@@ -16,7 +16,9 @@ class E2e1Test : E2eBaseTest() {
         searchEngine.rebuildIndex()
         verify()
 
+        verifySearch("gonna let you down")
         verifySearch("gonna make")
+        verifySearch("gonna")
     }
 
 
