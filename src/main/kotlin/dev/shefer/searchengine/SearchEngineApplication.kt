@@ -7,12 +7,24 @@ import dev.shefer.searchengine.indexing.filter.LowercaseTokenFilter
 import dev.shefer.searchengine.indexing.filter.TokenFilter
 import dev.shefer.searchengine.indexing.tokenizer.Tokenizer
 import dev.shefer.searchengine.indexing.tokenizer.TrigramTokenizer
+import dev.shefer.searchengine.search.SearchService
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
+import org.springframework.context.annotation.Bean
 import java.io.File
 
 @SpringBootApplication
-class SearchEngineApplication
+class SearchEngineApplication {
+    @Bean
+    fun analyzer(): Analyzer {
+        return Analyzer(
+            { TrigramTokenizer() },
+            listOf(
+                LowercaseTokenFilter()
+            )
+        )
+    }
+}
 
 const val TOKEN_DELIM = " ,!@#$%^&*()_-=+./\\?<>\"'{}\t\n"
 val EXTENSION_WHITELIST = listOf(".kt", ".kts", ".gitignore")
@@ -72,13 +84,8 @@ fun main(args: Array<String>) {
 
     val fileSystemScanner = FileIndexer()
 
-    val analyzer = Analyzer(
-        { TrigramTokenizer() },
-        listOf(
-            LowercaseTokenFilter()
-        )
-    )
-
+    val analyzer = context.getBean(Analyzer::class.java)
+    val searchService = context.getBean(SearchService::class.java)
 
     val sink: (t: Token) -> Unit = { tl ->
         val token = analyzer.tokenFilters.fold(tl.token) { t, tf -> tf.filter(t) }
@@ -94,28 +101,9 @@ fun main(args: Array<String>) {
     val directoryToScan = File(".")
     fileSystemScanner.indexRecursively(directoryToScan, analyzer, sink)
 
-    val searchResults = search("fun search", analyzer)
+    val searchResults = searchService.search("fun search")
 
     println(searchResults)
-}
-
-fun search(s: String, analyzer: Analyzer): List<LineLocation> {
-    val queryTokens = analyzer.analyze(s)
-
-    val searchCandidates = tokenRepository.findLinesByToken(queryTokens[0])
-    val result = ArrayList<LineLocation>()
-    for (searchCandidate in searchCandidates) {
-        var allExist = true;
-        for (queryToken in queryTokens) {
-            val checkExists = tokenRepository.checkExists(searchCandidate, queryToken)
-            if (!checkExists) {
-                allExist = false
-                break
-            }
-        }
-        if (allExist) result.add(searchCandidate)
-    }
-    return result
 }
 
 fun Analyzer.analyze(s: String): List<String> {
