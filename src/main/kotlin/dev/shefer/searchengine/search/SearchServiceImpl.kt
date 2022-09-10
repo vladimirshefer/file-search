@@ -1,8 +1,8 @@
 package dev.shefer.searchengine.search
 
-import dev.shefer.searchengine.Analyzer
-import dev.shefer.searchengine.LineLocation
 import dev.shefer.searchengine.analyze
+import dev.shefer.searchengine.engine.analysis.Analyzer
+import dev.shefer.searchengine.engine.dto.LineLocation
 import dev.shefer.searchengine.engine.service.TokenService
 import org.springframework.stereotype.Service
 

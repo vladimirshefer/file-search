@@ -1,7 +1,7 @@
 package dev.shefer.searchengine.engine.repository
 
-import dev.shefer.searchengine.FileLocation
-import dev.shefer.searchengine.LineLocation
+import dev.shefer.searchengine.engine.dto.FileLocation
+import dev.shefer.searchengine.engine.dto.LineLocation
 
 private typealias LineIndex = MutableMap<Int, MutableList<Int>>
 private typealias FileIndex = MutableMap<String, LineIndex>

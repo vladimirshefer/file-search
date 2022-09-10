@@ -1,7 +1,7 @@
 package dev.shefer.searchengine.engine.service
 
-import dev.shefer.searchengine.LineLocation
 import dev.shefer.searchengine.Token
+import dev.shefer.searchengine.engine.dto.LineLocation
 
 interface TokenService {
 

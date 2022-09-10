@@ -1,11 +1,13 @@
 package dev.shefer.searchengine
 
+import dev.shefer.searchengine.engine.analysis.Analyzer
+import dev.shefer.searchengine.engine.dto.FileLocation
+import dev.shefer.searchengine.engine.dto.LineLocation
+import dev.shefer.searchengine.engine.dto.TokenLocation
 import dev.shefer.searchengine.engine.repository.InMemoryTokenRepository
 import dev.shefer.searchengine.engine.service.TokenService
 import dev.shefer.searchengine.indexing.FileIndexer
 import dev.shefer.searchengine.indexing.filter.LowercaseTokenFilter
-import dev.shefer.searchengine.indexing.filter.TokenFilter
-import dev.shefer.searchengine.indexing.tokenizer.Tokenizer
 import dev.shefer.searchengine.indexing.tokenizer.TrigramTokenizer
 import dev.shefer.searchengine.search.SearchService
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -48,26 +50,6 @@ data class Token(
         )
     )
 }
-
-data class TokenLocation(
-    val lineLocation: LineLocation,
-    val tokenIndex: Int,
-)
-
-data class LineLocation(
-    val fileLocation: FileLocation,
-    val lineIndex: Int
-)
-
-data class FileLocation(
-    val directoryPath: String,
-    val fileName: String
-)
-
-class Analyzer(
-    val tokenizer: () -> Tokenizer,
-    val tokenFilters: List<TokenFilter>,
-)
 
 fun main(args: Array<String>) {
     val context = runApplication<SearchEngineApplication>(*args)

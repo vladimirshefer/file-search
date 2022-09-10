@@ -1,8 +1,8 @@
 package dev.shefer.searchengine.indexing
 
-import dev.shefer.searchengine.Analyzer
 import dev.shefer.searchengine.EXTENSION_WHITELIST
 import dev.shefer.searchengine.Token
+import dev.shefer.searchengine.engine.analysis.Analyzer
 import java.io.File
 
 class FileIndexer {

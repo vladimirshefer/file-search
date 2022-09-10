@@ -1,6 +1,6 @@
 package dev.shefer.searchengine.engine.repository
 
-import dev.shefer.searchengine.LineLocation
+import dev.shefer.searchengine.engine.dto.LineLocation
 
 interface TokenRepository {
 
