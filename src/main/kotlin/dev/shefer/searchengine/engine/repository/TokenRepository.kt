@@ -21,4 +21,6 @@ interface TokenRepository {
         queryToken: String
     ): Boolean
 
+    fun flush(directory: String)
+
 }

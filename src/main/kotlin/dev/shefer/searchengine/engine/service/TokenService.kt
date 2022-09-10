@@ -15,4 +15,6 @@ interface TokenService {
         searchCandidate: LineLocation,
         queryToken: String
     ): Boolean
+
+    fun flush(directory: String)
 }

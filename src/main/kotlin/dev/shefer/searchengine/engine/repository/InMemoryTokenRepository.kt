@@ -1,7 +1,11 @@
 package dev.shefer.searchengine.engine.repository
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
 import dev.shefer.searchengine.engine.dto.FileLocation
 import dev.shefer.searchengine.engine.dto.LineLocation
+import java.io.File
+import java.io.IOException
 
 private typealias LineIndex = MutableMap<Int, MutableList<Int>>
 private typealias FileIndex = MutableMap<String, LineIndex>
@@ -43,6 +47,22 @@ class InMemoryTokenRepository : TokenRepository {
             ?.get(searchCandidate.fileLocation.directoryPath)
             ?.get(searchCandidate.fileLocation.fileName)
             ?.get(searchCandidate.lineIndex) != null
+    }
+
+    override fun flush(directory: String) {
+        val dir = File(directory)
+        if (!dir.exists()) {
+            throw IOException("No such directory $directory")
+        }
+        val indexFile = dir.resolve("data_index.json")
+        if (indexFile.exists()) {
+            indexFile.delete()
+        }
+        indexFile.createNewFile()
+
+        ObjectMapper()
+            .enable(SerializationFeature.INDENT_OUTPUT)
+            .writeValue(indexFile, INDX)
     }
 
 }

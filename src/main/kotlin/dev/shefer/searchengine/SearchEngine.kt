@@ -34,7 +34,8 @@ class SearchEngine(
         progressBar.show()
         val directoryToScan = File(indexSettings.source)
         fileSystemScanner.indexRecursively(directoryToScan, indexSettings.analyzer, sink)
-        return progressBar;
+        tokenService.flush(indexSettings.data)
+        return progressBar
     }
 
     private fun resetIndex() {

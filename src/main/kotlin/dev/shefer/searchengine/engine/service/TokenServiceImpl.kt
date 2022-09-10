@@ -28,4 +28,8 @@ class TokenServiceImpl(
         return tokenRepository.checkExists(searchCandidate, queryToken)
     }
 
+    override fun flush(directory: String) {
+        tokenRepository.flush(directory)
+    }
+
 }
