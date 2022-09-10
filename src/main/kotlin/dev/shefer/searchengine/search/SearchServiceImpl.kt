@@ -4,9 +4,7 @@ import dev.shefer.searchengine.engine.analysis.Analyzer
 import dev.shefer.searchengine.engine.analysis.analyze
 import dev.shefer.searchengine.engine.dto.LineLocation
 import dev.shefer.searchengine.engine.service.TokenService
-import org.springframework.stereotype.Service
 
-@Service
 class SearchServiceImpl(
     private val tokenService: TokenService,
     private val analyzer: Analyzer,
