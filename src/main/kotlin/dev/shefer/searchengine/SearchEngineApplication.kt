@@ -1,9 +1,7 @@
 package dev.shefer.searchengine
 
 import dev.shefer.searchengine.engine.analysis.Analyzer
-import dev.shefer.searchengine.engine.dto.FileLocation
-import dev.shefer.searchengine.engine.dto.LineLocation
-import dev.shefer.searchengine.engine.dto.TokenLocation
+import dev.shefer.searchengine.engine.dto.Token
 import dev.shefer.searchengine.engine.filter.LowercaseTokenFilter
 import dev.shefer.searchengine.engine.repository.InMemoryTokenRepository
 import dev.shefer.searchengine.engine.service.TokenService
@@ -33,23 +31,6 @@ class SearchEngineApplication {
 
 const val TOKEN_DELIM = " ,!@#$%^&*()_-=+./\\?<>\"'{}\t\n"
 val EXTENSION_WHITELIST = listOf(".kt", ".kts", ".gitignore")
-
-data class Token(
-    val token: String,
-    val tokenLocation: TokenLocation
-) {
-    constructor(token: String, directoryPath: String, fileName: String, lineId: Int, tokenIndex: Int)
-            : this(
-        token,
-        TokenLocation(
-            LineLocation(
-                FileLocation(directoryPath, fileName),
-                lineId
-            ),
-            tokenIndex
-        )
-    )
-}
 
 fun main(args: Array<String>) {
     val context = runApplication<SearchEngineApplication>(*args)

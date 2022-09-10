@@ -1,8 +1,8 @@
 package dev.shefer.searchengine.indexing
 
 import dev.shefer.searchengine.EXTENSION_WHITELIST
-import dev.shefer.searchengine.Token
 import dev.shefer.searchengine.engine.analysis.Analyzer
+import dev.shefer.searchengine.engine.dto.Token
 import java.io.File
 
 class FileIndexer {
@@ -19,7 +19,7 @@ class FileIndexer {
 
         if (fileOrDirectory.isDirectory) {
             for (listFile in fileOrDirectory.listFiles()) {
-                indexRecursively(listFile, analyzer, sink);
+                indexRecursively(listFile, analyzer, sink)
             }
         }
     }
