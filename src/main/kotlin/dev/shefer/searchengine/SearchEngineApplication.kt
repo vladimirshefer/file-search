@@ -1,5 +1,6 @@
 package dev.shefer.searchengine
 
+import dev.shefer.searchengine.engine.repository.InMemoryTokenRepository
 import dev.shefer.searchengine.engine.service.TokenService
 import dev.shefer.searchengine.indexing.FileIndexer
 import dev.shefer.searchengine.indexing.filter.LowercaseTokenFilter
@@ -23,6 +24,9 @@ class SearchEngineApplication {
             )
         )
     }
+
+    @Bean
+    fun inMemoryTokenRepository() = InMemoryTokenRepository()
 }
 
 const val TOKEN_DELIM = " ,!@#$%^&*()_-=+./\\?<>\"'{}\t\n"
