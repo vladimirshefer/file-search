@@ -11,7 +11,7 @@ class SearchEngineApplication {
 }
 
 const val TOKEN_DELIM = " ,!@#$%^&*()_-=+./\\?<>\"'{}\t\n"
-val EXTENSION_WHITELIST = listOf(".kt", ".kts", ".gitignore")
+val EXTENSION_WHITELIST = listOf(".kt", ".kts", ".gitignore", ".txt")
 
 fun main(args: Array<String>) {
 //    val context = runApplication<SearchEngineApplication>(*args)
