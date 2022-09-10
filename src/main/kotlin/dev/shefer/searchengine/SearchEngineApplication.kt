@@ -1,7 +1,6 @@
 package dev.shefer.searchengine
 
-import dev.shefer.searchengine.engine.repository.InMemoryTokenRepository
-import dev.shefer.searchengine.engine.repository.TokenRepository
+import dev.shefer.searchengine.engine.service.TokenService
 import dev.shefer.searchengine.indexing.FileIndexer
 import dev.shefer.searchengine.indexing.filter.LowercaseTokenFilter
 import dev.shefer.searchengine.indexing.filter.TokenFilter
@@ -66,8 +65,6 @@ class Analyzer(
     val tokenFilters: List<TokenFilter>,
 )
 
-val tokenRepository: TokenRepository = InMemoryTokenRepository()
-
 fun main(args: Array<String>) {
     val context = runApplication<SearchEngineApplication>(*args)
 
@@ -75,15 +72,12 @@ fun main(args: Array<String>) {
 
     val analyzer = context.getBean(Analyzer::class.java)
     val searchService = context.getBean(SearchService::class.java)
+    val tokenService = context.getBean(TokenService::class.java)
 
     val sink: (t: Token) -> Unit = { tl ->
         val token = analyzer.tokenFilters.fold(tl.token) { t, tf -> tf.filter(t) }
-        tokenRepository.registerToken(
-            token,
-            tl.directoryPath,
-            tl.fileName,
-            tl.lineIndex,
-            tl.tokenIndex
+        tokenService.registerToken(
+            Token(token, tl.tokenLocation)
         )
     }
 
