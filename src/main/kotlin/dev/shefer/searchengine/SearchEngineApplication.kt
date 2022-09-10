@@ -44,17 +44,6 @@ data class Token(
             tokenIndex
         )
     )
-
-    val directoryPath: String
-        get() = tokenLocation.lineLocation.fileLocation.directoryPath
-    val fileName: String
-        get() = tokenLocation.lineLocation.fileLocation.fileName
-
-    val lineIndex: Int
-        get() = tokenLocation.lineLocation.lineIndex
-
-    val tokenIndex: Int
-        get() = tokenLocation.tokenIndex
 }
 
 data class TokenLocation(
