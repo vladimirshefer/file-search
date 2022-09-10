@@ -72,19 +72,19 @@ class Analyzer(
 fun main(args: Array<String>) {
     val context = runApplication<SearchEngineApplication>(*args)
 
-    val fileSystemScanner = FileIndexer()
-
     val analyzer = context.getBean(Analyzer::class.java)
     val searchService = context.getBean(SearchService::class.java)
     val tokenService = context.getBean(TokenService::class.java)
 
     val sink: (t: Token) -> Unit = { tl ->
-        val token = analyzer.tokenFilters.fold(tl.token) { t, tf -> tf.filter(t) }
-        tokenService.registerToken(
-            Token(token, tl.tokenLocation)
-        )
+        analyzer
+            .filterToken(tl.token)
+            ?.also { token ->
+                tokenService.registerToken(Token(token, tl.tokenLocation))
+            }
     }
 
+    val fileSystemScanner = FileIndexer()
     val directoryToScan = File(".")
     fileSystemScanner.indexRecursively(directoryToScan, analyzer, sink)
 
@@ -99,13 +99,15 @@ fun Analyzer.analyze(s: String): List<String> {
     for (c in s) {
         tokenizer1
             .next(c)
-            ?.let { token ->
-                tokenFilters.fold(token) { t, tf ->
-                    tf.filter(t)
-                }
-            }
+            ?.let { token -> filterToken(token) }
             ?.let { token -> result.add(token) }
     }
     return result
+}
+
+fun Analyzer.filterToken(token: String?): String? {
+    return tokenFilters.fold(token) { t, tf ->
+        t?.let { it: String -> tf.filter(it) }
+    }
 }
 
