@@ -2,8 +2,14 @@ package dev.shefer.searchengine.engine.repository
 
 import dev.shefer.searchengine.FileLocation
 import dev.shefer.searchengine.LineLocation
-import dev.shefer.searchengine.engine.entity.TokenIndex
+import org.springframework.stereotype.Repository
 
+private typealias LineIndex = MutableMap<Int, MutableList<Int>>
+private typealias FileIndex = MutableMap<String, LineIndex>
+private typealias DirectoryIndex = MutableMap<String, FileIndex>
+private typealias TokenIndex = MutableMap<String, DirectoryIndex>
+
+@Repository
 class InMemoryTokenRepository : TokenRepository {
     private val INDX: TokenIndex = HashMap()
 
@@ -40,6 +46,5 @@ class InMemoryTokenRepository : TokenRepository {
             ?.get(searchCandidate.fileLocation.fileName)
             ?.get(searchCandidate.lineIndex) != null
     }
-
 
 }
