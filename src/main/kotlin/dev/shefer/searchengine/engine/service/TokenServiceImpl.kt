@@ -3,9 +3,7 @@ package dev.shefer.searchengine.engine.service
 import dev.shefer.searchengine.engine.dto.LineLocation
 import dev.shefer.searchengine.engine.dto.Token
 import dev.shefer.searchengine.engine.repository.TokenRepository
-import org.springframework.stereotype.Service
 
-@Service
 class TokenServiceImpl(
     private val tokenRepository: TokenRepository
 ) : TokenService {
