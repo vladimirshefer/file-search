@@ -6,8 +6,10 @@ import dev.shefer.searchengine.engine.filter.LowercaseTokenFilter
 import dev.shefer.searchengine.engine.repository.InMemoryTokenRepository
 import dev.shefer.searchengine.engine.service.TokenService
 import dev.shefer.searchengine.engine.tokenizer.TrigramTokenizer
+import dev.shefer.searchengine.fs.FileAccessor
 import dev.shefer.searchengine.indexing.FileIndexer
 import dev.shefer.searchengine.search.SearchService
+import dev.shefer.searchengine.util.console.ConsoleUtil
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
@@ -48,12 +50,29 @@ fun main(args: Array<String>) {
     }
 
     val fileSystemScanner = FileIndexer()
-    val directoryToScan = File(".")
+    val directoryToScan = File("/home/vshefer/Desktop")
     fileSystemScanner.indexRecursively(directoryToScan, analyzer, sink)
 
-    val searchResults = searchService.search("fun search")
+    val searchQuery = "Rec"
+    val searchResults = searchService.search(searchQuery)
+    for (searchResult in searchResults) {
+        val originalLine = FileAccessor().getLine(searchResult)
+        val startIndex = originalLine.lowercase().indexOf(searchQuery.lowercase())
+        if (startIndex < 0) continue
+        println(
+            "Entry at file " +
+                    searchResult.fileLocation.directoryPath +
+                    "/" + searchResult.fileLocation.fileName +
+                    ":" + searchResult.lineIndex +
+                    "\n" + originalLine.substring(0, startIndex) +
+                    ConsoleUtil.ANSI_BLUE +
+                    originalLine.substring(startIndex, startIndex + searchQuery.length) +
+                    ConsoleUtil.ANSI_RESET +
+                    originalLine.substring(startIndex + searchQuery.length)
+        )
+    }
 
-    println(searchResults)
+    println("END!")
 }
 
 fun Analyzer.analyze(s: String): List<String> {
