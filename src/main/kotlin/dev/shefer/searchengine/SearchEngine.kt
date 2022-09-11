@@ -33,17 +33,22 @@ class SearchEngine(
         }
 
         val directoryToScan = File(indexSettings.source)
-//        fileSystemScanner.indexRecursively(directoryToScan, indexSettings.analyzer, sink)
 
         val directoryProgress = fileSystemScanner.indexDirectoryAsync(directoryToScan, indexSettings.analyzer, sink)
         println("Indexing submitted. CurrentProgress = ${directoryProgress.report()}")
-        tokenService.flush(indexSettings.data)
         return directoryProgress
     }
 
-    private fun resetIndex() {
-        TODO()
-        File(indexSettings.data).delete()
+    fun saveIndex() {
+        tokenRepository.save(indexSettings.data)
+    }
+
+    fun loadIndex() {
+        tokenRepository.load(indexSettings.data)
+    }
+
+    fun dropIndex() {
+        tokenRepository.drop(indexSettings.data)
     }
 
     fun search(searchQuery: String) {

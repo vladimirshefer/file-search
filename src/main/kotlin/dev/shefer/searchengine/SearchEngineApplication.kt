@@ -4,36 +4,34 @@ import dev.shefer.searchengine.engine.analysis.Analyzer
 import dev.shefer.searchengine.engine.dto.IndexSettings
 import dev.shefer.searchengine.engine.filter.LowercaseTokenFilter
 import dev.shefer.searchengine.engine.tokenizer.TrigramTokenizer
-import org.springframework.boot.autoconfigure.SpringBootApplication
 
-@SpringBootApplication
-class SearchEngineApplication {
-}
+val EXTENSION_WHITELIST = listOf(".kt", ".kts", ".gitignore", ".txt", ".properties", ".bat")
 
-const val TOKEN_DELIM = " ,!@#$%^&*()_-=+./\\?<>\"'{}\t\n"
-val EXTENSION_WHITELIST = listOf(".kt", ".kts", ".gitignore", ".txt")
-
-fun main(args: Array<String>) {
-//    val context = runApplication<SearchEngineApplication>(*args)
+fun main() {
     val indexSettings = IndexSettings(
-        "/home/vshefer/Desktop",
-        "./index_data",
-        Analyzer(
-            { TrigramTokenizer() },
-            listOf(
+        source = "./src/main",
+        data = "./index_data",
+        analyzer = Analyzer(
+            tokenizer = { TrigramTokenizer() },
+            tokenFilters = listOf(
+                /* Makes search case insensitive.
+                   Remove this token filter to make
+                   search case sensitive. */
                 LowercaseTokenFilter()
             )
         )
     )
 
     val searchEngine = SearchEngine(indexSettings)
-    val indexProgress = searchEngine.rebuildIndex()
-
-    indexProgress.join()
-    println(indexProgress.report())
+    searchEngine.loadIndex()
 
     searchEngine.search("Rec")
 
-    println("END!")
+    searchEngine.dropIndex()
+    val indexProgress = searchEngine.rebuildIndex()
+    indexProgress.join()
+    searchEngine.search("Rec")
+
+    searchEngine.saveIndex()
 }
 

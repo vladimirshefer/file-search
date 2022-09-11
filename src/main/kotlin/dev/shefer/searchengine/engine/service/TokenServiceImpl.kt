@@ -29,7 +29,7 @@ class TokenServiceImpl(
     }
 
     override fun flush(directory: String) {
-        tokenRepository.flush(directory)
+        tokenRepository.save(directory)
     }
 
 }
