@@ -5,7 +5,7 @@ import dev.shefer.searchengine.engine.dto.IndexSettings
 import dev.shefer.searchengine.engine.dto.Token
 import dev.shefer.searchengine.engine.repository.InMemoryTokenRepository
 import dev.shefer.searchengine.engine.service.TokenServiceImpl
-import dev.shefer.searchengine.engine.util.ProgressBar
+import dev.shefer.searchengine.engine.util.Progress
 import dev.shefer.searchengine.fs.FileAccessor
 import dev.shefer.searchengine.indexing.FileIndexer
 import dev.shefer.searchengine.search.SearchServiceImpl
@@ -21,7 +21,9 @@ class SearchEngine(
     private val tokenService = TokenServiceImpl(tokenRepository)
     val searchService = SearchServiceImpl(tokenService, indexSettings.analyzer)
 
-    fun rebuildIndex(): ProgressBar {
+    fun rebuildIndex(): Progress {
+        File(indexSettings.data).mkdirs()
+
         val sink: (t: Token) -> Unit = { tl ->
             indexSettings.analyzer
                 .filterToken(tl.token)
@@ -30,12 +32,13 @@ class SearchEngine(
                 }
         }
 
-        val progressBar = ProgressBar("Staring reindex", 0, 0)
-        progressBar.show()
         val directoryToScan = File(indexSettings.source)
-        fileSystemScanner.indexRecursively(directoryToScan, indexSettings.analyzer, sink)
+//        fileSystemScanner.indexRecursively(directoryToScan, indexSettings.analyzer, sink)
+
+        val directoryProgress = fileSystemScanner.indexDirectoryAsync(directoryToScan, indexSettings.analyzer, sink)
+        println("Indexing submitted. CurrentProgress = ${directoryProgress.report()}")
         tokenService.flush(indexSettings.data)
-        return progressBar
+        return directoryProgress
     }
 
     private fun resetIndex() {
