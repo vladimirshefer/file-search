@@ -6,7 +6,6 @@ import dev.shefer.searchengine.engine.dto.Token
 import dev.shefer.searchengine.engine.util.Progress
 import java.io.File
 import java.io.IOException
-import java.io.InputStreamReader
 import java.nio.file.FileVisitResult
 import java.nio.file.Files
 import java.nio.file.Path
@@ -143,33 +142,34 @@ class FileIndexer {
         val directoryPath = file.parent
         val fileName = file.name
 
-        val reader: InputStreamReader = file.reader()
-        var read = reader.read()
+        file.reader().use {reader ->
+            var read = reader.read()
 
-        var lineNum = 0
-        var tokenIndex = 0
+            var lineNum = 0
+            var tokenIndex = 0
 
-        while (read != -1) {
+            while (read != -1) {
 
-            if (Thread.currentThread().isInterrupted) {
-                Thread.interrupted()
-                return false
+                if (Thread.currentThread().isInterrupted) {
+                    Thread.interrupted()
+                    return false
+                }
+
+                val char = read.toChar()
+                if (char == '\n') {
+                    lineNum++
+                    tokenIndex = 0
+                }
+
+                val token = tokenizer.next(char)
+
+                if (token != null) {
+                    sink(Token(token, directoryPath, fileName, lineNum, tokenIndex))
+                    tokenIndex++
+                }
+
+                read = reader.read()
             }
-
-            val char = read.toChar()
-            if (char == '\n') {
-                lineNum++
-                tokenIndex = 0
-            }
-
-            val token = tokenizer.next(char)
-
-            if (token != null) {
-                sink(Token(token, directoryPath, fileName, lineNum, tokenIndex))
-                tokenIndex++
-            }
-
-            read = reader.read()
         }
         return true
     }
