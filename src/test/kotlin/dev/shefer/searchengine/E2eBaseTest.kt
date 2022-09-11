@@ -2,36 +2,33 @@ package dev.shefer.searchengine
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import dev.shefer.searchengine.engine.analysis.Analyzer
-import dev.shefer.searchengine.engine.dto.FileLocation
 import dev.shefer.searchengine.engine.dto.IndexSettings
 import dev.shefer.searchengine.engine.dto.LineLocation
+import dev.shefer.searchengine.util.StupidSearchService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.fail
 import org.opentest4j.AssertionFailedError
 import java.io.File
-import java.nio.file.FileVisitResult
 import java.nio.file.Files
 import java.nio.file.Files.createDirectory
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.nio.file.SimpleFileVisitor
-import java.nio.file.attribute.BasicFileAttributes
 import java.util.*
-import kotlin.io.path.absolutePathString
 import kotlin.io.path.exists
 import kotlin.io.path.name
-import kotlin.io.path.readLines
 
 abstract class E2eBaseTest {
 
-    private val LOCAL_TEST = true
-    private val OVERRIDE_TEST_DATA = false
+    companion object {
+        private const val OVERRIDE_TEST_DATA = false
+    }
 
-    val sourceDir = getTestDataDirectory() + "/source"
-    val expectedDir = getTestDataDirectory() + "/expected"
-    val dataDir = getTestDataDirectory() + "/dist"
+    private val sourceDir: String = getTestDataDirectory() + "/source"
+    private val expectedDir: String = getTestDataDirectory() + "/expected"
+    private val dataDir: String = getTestDataDirectory() + "/dist"
 
     @AfterEach
     fun afterEachBase() {
@@ -70,38 +67,28 @@ abstract class E2eBaseTest {
 
     private fun getTestDataDirectory(): String {
         val testDir = "test_data/" + javaClass.simpleName
-        if (LOCAL_TEST) {
-            val resourceDirectory = Paths.get("src", "test", "resources")
-            val resourcePath = resourceDirectory.toFile().getAbsolutePath()
-            return "$resourcePath/$testDir"
-        }
-
-        val resourceFile = E2eBaseTest::class.java.classLoader
-            .getResource(testDir)
-
-        return resourceFile?.path
-            ?: fail("resource not found for test")
+        val resourceDirectory = Paths.get("src", "test", "resources")
+        val resourcePath = resourceDirectory.toFile().absolutePath
+        return "$resourcePath/$testDir"
     }
 
-    protected fun verify() {
-        verifyDirsAreEqual(Paths.get(dataDir), Paths.get(expectedDir))
+    protected fun verifyIndexFiles() {
+        verifyDirsAreEqual(Paths.get(expectedDir), Paths.get(dataDir))
     }
 
     private fun verifyDirsAreEqual(one: Path, other: Path) {
-        Files.walkFileTree(one, object : SimpleFileVisitor<Path?>() {
-            override fun visitFile(
-                file: Path?,
-                attrs: BasicFileAttributes?
-            ): FileVisitResult {
-                val result: FileVisitResult = super.visitFile(file, attrs)
-                // get the relative file name from path "one"
-                val relativize: Path = one.relativize(file)
-                // construct the path for the counterpart file in "other"
-                val fileInOther: Path = other.resolve(relativize)
-                verifyFilesEqual(fileInOther, file!!)
-                return result
+        StupidSearchService.forEachFile(other.toString()) { file ->
+            val relativize: Path = other.relativize(file)
+            val fileInOther: Path = one.resolve(relativize)
+            assertTrue(fileInOther.exists()) {
+                "file $relativize does not exist in $one, but exists in $other"
             }
-        })
+        }
+        StupidSearchService.forEachFile(one.toString()) { file ->
+            val relativize: Path = one.relativize(file)
+            val fileInOther: Path = other.resolve(relativize)
+            verifyFilesEqual(fileInOther, file)
+        }
     }
 
     private fun verifyFilesEqual(fileInOther: Path, file: Path) {
@@ -112,49 +99,20 @@ abstract class E2eBaseTest {
         val otherBytes = Files.readAllBytes(fileInOther)
         val theseBytes = Files.readAllBytes(file)
         if (!Arrays.equals(otherBytes, theseBytes)) {
-            throw AssertionFailedError(file.toString() + " is not equal to " + fileInOther)
+            throw AssertionFailedError("$file is not equal to $fileInOther")
         }
     }
 
     private fun assertJsonFilesEqual(fileInOther: Path, file: Path) {
         val readTree1 = ObjectMapper().readTree(fileInOther.toFile())
         val readTree2 = ObjectMapper().readTree(file.toFile())
-        if (!readTree1
-                .equals(readTree2)
-        ) {
-            fail(file.toString() + " json is not equal to " + fileInOther)
+        if (!readTree1.equals(readTree2)) {
+            fail("$file json is not equal to $fileInOther")
         }
     }
 
-    protected fun stupidSearch(queryString: String): List<LineLocation> {
-        val searchResults = ArrayList<LineLocation>()
-        Files.walkFileTree(
-            Paths.get(sourceDir),
-            object : SimpleFileVisitor<Path?>() {
-                override fun visitFile(file: Path?, attrs: BasicFileAttributes?): FileVisitResult {
-                    val result = super.visitFile(file, attrs)
-                    if (file == null) {
-                        return result
-                    }
-
-                    file.readLines().forEachIndexed { i, line ->
-                        if (line.contains(queryString)) {
-                            searchResults.add(
-                                LineLocation(
-                                    FileLocation(
-                                        file.parent.absolutePathString(),
-                                        file.name
-                                    ),
-                                    i
-                                )
-                            )
-                        }
-                    }
-                    return result
-                }
-            }
-        )
-        return searchResults
+    private fun stupidSearch(queryString: String): List<LineLocation> {
+        return StupidSearchService(sourceDir).search(queryString)
     }
 
     protected fun verifySearch(queryString: String) {
@@ -165,11 +123,12 @@ abstract class E2eBaseTest {
         val expected = stupidSearch(queryString)
         val stupidSearchTimeMillis = System.currentTimeMillis() - beforeStupidSearch
         val speedupRate = stupidSearchTimeMillis.toDouble() / searchTimeMillis
-        println("${this.javaClass.simpleName}:" +
-                " Search `$queryString` is $speedupRate times faster" +
-                " (${stupidSearchTimeMillis}ms/${searchTimeMillis}ms)." +
-                " // ${expected.size} search results."
-        )
         Assertions.assertEquals(expected, actual)
+        println(
+            "${this.javaClass.simpleName}:" +
+                    " Search `$queryString` is $speedupRate times faster" +
+                    " (${stupidSearchTimeMillis}ms/${searchTimeMillis}ms)." +
+                    " // ${expected.size} search results."
+        )
     }
 }

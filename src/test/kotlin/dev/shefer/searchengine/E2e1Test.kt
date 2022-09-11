@@ -13,13 +13,14 @@ class E2e1Test : E2eBaseTest() {
 
     @Test
     fun name() {
-        searchEngine.rebuildIndex()
-        verify()
+        val rebuildIndex = searchEngine.rebuildIndex()
+        rebuildIndex.join()
+        searchEngine.saveIndex()
+        verifyIndexFiles()
 
         verifySearch("gonna let you down")
         verifySearch("gonna make")
         verifySearch("gonna")
     }
-
 
 }
