@@ -12,8 +12,11 @@ interface Progress {
      * Try to stop task execution as soon as
      * possible without awaiting completion.
      */
-    fun cancel() {
+    fun cancel()
 
-    }
+    /**
+     * Blocking wait until progress if completed
+     */
+    fun join()
 
 }

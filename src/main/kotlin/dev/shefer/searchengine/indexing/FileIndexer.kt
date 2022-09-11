@@ -28,56 +28,42 @@ class FileIndexer {
         val totalSize: Long
     )
 
-    data class FileIndexingProgress(
-        val fileInfo: FileInfo,
-        val readFuture: CompletableFuture<out Any> // TODO set correct generic
-    ) : Progress {
-
-        private var progress = 0.0
-
-        init {
-            readFuture.whenCompleteAsync { _, _ ->
-                progress = 1.0
-            }
-        }
-
-        override fun report(): Double {
-            return progress
-        }
-
-        override fun cancel() {
-            readFuture.cancel(true)
-        }
-
-    }
-
     data class DirectoryIndexingProgress(
-        val directoryInfo: DirectoryInfo,
-        val fileProgresses: List<FileIndexingProgress>
+        private val directoryInfo: DirectoryInfo
     ) : Progress {
+
+        private val fileProgresses: MutableList<CompletableFuture<Unit>> = ArrayList()
 
         private val totalSize = directoryInfo.totalSize
         private var indexed: AtomicLong = AtomicLong()
 
-        init {
-            for (fileProgress in fileProgresses) {
-                fileProgress.readFuture.whenCompleteAsync { _, _ ->
-                    indexed.addAndGet(fileProgress.fileInfo.size)
-                    println("File ${fileProgress.fileInfo.file} indexed")
-                }
-            }
-        }
+        private var canceled = false
 
         override fun report(): Double {
             return indexed.get().toDouble() / totalSize
         }
 
         override fun cancel() {
+            canceled = true
             for (fileProgress in fileProgresses) {
-                fileProgress.readFuture.cancel(true)
+                fileProgress.cancel(true)
             }
         }
 
+        override fun join() {
+            for (fileProgress in fileProgresses) {
+                fileProgress.join()
+            }
+        }
+
+        fun fileIndexingStarted(completion: CompletableFuture<Unit>) {
+            fileProgresses.add(completion)
+            if (canceled) completion.cancel(true)
+        }
+
+        fun fileIndexingFinished(fileInfo: FileInfo) {
+            indexed.addAndGet(fileInfo.size)
+        }
     }
 
     fun indexDirectoryAsync(
@@ -86,15 +72,17 @@ class FileIndexer {
         sink: (t: Token) -> Unit
     ): Progress {
         val filesList = getDirectoryInfo(directory)
-        val futures = ArrayList<FileIndexingProgress>()
+        val directoryIndexingProgress = DirectoryIndexingProgress(filesList)
+
         for (fileInfo in filesList.files) {
-            val submit: CompletableFuture<Boolean> = CompletableFuture.supplyAsync {
+            val submit: CompletableFuture<Unit> = CompletableFuture.supplyAsync {
                 indexFile(fileInfo.file.toFile(), analyzer, sink)
+                directoryIndexingProgress.fileIndexingFinished(fileInfo)
             }
-            futures.add(FileIndexingProgress(fileInfo, submit))
+            directoryIndexingProgress.fileIndexingStarted(submit)
         }
 
-        return DirectoryIndexingProgress(filesList, futures)
+        return directoryIndexingProgress
     }
 
     fun getDirectoryInfo(

@@ -27,7 +27,10 @@ fun main(args: Array<String>) {
     )
 
     val searchEngine = SearchEngine(indexSettings)
-    searchEngine.rebuildIndex()
+    val indexProgress = searchEngine.rebuildIndex()
+
+    indexProgress.join()
+    println(indexProgress.report())
 
     searchEngine.search("Rec")
 
