@@ -6,6 +6,8 @@ import dev.shefer.searchengine.engine.dto.FileLocation
 import dev.shefer.searchengine.engine.dto.LineLocation
 import java.io.File
 import java.io.IOException
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 
 private typealias LineIndex = MutableMap<Int, MutableList<Int>>
 private typealias FileIndex = MutableMap<String, LineIndex>
@@ -13,7 +15,7 @@ private typealias DirectoryIndex = MutableMap<String, FileIndex>
 private typealias TokenIndex = MutableMap<String, DirectoryIndex>
 
 class InMemoryTokenRepository : TokenRepository {
-    private val INDX: TokenIndex = HashMap()
+    private val INDX: TokenIndex = ConcurrentHashMap()
 
     override fun registerToken(
         token: String,
@@ -23,10 +25,10 @@ class InMemoryTokenRepository : TokenRepository {
         linePosition: Int
     ) {
         INDX
-            .getOrPut(token) { HashMap() }
-            .getOrPut(directoryPath) { HashMap() }
-            .getOrPut(filename) { HashMap() }
-            .getOrPut(lineNumber) { ArrayList() }
+            .getOrPut(token) { ConcurrentHashMap() }
+            .getOrPut(directoryPath) { ConcurrentHashMap() }
+            .getOrPut(filename) { ConcurrentHashMap() }
+            .getOrPut(lineNumber) { CopyOnWriteArrayList() }
             .add(linePosition)
     }
 
