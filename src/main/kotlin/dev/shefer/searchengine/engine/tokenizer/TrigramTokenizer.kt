@@ -1,5 +1,10 @@
 package dev.shefer.searchengine.engine.tokenizer
 
+/**
+ * This tokenizer splits the text into trigrams.
+ * Trigram is a triple of characters.
+ * Example: "abcdefghi" -> ["abc","bcd",'cde","def","efh","fgh","ghi"]
+ */
 class TrigramTokenizer : Tokenizer {
 
     var char1: Char? = null
