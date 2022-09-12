@@ -1,6 +1,5 @@
 package dev.shefer.searchengine.files
 
-import dev.shefer.searchengine.engine.dto.LineLocation
 import dev.shefer.searchengine.files.dto.DirectoryInfo
 import dev.shefer.searchengine.files.dto.FileInfo
 import java.io.IOException
@@ -23,12 +22,12 @@ class FileAccessor {
 
         /**
          * Reads the turns the line of the file.
-         * TODO: Optimize reads (with RandomAccessFile?)
+         * TODO: Optimize reads. Now is impossible without file line separators index.
          */
-        fun getLine(lineLocation: LineLocation): String {
-            val filename = lineLocation.fileLocation.fullPath.toString()
+        fun getLine(path: Path, lineIndex: Int): String {
+            val filename = path.toString()
             val channel = RandomAccessFile(filename, "r")
-            for (i in 0 until lineLocation.lineIndex) {
+            for (i in 0 until lineIndex) {
                 channel.readLine()
             }
             return channel.readLine()

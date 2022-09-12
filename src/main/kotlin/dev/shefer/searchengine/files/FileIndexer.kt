@@ -59,7 +59,7 @@ class FileIndexer(
                 val token = tokenizer.next(char)
 
                 if (token != null) {
-                    val fileLocation = FileLocation(indexSettings.sourcePath.relativize(file), indexSettings.sourcePath)
+                    val fileLocation = FileLocation(indexSettings.sourcePath.relativize(file))
                     val lineLocation = LineLocation(fileLocation, lineNum)
                     val tokenLocation = TokenLocation(lineLocation, tokenIndex)
                     val token1 = Token(token, tokenLocation)

@@ -25,7 +25,6 @@ private typealias TokenIndex = MutableMap<String, DirectoryIndex>
  * See https://en.wikipedia.org/wiki/Inverted_index.
  */
 class InvertedIndexImpl(
-    private val sourcePath: Path,
     private val dataPath: Path,
 ) : InvertedIndex {
 
@@ -55,7 +54,7 @@ class InvertedIndexImpl(
             val get = index[token] ?: emptyMap()
             get.flatMap { (dirName, files) ->
                 files.flatMap { (filename, lines) ->
-                    val fileLocation = FileLocation(Path.of(dirName, filename), sourcePath)
+                    val fileLocation = FileLocation(Path.of(dirName, filename))
                     lines.flatMap { (lineId, positions) ->
                         val lineLocation = LineLocation(fileLocation, lineId)
                         positions.map { tokenPosition -> TokenLocation(lineLocation, tokenPosition) }

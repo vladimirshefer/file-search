@@ -54,7 +54,7 @@ class StupidSearchService(
             path.readLines().forEachIndexed { i, line ->
                 if (line.contains(queryString)) {
                     searchResults.add(
-                        LineLocation(FileLocation(relativeFile, basePath), i)
+                        LineLocation(FileLocation(relativeFile), i)
                     )
                 }
             }

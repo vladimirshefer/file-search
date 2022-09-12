@@ -16,7 +16,7 @@ class SearchEngine(
 ) {
 
     private val fileIndexer = FileIndexer(indexSettings)
-    private val invertedIndex = InvertedIndexImpl(indexSettings.sourcePath, indexSettings.dataPath)
+    private val invertedIndex = InvertedIndexImpl(indexSettings.dataPath)
     private val searchService = TrigramIndexedSearchService(invertedIndex, indexSettings.analyzer)
 
     fun rebuildIndex(): Progress {
@@ -50,7 +50,8 @@ class SearchEngine(
     fun search(searchQuery: String) {
         val lineLocations = searchService.search(searchQuery)
         for (lineLocation in lineLocations) {
-            val originalLine = FileAccessor.getLine(lineLocation)
+            val path = indexSettings.sourcePath.relativize(lineLocation.fileLocation.path)
+            val originalLine = FileAccessor.getLine(path, lineLocation.lineIndex)
             val startIndex = originalLine.lowercase().indexOf(searchQuery.lowercase())
             if (startIndex < 0) continue
             val searchResult = SearchResult(lineLocation, searchQuery, originalLine, startIndex)

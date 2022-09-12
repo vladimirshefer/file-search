@@ -15,7 +15,7 @@ class InvertedIndexImplTest {
     @Test
     internal fun test() {
         val baseDir = Path.of("/_s")
-        val index: InvertedIndex = InvertedIndexImpl(baseDir, baseDir)
+        val index: InvertedIndex = InvertedIndexImpl(baseDir)
 
         val token11 = t("token1", TokenLocation(l("/file1.txt", baseDir, 13), 55))
         val token21 = t("token2", TokenLocation(l("/file2.txt", baseDir, 19), 74))
@@ -57,6 +57,6 @@ class InvertedIndexImplTest {
     }
 
     private fun l(path: String, sourcePath: Path, lineIndex: Int): LineLocation {
-        return LineLocation(FileLocation(Path.of(path), sourcePath), lineIndex)
+        return LineLocation(FileLocation(Path.of(path)), lineIndex)
     }
 }
