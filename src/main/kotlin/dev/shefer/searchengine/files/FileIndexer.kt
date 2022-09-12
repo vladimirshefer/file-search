@@ -1,25 +1,27 @@
 package dev.shefer.searchengine.files
 
-import dev.shefer.searchengine.engine.analysis.Analyzer
+import dev.shefer.searchengine.engine.dto.FileLocation
+import dev.shefer.searchengine.engine.dto.IndexSettings
+import dev.shefer.searchengine.engine.dto.LineLocation
 import dev.shefer.searchengine.engine.dto.Token
+import dev.shefer.searchengine.engine.dto.TokenLocation
 import dev.shefer.searchengine.engine.util.Progress
 import dev.shefer.searchengine.files.dto.DirectoryIndexingProgress
-import java.io.File
+import java.nio.file.Path
 import java.util.concurrent.CompletableFuture
+import kotlin.io.path.reader
 
-class FileIndexer {
+class FileIndexer(
+    private val indexSettings: IndexSettings
+) {
 
-    fun indexDirectoryAsync(
-        directory: File,
-        analyzer: Analyzer,
-        sink: (t: Token) -> Unit
-    ): Progress {
-        val filesList = FileAccessor.getDirectoryInfo(directory)
+    fun indexDirectoryAsync(sink: (t: Token) -> Unit): Progress {
+        val filesList = FileAccessor.getDirectoryInfo(indexSettings.sourcePath)
         val directoryIndexingProgress = DirectoryIndexingProgress(filesList)
 
         for (fileInfo in filesList.files) {
             val submit: CompletableFuture<Unit> = CompletableFuture.supplyAsync {
-                indexFile(fileInfo.file.toFile(), analyzer, sink)
+                indexFile(fileInfo.file, sink)
                 directoryIndexingProgress.fileIndexingFinished(fileInfo)
             }
             directoryIndexingProgress.fileIndexingStarted(submit)
@@ -32,11 +34,8 @@ class FileIndexer {
      * Return true if file has been successfully indexed.
      * Return false if indexing has been cancelled.
      */
-    private fun indexFile(file: File, analyzer: Analyzer, sink: (t: Token) -> Unit): Boolean {
-        val tokenizer = analyzer.tokenizer()
-
-        val directoryPath = file.parent
-        val fileName = file.name
+    private fun indexFile(file: Path, sink: (t: Token) -> Unit): Boolean {
+        val tokenizer = indexSettings.analyzer.tokenizer()
 
         file.reader().use { reader ->
             var read = reader.read()
@@ -60,7 +59,11 @@ class FileIndexer {
                 val token = tokenizer.next(char)
 
                 if (token != null) {
-                    sink(Token(token, directoryPath, fileName, lineNum, tokenIndex))
+                    val fileLocation = FileLocation(indexSettings.sourcePath.relativize(file), indexSettings.sourcePath)
+                    val lineLocation = LineLocation(fileLocation, lineNum)
+                    val tokenLocation = TokenLocation(lineLocation, tokenIndex)
+                    val token1 = Token(token, tokenLocation)
+                    sink(token1)
                     tokenIndex++
                 }
 

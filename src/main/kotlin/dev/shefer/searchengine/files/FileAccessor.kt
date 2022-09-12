@@ -3,7 +3,6 @@ package dev.shefer.searchengine.files
 import dev.shefer.searchengine.engine.dto.LineLocation
 import dev.shefer.searchengine.files.dto.DirectoryInfo
 import dev.shefer.searchengine.files.dto.FileInfo
-import java.io.File
 import java.io.IOException
 import java.io.RandomAccessFile
 import java.nio.file.FileVisitResult
@@ -27,7 +26,7 @@ class FileAccessor {
          * TODO: Optimize reads (with RandomAccessFile?)
          */
         fun getLine(lineLocation: LineLocation): String {
-            val filename = lineLocation.fileLocation.directoryPath + "/" + lineLocation.fileLocation.fileName
+            val filename = lineLocation.fileLocation.fullPath.toString()
             val channel = RandomAccessFile(filename, "r")
             for (i in 0 until lineLocation.lineIndex) {
                 channel.readLine()
@@ -36,14 +35,13 @@ class FileAccessor {
                 ?: throw IllegalStateException("Could not read line from file. Has the file been changed or deleted?")
         }
 
-
         /**
          * Returns list of all accessible files with sizes in this directory and subdirectories.
          */
-        fun getDirectoryInfo(fileOrDirectory: File): DirectoryInfo {
+        fun getDirectoryInfo(directory: Path): DirectoryInfo {
             val fileList = ArrayList<FileInfo>()
             var totalSize = 0L
-            Files.walkFileTree(fileOrDirectory.toPath().normalize(), object : SimpleFileVisitor<Path?>() {
+            Files.walkFileTree(directory.normalize(), object : SimpleFileVisitor<Path?>() {
                 override fun visitFileFailed(file: Path?, e: IOException?): FileVisitResult {
                     System.err.printf("Visiting failed for %s\n", file)
                     return FileVisitResult.SKIP_SUBTREE

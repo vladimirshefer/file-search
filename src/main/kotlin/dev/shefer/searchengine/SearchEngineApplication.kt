@@ -5,8 +5,6 @@ import dev.shefer.searchengine.engine.dto.IndexSettings
 import dev.shefer.searchengine.engine.filter.LowercaseTokenFilter
 import dev.shefer.searchengine.engine.tokenizer.TrigramTokenizer
 
-val EXTENSION_WHITELIST = listOf(".kt", ".kts", ".gitignore", ".txt", ".properties", ".bat")
-
 fun main() {
     val indexSettings = IndexSettings(
         source = "./src/main",
@@ -23,15 +21,14 @@ fun main() {
     )
 
     val searchEngine = SearchEngine(indexSettings)
-    searchEngine.loadIndex()
-
-    searchEngine.search("Rec")
-
-    searchEngine.dropIndex()
     val indexProgress = searchEngine.rebuildIndex()
+    while (indexProgress.report() < 0.5) {
+        println(indexProgress.report())
+        Thread.sleep(50)
+    }
     indexProgress.join()
     searchEngine.search("Rec")
 
     searchEngine.saveIndex()
-}
 
+}

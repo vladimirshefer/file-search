@@ -4,11 +4,13 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import dev.shefer.searchengine.engine.dto.FileLocation
+import dev.shefer.searchengine.engine.dto.IndexSettings
 import dev.shefer.searchengine.engine.dto.LineLocation
 import dev.shefer.searchengine.engine.dto.Token
 import dev.shefer.searchengine.engine.dto.TokenLocation
 import java.io.File
 import java.io.IOException
+import java.nio.file.Path
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantReadWriteLock
 
@@ -17,7 +19,12 @@ private typealias FileIndex = MutableMap<String, LineIndex>
 private typealias DirectoryIndex = MutableMap<String, FileIndex>
 private typealias TokenIndex = MutableMap<String, DirectoryIndex>
 
-class InMemoryTokenRepository : TokenRepository {
+/**
+ * Holder of the basic
+ */
+class SearchIndexImpl(
+    private val indexSettings: IndexSettings
+) : SearchIndex {
 
     private val rwLock = ReentrantReadWriteLock()
     private val rLock = rwLock.readLock()
@@ -25,29 +32,25 @@ class InMemoryTokenRepository : TokenRepository {
 
     private var index: TokenIndex = HashMap()
 
-    override fun registerToken(
-        token: String,
-        directoryPath: String,
-        filename: String,
-        lineNumber: Int,
-        linePosition: Int
-    ) {
+    override fun registerToken(token: Token) {
         writeLock {
             index
-                .getOrPut(token) { HashMap() }
-                .getOrPut(directoryPath) { HashMap() }
-                .getOrPut(filename) { HashMap() }
-                .getOrPut(lineNumber) { HashSet() }
-                .add(linePosition)
+                .getOrPut(token.token) { HashMap() }
+                .getOrPut(token.tokenLocation.lineLocation.fileLocation.directoryPath) { HashMap() }
+                .getOrPut(token.tokenLocation.lineLocation.fileLocation.fileName) { HashMap() }
+                .getOrPut(token.tokenLocation.lineLocation.lineIndex) { HashSet() }
+                .add(
+                    token.tokenLocation.tokenIndex
+                )
         }
     }
 
-    override fun findLinesByToken(token: String): List<TokenLocation> {
+    override fun findTokenLocations(token: String): List<TokenLocation> {
         return readLock {
             val get = index[token] ?: emptyMap()
             get.flatMap { (dirName, files) ->
                 files.flatMap { (filename, lines) ->
-                    val fileLocation = FileLocation(dirName, filename)
+                    val fileLocation = FileLocation(Path.of(dirName, filename), indexSettings.sourcePath)
                     lines.flatMap { (lineId, positions) ->
                         val lineLocation = LineLocation(fileLocation, lineId)
                         positions.map { tokenPosition -> TokenLocation(lineLocation, tokenPosition) }
@@ -67,8 +70,9 @@ class InMemoryTokenRepository : TokenRepository {
         }
     }
 
-    override fun save(indexDirectory: String) {
+    override fun save() {
         writeLock {
+            val indexDirectory = indexSettings.data
             val indexFile = getIndexFile(indexDirectory)
             if (indexFile.exists()) {
                 indexFile.delete()
@@ -79,8 +83,9 @@ class InMemoryTokenRepository : TokenRepository {
         }
     }
 
-    override fun load(indexDirectory: String) {
+    override fun load() {
         writeLock {
+            val indexDirectory: String = indexSettings.data
             val indexFile = getIndexFile(indexDirectory)
             if (!indexFile.exists()) {
                 throw IOException("No such file $indexFile")
@@ -90,8 +95,9 @@ class InMemoryTokenRepository : TokenRepository {
         }
     }
 
-    override fun drop(indexDirectory: String) {
+    override fun drop() {
         writeLock {
+            val indexDirectory: String = indexSettings.data
             val indexFile = getIndexFile(indexDirectory)
             if (indexFile.exists()) {
                 indexFile.delete()

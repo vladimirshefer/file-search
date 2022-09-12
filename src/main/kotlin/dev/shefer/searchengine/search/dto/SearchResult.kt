@@ -17,13 +17,12 @@ data class SearchResult(
     override fun toString(): String {
         val startIndex = entryPosition
 
-        return "Entry at file " +
-                lineLocation.toString() +
-                "\n" + originalLine.substring(0, startIndex) +
-                ConsoleUtil.ANSI_BLUE +
-                originalLine.substring(startIndex, startIndex + searchQuery.length) +
-                ConsoleUtil.ANSI_RESET +
-                originalLine.substring(startIndex + searchQuery.length)
+        val prefix = originalLine.substring(0, startIndex)
+        val match = originalLine.substring(startIndex, startIndex + searchQuery.length)
+        val suffix = originalLine.substring(startIndex + searchQuery.length)
+
+        return "Entry at file $lineLocation:$startIndex" +
+                "\n$prefix${ConsoleUtil.ANSI_BLUE}$match${ConsoleUtil.ANSI_RESET}$suffix"
     }
 
 }

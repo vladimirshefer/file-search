@@ -9,8 +9,6 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
-import kotlin.io.path.absolutePathString
-import kotlin.io.path.name
 import kotlin.io.path.readLines
 
 /**
@@ -20,9 +18,12 @@ class StupidSearchService(
     private val sourceDir: String
 ) : SearchService {
 
+    private val sourcePath = Path.of(sourceDir).normalize()
+
     override fun search(query: String): List<LineLocation> {
         val searchResults = ArrayList<LineLocation>()
-        forEachFile(sourceDir) { file -> searchResults.addAll(findInFile(file, query)) }
+        forEachFile(sourceDir) { file ->
+            searchResults.addAll(findInFile(sourcePath.relativize(file), sourcePath, query)) }
         return searchResults
     }
 
@@ -47,18 +48,13 @@ class StupidSearchService(
             }
         }
 
-        fun findInFile(file: Path, queryString: String): List<LineLocation> {
+        fun findInFile(relativeFile: Path, basePath: Path, queryString: String): List<LineLocation> {
             val searchResults = ArrayList<LineLocation>()
-            file.readLines().forEachIndexed { i, line ->
+            val path = basePath.resolve(relativeFile)
+            path.readLines().forEachIndexed { i, line ->
                 if (line.contains(queryString)) {
                     searchResults.add(
-                        LineLocation(
-                            FileLocation(
-                                file.parent.absolutePathString(),
-                                file.name
-                            ),
-                            i
-                        )
+                        LineLocation(FileLocation(relativeFile, basePath), i)
                     )
                 }
             }

@@ -3,23 +3,17 @@ package dev.shefer.searchengine.engine.repository
 import dev.shefer.searchengine.engine.dto.Token
 import dev.shefer.searchengine.engine.dto.TokenLocation
 
-interface TokenRepository {
+interface SearchIndex {
 
     /**
      * Add token and location to the index.
      */
-    fun registerToken(
-        token: String,
-        directoryPath: String,
-        filename: String,
-        lineNumber: Int,
-        linePosition: Int
-    )
+    fun registerToken(token: Token)
 
     /**
      * Get all token locations.
      */
-    fun findLinesByToken(
+    fun findTokenLocations(
         token: String
     ): List<TokenLocation>
 
@@ -32,17 +26,16 @@ interface TokenRepository {
      * Save index into specific directory.
      * If directory or index files do not exist, it will be created.
      */
-    fun save(indexDirectory: String)
+    fun save()
 
     /**
      * Load index from specific directory.
      * If directory or index files do not exist, then IOException will be thrown.
      */
-    fun load(indexDirectory: String)
+    fun load()
 
     /**
      * Drop any index information both stored and in memory.
      */
-    fun drop(indexDirectory: String)
-
+    fun drop()
 }

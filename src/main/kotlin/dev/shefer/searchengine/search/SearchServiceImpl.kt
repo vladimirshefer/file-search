@@ -5,10 +5,10 @@ import dev.shefer.searchengine.engine.analysis.analyze
 import dev.shefer.searchengine.engine.dto.LineLocation
 import dev.shefer.searchengine.engine.dto.Token
 import dev.shefer.searchengine.engine.dto.TokenLocation
-import dev.shefer.searchengine.engine.service.TokenService
+import dev.shefer.searchengine.engine.repository.SearchIndex
 
 class SearchServiceImpl(
-    private val tokenService: TokenService,
+    private val searchIndex: SearchIndex,
     private val analyzer: Analyzer,
 ) : SearchService {
 
@@ -16,7 +16,7 @@ class SearchServiceImpl(
         val queryTokens = analyzer.analyze(query)
             .also { if (it.isEmpty()) return emptyList() }
 
-        val searchCandidates = tokenService.findLinesByToken(queryTokens[0])
+        val searchCandidates = searchIndex.findTokenLocations(queryTokens[0])
 
         return searchCandidates
             .filter { checkSearchCandidate(it, queryTokens) }
@@ -54,7 +54,7 @@ class SearchServiceImpl(
     }
 
     private fun checkTokenExists(queryToken: String, tokenLocation: TokenLocation, indexShift: Int): Boolean {
-        return tokenService.checkExists(
+        return searchIndex.checkExists(
             Token(
                 queryToken,
                 TokenLocation(

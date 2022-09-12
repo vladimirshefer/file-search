@@ -1,6 +1,7 @@
 package dev.shefer.searchengine.engine.dto
 
 import dev.shefer.searchengine.engine.analysis.Analyzer
+import java.nio.file.Path
 
 class IndexSettings(
     /**
@@ -12,4 +13,6 @@ class IndexSettings(
      */
     val data: String,
     val analyzer: Analyzer,
-)
+) {
+    val sourcePath: Path = Path.of(source).normalize()
+}
