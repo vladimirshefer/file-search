@@ -5,8 +5,8 @@ import dev.shefer.searchengine.engine.config.IndexSettings
 
 fun main() {
     val indexSettings = IndexSettings(
-        source = "./src/main",
-        data = "./index_data",
+        sourceDir = "./src/main",
+        dataDir = "./index_data",
         analyzer = Analyzer.DEFAULT // could also try TRIGRAM_CASESENSITIVE
     )
 

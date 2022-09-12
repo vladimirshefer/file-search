@@ -6,13 +6,13 @@ class IndexSettings(
     /**
      * Source files directory path.
      */
-    val source: String,
+    val sourceDir: String,
     /**
      * Location for index data.
      */
-    val data: String,
+    val dataDir: String,
     val analyzer: Analyzer,
 ) {
-    val sourcePath: Path = Path.of(source).normalize()
-    val dataPath: Path = Path.of(data).normalize()
+    val sourcePath: Path = Path.of(sourceDir).normalize()
+    val dataPath: Path = Path.of(dataDir).normalize()
 }

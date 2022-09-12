@@ -9,7 +9,6 @@ import dev.shefer.searchengine.files.FileAccessor
 import dev.shefer.searchengine.files.FileIndexer
 import dev.shefer.searchengine.search.TrigramIndexedSearchService
 import dev.shefer.searchengine.search.dto.SearchResult
-import java.io.File
 
 class SearchEngine(
     private val indexSettings: IndexSettings
@@ -20,7 +19,7 @@ class SearchEngine(
     val searchService = TrigramIndexedSearchService(invertedIndex, indexSettings.analyzer)
 
     fun rebuildIndex(): Progress {
-        File(indexSettings.data).mkdirs()
+        indexSettings.dataPath.toFile().mkdirs()
 
         val sink: (t: Token) -> Unit = { tl ->
             indexSettings.analyzer
