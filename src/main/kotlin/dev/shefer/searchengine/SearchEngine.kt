@@ -7,7 +7,7 @@ import dev.shefer.searchengine.engine.repository.SearchIndexImpl
 import dev.shefer.searchengine.engine.util.Progress
 import dev.shefer.searchengine.files.FileAccessor
 import dev.shefer.searchengine.files.FileIndexer
-import dev.shefer.searchengine.search.SearchServiceImpl
+import dev.shefer.searchengine.search.TrigramIndexedSearchService
 import dev.shefer.searchengine.search.dto.SearchResult
 import java.io.File
 
@@ -17,7 +17,7 @@ class SearchEngine(
 
     private val fileIndexer = FileIndexer(indexSettings)
     private val searchIndex = SearchIndexImpl(indexSettings)
-    val searchService = SearchServiceImpl(searchIndex, indexSettings.analyzer)
+    val searchService = TrigramIndexedSearchService(searchIndex, indexSettings.analyzer)
 
     fun rebuildIndex(): Progress {
         File(indexSettings.data).mkdirs()

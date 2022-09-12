@@ -7,7 +7,10 @@ import dev.shefer.searchengine.engine.dto.Token
 import dev.shefer.searchengine.engine.dto.TokenLocation
 import dev.shefer.searchengine.engine.repository.SearchIndex
 
-class SearchServiceImpl(
+/**
+ * Searches for text using trigram inverted index
+ */
+class TrigramIndexedSearchService(
     private val searchIndex: SearchIndex,
     private val analyzer: Analyzer,
 ) : SearchService {
