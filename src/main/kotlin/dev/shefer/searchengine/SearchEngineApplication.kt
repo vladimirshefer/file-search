@@ -2,22 +2,12 @@ package dev.shefer.searchengine
 
 import dev.shefer.searchengine.engine.config.Analyzer
 import dev.shefer.searchengine.engine.config.IndexSettings
-import dev.shefer.searchengine.engine.filter.LowercaseTokenFilter
-import dev.shefer.searchengine.engine.tokenizer.TrigramTokenizer
 
 fun main() {
     val indexSettings = IndexSettings(
         source = "./src/main",
         data = "./index_data",
-        analyzer = Analyzer(
-            tokenizer = { TrigramTokenizer() },
-            tokenFilters = listOf(
-                /* Makes search case insensitive.
-                   Remove this token filter to make
-                   search case sensitive. */
-                LowercaseTokenFilter()
-            )
-        )
+        analyzer = Analyzer.DEFAULT // could also try TRIGRAM_CASESENSITIVE
     )
 
     val searchEngine = SearchEngine(indexSettings)
