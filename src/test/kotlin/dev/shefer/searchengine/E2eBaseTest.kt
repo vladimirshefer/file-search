@@ -116,14 +116,14 @@ abstract class E2eBaseTest {
     }
 
     protected fun verifySearch(queryString: String) {
-        val beforeSearch = System.currentTimeMillis()
-        val actual = searchEngine.searchService.search(queryString)
-        val searchTimeMillis = System.currentTimeMillis() - beforeSearch
-        val beforeStupidSearch = System.currentTimeMillis()
-        val expected = stupidSearch(queryString)
-        val stupidSearchTimeMillis = System.currentTimeMillis() - beforeStupidSearch
-        val speedupRate = stupidSearchTimeMillis.toDouble() / searchTimeMillis
-        Assertions.assertEquals(expected, actual)
+        val actual: List<LineLocation> = searchEngine.searchService.search(queryString)
+        val expected: List<LineLocation> = stupidSearch(queryString)
+        Assertions.assertEquals(expected.toSet(), actual.toSet())
+
+        val searchTimeMillis = measureTime { searchEngine.searchService.search(queryString) }
+        val stupidSearchTimeMillis = measureTime { stupidSearch(queryString) }
+        val speedupRate = stupidSearchTimeMillis / searchTimeMillis
+
         println(
             "${this.javaClass.simpleName}:" +
                     " Search `$queryString` is $speedupRate times faster" +
@@ -131,4 +131,22 @@ abstract class E2eBaseTest {
                     " // ${expected.size} search results."
         )
     }
+
+    private fun measureTime(block: () -> Any?): Double {
+        val baseline = measureTimeInternal { "" }.second
+        val time = measureTimeInternal(block).second
+        return time - baseline
+    }
+
+    private fun measureTimeInternal(block: () -> Any?): Pair<Any?, Double> {
+        var actual: Any? = ""
+        val times = 10000
+        val beforeSearch = System.currentTimeMillis()
+        for (i in 1..times) {
+            actual = block()
+        }
+        val searchTimeMillis = (System.currentTimeMillis() - beforeSearch) / times.toDouble()
+        return Pair(actual, searchTimeMillis)
+    }
+
 }
