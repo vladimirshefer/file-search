@@ -3,6 +3,8 @@ package dev.shefer.searchengine.search
 import dev.shefer.searchengine.engine.analysis.Analyzer
 import dev.shefer.searchengine.engine.analysis.analyze
 import dev.shefer.searchengine.engine.dto.LineLocation
+import dev.shefer.searchengine.engine.dto.Token
+import dev.shefer.searchengine.engine.dto.TokenLocation
 import dev.shefer.searchengine.engine.service.TokenService
 
 class SearchServiceImpl(
@@ -12,20 +14,54 @@ class SearchServiceImpl(
 
     override fun search(query: String): List<LineLocation> {
         val queryTokens = analyzer.analyze(query)
+            .also { if (it.isEmpty()) return emptyList() }
 
         val searchCandidates = tokenService.findLinesByToken(queryTokens[0])
-        val result = ArrayList<LineLocation>()
-        for (searchCandidate in searchCandidates) {
-            var allExist = true
-            for (queryToken in queryTokens) {
-                val checkExists = tokenService.checkExists(searchCandidate, queryToken)
-                if (!checkExists) {
-                    allExist = false
-                    break
-                }
+
+        return searchCandidates
+            .filter { checkSearchCandidate(it, queryTokens) }
+            .map { it.lineLocation }
+    }
+
+    private fun checkSearchCandidate(
+        tokenLocation: TokenLocation,
+        queryTokens: List<String>
+    ): Boolean {
+        var allExist = true
+
+        /*
+        since we use trigrams, then checking every trigram is redundant.
+        we could check only every third trigram and the last one for trailing.
+        example: line: [abcdefghiklmnop], query: [defghikl]
+        then we gonna check [[def],[ghi],[ikl]], where "ikl" is trailing trigram
+        */
+        for (i in 3 until queryTokens.size step 3) {
+            val tokenExists = checkTokenExists(tokenLocation, queryTokens, i)
+            if (!tokenExists) {
+                allExist = false
+                break
             }
-            if (allExist) result.add(searchCandidate)
         }
-        return result
+        val lastExists = checkTokenExists(tokenLocation, queryTokens, queryTokens.lastIndex)
+        if (!lastExists) {
+            allExist = false
+        }
+        return allExist
+    }
+
+    private fun checkTokenExists(tokenLocation: TokenLocation, queryTokens: List<String>, i: Int): Boolean {
+        return checkTokenExists(queryTokens[i], tokenLocation, i)
+    }
+
+    private fun checkTokenExists(queryToken: String, tokenLocation: TokenLocation, indexShift: Int): Boolean {
+        return tokenService.checkExists(
+            Token(
+                queryToken,
+                TokenLocation(
+                    tokenLocation.lineLocation,
+                    tokenLocation.tokenIndex + indexShift
+                )
+            )
+        )
     }
 }

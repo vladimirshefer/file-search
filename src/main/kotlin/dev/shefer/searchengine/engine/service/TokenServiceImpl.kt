@@ -1,7 +1,7 @@
 package dev.shefer.searchengine.engine.service
 
-import dev.shefer.searchengine.engine.dto.LineLocation
 import dev.shefer.searchengine.engine.dto.Token
+import dev.shefer.searchengine.engine.dto.TokenLocation
 import dev.shefer.searchengine.engine.repository.TokenRepository
 
 class TokenServiceImpl(
@@ -20,12 +20,12 @@ class TokenServiceImpl(
         )
     }
 
-    override fun findLinesByToken(token: String): List<LineLocation> {
+    override fun findLinesByToken(token: String): List<TokenLocation> {
         return tokenRepository.findLinesByToken(token)
     }
 
-    override fun checkExists(searchCandidate: LineLocation, queryToken: String): Boolean {
-        return tokenRepository.checkExists(searchCandidate, queryToken)
+    override fun checkExists(token: Token): Boolean {
+        return tokenRepository.checkExists(token)
     }
 
     override fun flush(directory: String) {

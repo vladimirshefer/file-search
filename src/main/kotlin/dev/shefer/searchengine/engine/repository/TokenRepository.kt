@@ -1,6 +1,7 @@
 package dev.shefer.searchengine.engine.repository
 
-import dev.shefer.searchengine.engine.dto.LineLocation
+import dev.shefer.searchengine.engine.dto.Token
+import dev.shefer.searchengine.engine.dto.TokenLocation
 
 interface TokenRepository {
 
@@ -20,15 +21,12 @@ interface TokenRepository {
      */
     fun findLinesByToken(
         token: String
-    ): List<LineLocation>
+    ): List<TokenLocation>
 
     /**
-     * Check if specific token exists on specified file line.
+     * Check if specific token exists in index.
      */
-    fun checkExists(
-        searchCandidate: LineLocation,
-        queryToken: String
-    ): Boolean
+    fun checkExists(token: Token): Boolean
 
     /**
      * Save index into specific directory.

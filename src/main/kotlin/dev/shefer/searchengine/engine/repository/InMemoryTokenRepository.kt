@@ -5,12 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import dev.shefer.searchengine.engine.dto.FileLocation
 import dev.shefer.searchengine.engine.dto.LineLocation
+import dev.shefer.searchengine.engine.dto.Token
+import dev.shefer.searchengine.engine.dto.TokenLocation
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantReadWriteLock
 
-private typealias LineIndex = MutableMap<Int, MutableList<Int>>
+private typealias LineIndex = MutableMap<Int, MutableSet<Int>>
 private typealias FileIndex = MutableMap<String, LineIndex>
 private typealias DirectoryIndex = MutableMap<String, FileIndex>
 private typealias TokenIndex = MutableMap<String, DirectoryIndex>
@@ -35,31 +37,33 @@ class InMemoryTokenRepository : TokenRepository {
                 .getOrPut(token) { HashMap() }
                 .getOrPut(directoryPath) { HashMap() }
                 .getOrPut(filename) { HashMap() }
-                .getOrPut(lineNumber) { ArrayList() }
+                .getOrPut(lineNumber) { HashSet() }
                 .add(linePosition)
         }
     }
 
-    override fun findLinesByToken(token: String): List<LineLocation> {
+    override fun findLinesByToken(token: String): List<TokenLocation> {
         return readLock {
-            val get = index.get(token) ?: emptyMap()
+            val get = index[token] ?: emptyMap()
             get.flatMap { (dirName, files) ->
                 files.flatMap { (filename, lines) ->
                     val fileLocation = FileLocation(dirName, filename)
-                    lines.keys.map { lineId ->
-                        LineLocation(fileLocation, lineId)
+                    lines.flatMap { (lineId, positions) ->
+                        val lineLocation = LineLocation(fileLocation, lineId)
+                        positions.map { tokenPosition -> TokenLocation(lineLocation, tokenPosition) }
                     }
                 }
             }
         }
     }
 
-    override fun checkExists(searchCandidate: LineLocation, queryToken: String): Boolean {
+    override fun checkExists(token: Token): Boolean {
         return readLock {
-            index[queryToken]
-                ?.get(searchCandidate.fileLocation.directoryPath)
-                ?.get(searchCandidate.fileLocation.fileName)
-                ?.get(searchCandidate.lineIndex) != null
+            index[token.token]
+                ?.get(token.tokenLocation.lineLocation.fileLocation.directoryPath)
+                ?.get(token.tokenLocation.lineLocation.fileLocation.fileName)
+                ?.get(token.tokenLocation.lineLocation.lineIndex)
+                ?.contains(token.tokenLocation.tokenIndex) ?: false
         }
     }
 

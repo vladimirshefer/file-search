@@ -1,7 +1,7 @@
 package dev.shefer.searchengine.engine.service
 
-import dev.shefer.searchengine.engine.dto.LineLocation
 import dev.shefer.searchengine.engine.dto.Token
+import dev.shefer.searchengine.engine.dto.TokenLocation
 
 interface TokenService {
 
@@ -9,12 +9,9 @@ interface TokenService {
 
     fun findLinesByToken(
         token: String
-    ): List<LineLocation>
+    ): List<TokenLocation>
 
-    fun checkExists(
-        searchCandidate: LineLocation,
-        queryToken: String
-    ): Boolean
+    fun checkExists(token: Token): Boolean
 
     fun flush(directory: String)
 }
