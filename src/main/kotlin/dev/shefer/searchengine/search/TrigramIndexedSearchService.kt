@@ -5,13 +5,13 @@ import dev.shefer.searchengine.engine.analysis.analyze
 import dev.shefer.searchengine.engine.dto.LineLocation
 import dev.shefer.searchengine.engine.dto.Token
 import dev.shefer.searchengine.engine.dto.TokenLocation
-import dev.shefer.searchengine.engine.repository.SearchIndex
+import dev.shefer.searchengine.engine.index.InvertedIndex
 
 /**
  * Searches for text using trigram inverted index
  */
 class TrigramIndexedSearchService(
-    private val searchIndex: SearchIndex,
+    private val index: InvertedIndex,
     private val analyzer: Analyzer,
 ) : SearchService {
 
@@ -19,7 +19,7 @@ class TrigramIndexedSearchService(
         val queryTokens = analyzer.analyze(query)
             .also { if (it.isEmpty()) return emptyList() }
 
-        val searchCandidates = searchIndex.findTokenLocations(queryTokens[0])
+        val searchCandidates = index.findTokenLocations(queryTokens[0])
 
         return searchCandidates
             .filter { checkSearchCandidate(it, queryTokens) }
@@ -57,7 +57,7 @@ class TrigramIndexedSearchService(
     }
 
     private fun checkTokenExists(queryToken: String, tokenLocation: TokenLocation, indexShift: Int): Boolean {
-        return searchIndex.checkExists(
+        return index.checkExists(
             Token(
                 queryToken,
                 TokenLocation(

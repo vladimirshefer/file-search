@@ -1,4 +1,4 @@
-package dev.shefer.searchengine.engine.repository
+package dev.shefer.searchengine.engine.index
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -20,11 +20,12 @@ private typealias DirectoryIndex = MutableMap<String, FileIndex>
 private typealias TokenIndex = MutableMap<String, DirectoryIndex>
 
 /**
- * Holder of the basic
+ * Inverted index for text tokens.
+ * See https://en.wikipedia.org/wiki/Inverted_index.
  */
-class SearchIndexImpl(
+class InvertedIndexImpl(
     private val indexSettings: IndexSettings
-) : SearchIndex {
+) : InvertedIndex {
 
     private val rwLock = ReentrantReadWriteLock()
     private val rLock = rwLock.readLock()

@@ -1,9 +1,9 @@
-package dev.shefer.searchengine.engine.repository
+package dev.shefer.searchengine.engine.index
 
 import dev.shefer.searchengine.engine.dto.Token
 import dev.shefer.searchengine.engine.dto.TokenLocation
 
-interface SearchIndex {
+interface InvertedIndex {
 
     /**
      * Add token and location to the index.
@@ -13,9 +13,7 @@ interface SearchIndex {
     /**
      * Get all token locations.
      */
-    fun findTokenLocations(
-        token: String
-    ): List<TokenLocation>
+    fun findTokenLocations(token: String): List<TokenLocation>
 
     /**
      * Check if specific token exists in index.

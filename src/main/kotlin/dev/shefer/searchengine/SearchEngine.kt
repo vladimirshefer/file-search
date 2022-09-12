@@ -3,7 +3,7 @@ package dev.shefer.searchengine
 import dev.shefer.searchengine.engine.analysis.filterToken
 import dev.shefer.searchengine.engine.dto.IndexSettings
 import dev.shefer.searchengine.engine.dto.Token
-import dev.shefer.searchengine.engine.repository.SearchIndexImpl
+import dev.shefer.searchengine.engine.index.InvertedIndexImpl
 import dev.shefer.searchengine.engine.util.Progress
 import dev.shefer.searchengine.files.FileAccessor
 import dev.shefer.searchengine.files.FileIndexer
@@ -16,8 +16,8 @@ class SearchEngine(
 ) {
 
     private val fileIndexer = FileIndexer(indexSettings)
-    private val searchIndex = SearchIndexImpl(indexSettings)
-    val searchService = TrigramIndexedSearchService(searchIndex, indexSettings.analyzer)
+    private val invertedIndex = InvertedIndexImpl(indexSettings)
+    val searchService = TrigramIndexedSearchService(invertedIndex, indexSettings.analyzer)
 
     fun rebuildIndex(): Progress {
         File(indexSettings.data).mkdirs()
@@ -26,7 +26,7 @@ class SearchEngine(
             indexSettings.analyzer
                 .filterToken(tl.token)
                 ?.also { token ->
-                    searchIndex.registerToken(Token(token, tl.tokenLocation))
+                    invertedIndex.registerToken(Token(token, tl.tokenLocation))
                 }
         }
 
@@ -36,15 +36,15 @@ class SearchEngine(
     }
 
     fun saveIndex() {
-        searchIndex.save()
+        invertedIndex.save()
     }
 
     fun loadIndex() {
-        searchIndex.load()
+        invertedIndex.load()
     }
 
     fun dropIndex() {
-        searchIndex.drop()
+        invertedIndex.drop()
     }
 
     fun search(searchQuery: String) {
