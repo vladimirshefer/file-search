@@ -3,8 +3,8 @@ package dev.shefer.searchengine.engine.index
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
+import dev.shefer.searchengine.engine.config.IndexSettings
 import dev.shefer.searchengine.engine.dto.FileLocation
-import dev.shefer.searchengine.engine.dto.IndexSettings
 import dev.shefer.searchengine.engine.dto.LineLocation
 import dev.shefer.searchengine.engine.dto.Token
 import dev.shefer.searchengine.engine.dto.TokenLocation

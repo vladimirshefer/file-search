@@ -1,6 +1,5 @@
-package dev.shefer.searchengine.engine.dto
+package dev.shefer.searchengine.engine.config
 
-import dev.shefer.searchengine.engine.analysis.Analyzer
 import java.nio.file.Path
 
 class IndexSettings(

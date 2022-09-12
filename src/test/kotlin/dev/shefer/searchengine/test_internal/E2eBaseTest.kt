@@ -2,8 +2,8 @@ package dev.shefer.searchengine.test_internal
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import dev.shefer.searchengine.SearchEngine
-import dev.shefer.searchengine.engine.analysis.Analyzer
-import dev.shefer.searchengine.engine.dto.IndexSettings
+import dev.shefer.searchengine.engine.config.Analyzer
+import dev.shefer.searchengine.engine.config.IndexSettings
 import dev.shefer.searchengine.engine.dto.LineLocation
 import dev.shefer.searchengine.test_internal.util.StupidSearchService
 import org.junit.jupiter.api.AfterEach

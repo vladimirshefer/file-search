@@ -1,7 +1,7 @@
 package dev.shefer.searchengine
 
-import dev.shefer.searchengine.engine.analysis.Analyzer
-import dev.shefer.searchengine.engine.dto.IndexSettings
+import dev.shefer.searchengine.engine.config.Analyzer
+import dev.shefer.searchengine.engine.config.IndexSettings
 import dev.shefer.searchengine.engine.filter.LowercaseTokenFilter
 import dev.shefer.searchengine.engine.tokenizer.TrigramTokenizer
 

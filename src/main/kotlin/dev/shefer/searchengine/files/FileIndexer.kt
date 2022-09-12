@@ -1,7 +1,7 @@
 package dev.shefer.searchengine.files
 
+import dev.shefer.searchengine.engine.config.IndexSettings
 import dev.shefer.searchengine.engine.dto.FileLocation
-import dev.shefer.searchengine.engine.dto.IndexSettings
 import dev.shefer.searchengine.engine.dto.LineLocation
 import dev.shefer.searchengine.engine.dto.Token
 import dev.shefer.searchengine.engine.dto.TokenLocation

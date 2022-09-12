@@ -1,6 +1,6 @@
 package dev.shefer.searchengine
 
-import dev.shefer.searchengine.engine.analysis.Analyzer
+import dev.shefer.searchengine.engine.config.Analyzer
 import dev.shefer.searchengine.engine.filter.LowercaseTokenFilter
 import dev.shefer.searchengine.engine.tokenizer.TrigramTokenizer
 import dev.shefer.searchengine.test_internal.E2eBaseTest

@@ -1,7 +1,7 @@
 package dev.shefer.searchengine.search
 
-import dev.shefer.searchengine.engine.analysis.Analyzer
-import dev.shefer.searchengine.engine.analysis.analyze
+import dev.shefer.searchengine.engine.config.Analyzer
+import dev.shefer.searchengine.engine.config.analyze
 import dev.shefer.searchengine.engine.dto.LineLocation
 import dev.shefer.searchengine.engine.dto.Token
 import dev.shefer.searchengine.engine.dto.TokenLocation

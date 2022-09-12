@@ -1,7 +1,7 @@
 package dev.shefer.searchengine
 
-import dev.shefer.searchengine.engine.analysis.filterToken
-import dev.shefer.searchengine.engine.dto.IndexSettings
+import dev.shefer.searchengine.engine.config.IndexSettings
+import dev.shefer.searchengine.engine.config.filterToken
 import dev.shefer.searchengine.engine.dto.Token
 import dev.shefer.searchengine.engine.index.InvertedIndexImpl
 import dev.shefer.searchengine.engine.util.Progress

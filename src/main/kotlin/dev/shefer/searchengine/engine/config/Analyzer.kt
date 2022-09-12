@@ -1,4 +1,4 @@
-package dev.shefer.searchengine.engine.analysis
+package dev.shefer.searchengine.engine.config
 
 import dev.shefer.searchengine.engine.filter.TokenFilter
 import dev.shefer.searchengine.engine.tokenizer.Tokenizer
