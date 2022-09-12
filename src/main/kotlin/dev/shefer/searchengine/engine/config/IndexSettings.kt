@@ -14,4 +14,5 @@ class IndexSettings(
     val analyzer: Analyzer,
 ) {
     val sourcePath: Path = Path.of(source).normalize()
+    val dataPath: Path = Path.of(data).normalize()
 }

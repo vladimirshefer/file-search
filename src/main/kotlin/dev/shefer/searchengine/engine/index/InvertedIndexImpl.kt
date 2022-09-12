@@ -3,16 +3,17 @@ package dev.shefer.searchengine.engine.index
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
-import dev.shefer.searchengine.engine.config.IndexSettings
 import dev.shefer.searchengine.engine.dto.FileLocation
 import dev.shefer.searchengine.engine.dto.LineLocation
 import dev.shefer.searchengine.engine.dto.Token
 import dev.shefer.searchengine.engine.dto.TokenLocation
-import java.io.File
 import java.io.IOException
 import java.nio.file.Path
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantReadWriteLock
+import kotlin.io.path.createFile
+import kotlin.io.path.deleteIfExists
+import kotlin.io.path.notExists
 
 private typealias LineIndex = MutableMap<Int, MutableSet<Int>>
 private typealias FileIndex = MutableMap<String, LineIndex>
@@ -24,8 +25,11 @@ private typealias TokenIndex = MutableMap<String, DirectoryIndex>
  * See https://en.wikipedia.org/wiki/Inverted_index.
  */
 class InvertedIndexImpl(
-    private val indexSettings: IndexSettings
+    private val sourcePath: Path,
+    private val dataPath: Path,
 ) : InvertedIndex {
+
+    private val dataFile = dataPath.resolve(INDEX_FILENAME)
 
     private val rwLock = ReentrantReadWriteLock()
     private val rLock = rwLock.readLock()
@@ -51,7 +55,7 @@ class InvertedIndexImpl(
             val get = index[token] ?: emptyMap()
             get.flatMap { (dirName, files) ->
                 files.flatMap { (filename, lines) ->
-                    val fileLocation = FileLocation(Path.of(dirName, filename), indexSettings.sourcePath)
+                    val fileLocation = FileLocation(Path.of(dirName, filename), sourcePath)
                     lines.flatMap { (lineId, positions) ->
                         val lineLocation = LineLocation(fileLocation, lineId)
                         positions.map { tokenPosition -> TokenLocation(lineLocation, tokenPosition) }
@@ -73,46 +77,26 @@ class InvertedIndexImpl(
 
     override fun save() {
         writeLock {
-            val indexDirectory = indexSettings.data
-            val indexFile = getIndexFile(indexDirectory)
-            if (indexFile.exists()) {
-                indexFile.delete()
-            }
-            indexFile.createNewFile()
-
-            OBJECT_MAPPER.writeValue(indexFile, index)
+            dataFile.deleteIfExists()
+            dataFile.createFile()
+            OBJECT_MAPPER.writeValue(dataFile.toFile(), index)
         }
     }
 
     override fun load() {
         writeLock {
-            val indexDirectory: String = indexSettings.data
-            val indexFile = getIndexFile(indexDirectory)
-            if (!indexFile.exists()) {
-                throw IOException("No such file $indexFile")
+            if (dataFile.notExists()) {
+                throw IOException("No such file $dataFile")
             }
-
-            index = OBJECT_MAPPER.readValue(indexFile, INDEX_DATA_TYPE_REFERENCE)
+            index = OBJECT_MAPPER.readValue(dataFile.toFile(), INDEX_DATA_TYPE_REFERENCE)
         }
     }
 
     override fun drop() {
         writeLock {
-            val indexDirectory: String = indexSettings.data
-            val indexFile = getIndexFile(indexDirectory)
-            if (indexFile.exists()) {
-                indexFile.delete()
-            }
+            dataFile.deleteIfExists()
             index = HashMap()
         }
-    }
-
-    private fun getIndexFile(directory: String): File {
-        val dir = File(directory)
-        if (!dir.exists()) {
-            throw IOException("No such directory $directory")
-        }
-        return dir.resolve("data_index.json")
     }
 
     private fun <T> writeLock(block: () -> T): T {
@@ -127,6 +111,8 @@ class InvertedIndexImpl(
 
         private val OBJECT_MAPPER = ObjectMapper()
             .enable(SerializationFeature.INDENT_OUTPUT)
+
+        private const val INDEX_FILENAME = "data_index.json"
 
         private val INDEX_DATA_TYPE_REFERENCE =
             object : TypeReference<TokenIndex>() {}

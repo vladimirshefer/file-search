@@ -16,8 +16,8 @@ class SearchEngine(
 ) {
 
     private val fileIndexer = FileIndexer(indexSettings)
-    private val invertedIndex = InvertedIndexImpl(indexSettings)
-    val searchService = TrigramIndexedSearchService(invertedIndex, indexSettings.analyzer)
+    private val invertedIndex = InvertedIndexImpl(indexSettings.sourcePath, indexSettings.dataPath)
+    private val searchService = TrigramIndexedSearchService(invertedIndex, indexSettings.analyzer)
 
     fun rebuildIndex(): Progress {
         File(indexSettings.data).mkdirs()
