@@ -6,8 +6,8 @@ import dev.shefer.searchengine.engine.dto.Token
 import dev.shefer.searchengine.engine.repository.InMemoryTokenRepository
 import dev.shefer.searchengine.engine.service.TokenServiceImpl
 import dev.shefer.searchengine.engine.util.Progress
-import dev.shefer.searchengine.fs.FileAccessor
-import dev.shefer.searchengine.indexing.FileIndexer
+import dev.shefer.searchengine.files.FileAccessor
+import dev.shefer.searchengine.files.FileIndexer
 import dev.shefer.searchengine.search.SearchServiceImpl
 import dev.shefer.searchengine.search.dto.SearchResult
 import java.io.File
@@ -54,7 +54,7 @@ class SearchEngine(
     fun search(searchQuery: String) {
         val lineLocations = searchService.search(searchQuery)
         for (lineLocation in lineLocations) {
-            val originalLine = FileAccessor().getLine(lineLocation)
+            val originalLine = FileAccessor.getLine(lineLocation)
             val startIndex = originalLine.lowercase().indexOf(searchQuery.lowercase())
             if (startIndex < 0) continue
             val searchResult = SearchResult(lineLocation, searchQuery, originalLine, startIndex)
