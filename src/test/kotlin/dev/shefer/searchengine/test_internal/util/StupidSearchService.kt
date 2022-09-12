@@ -1,4 +1,4 @@
-package dev.shefer.searchengine.util
+package dev.shefer.searchengine.test_internal.util
 
 import dev.shefer.searchengine.engine.dto.FileLocation
 import dev.shefer.searchengine.engine.dto.LineLocation

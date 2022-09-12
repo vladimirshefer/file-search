@@ -1,10 +1,11 @@
-package dev.shefer.searchengine
+package dev.shefer.searchengine.test_internal
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import dev.shefer.searchengine.SearchEngine
 import dev.shefer.searchengine.engine.analysis.Analyzer
 import dev.shefer.searchengine.engine.dto.IndexSettings
 import dev.shefer.searchengine.engine.dto.LineLocation
-import dev.shefer.searchengine.util.StupidSearchService
+import dev.shefer.searchengine.test_internal.util.StupidSearchService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertTrue
