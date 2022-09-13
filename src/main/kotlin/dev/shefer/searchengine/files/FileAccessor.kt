@@ -18,7 +18,7 @@ class FileAccessor {
 
     companion object {
 
-        val EXTENSION_WHITELIST = listOf(".kt", ".kts", ".gitignore", ".txt", ".properties", ".bat")
+        val EXTENSION_WHITELIST = listOf(".kt", ".kts", ".gitignore", ".txt", ".properties", ".bat", ".yaml", ".yml")
 
         /**
          * Reads the turns the line of the file.
