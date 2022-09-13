@@ -49,7 +49,7 @@ class SearchEngine(
     fun search(searchQuery: String) {
         val lineLocations = searchService.search(searchQuery)
         for (lineLocation in lineLocations) {
-            val path = indexSettings.sourcePath.relativize(lineLocation.fileLocation.path)
+            val path = indexSettings.sourcePath.resolve(lineLocation.fileLocation.path)
             val originalLine = FileAccessor.getLine(path, lineLocation.lineIndex)
             val startIndex = originalLine.lowercase().indexOf(searchQuery.lowercase())
             if (startIndex < 0) continue
