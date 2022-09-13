@@ -25,6 +25,7 @@ class E2e1Test : E2eBaseTest() {
         verifySearch("We all live in a yellow submarine")
         verifySearch("gonna make")
         verifySearch("gonna")
+        verifySearch("indexing and search")
     }
 
 }

@@ -5,7 +5,7 @@ import dev.shefer.searchengine.engine.config.IndexSettings
 
 fun main() {
     val indexSettings = IndexSettings(
-        sourceDir = "./src/main",
+        sourceDir = "../vovan-balabol-bot-frontend/",
         dataDir = "./index_data",
         analyzer = Analyzer.DEFAULT // could also try TRIGRAM_CASESENSITIVE
     )
@@ -17,7 +17,7 @@ fun main() {
         Thread.sleep(50)
     }
     indexProgress.join()
-    searchEngine.search("Rec")
+    searchEngine.search("version ")
 
     searchEngine.saveIndex()
 

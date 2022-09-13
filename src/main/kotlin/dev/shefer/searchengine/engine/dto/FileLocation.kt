@@ -9,7 +9,7 @@ data class FileLocation(
     val path: Path
 ) {
 
-    val directoryPath: String = path.parent.toString()
+    val directoryPath: String = path.parent?.toString() ?: ""
     val fileName: String = path.fileName.toString()
 
     override fun toString(): String {
