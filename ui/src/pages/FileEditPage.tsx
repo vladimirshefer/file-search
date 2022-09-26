@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from 'react'
 import axios from "axios";
-import {Link, useLocation, useParams} from "react-router-dom";
+import {Link, useParams} from "react-router-dom";
+import "styles/FileEditPage.css"
 
 function FileEditPage() {
-    let urlPath = useLocation();
     let {"*": filePath = ""} = useParams<string>()
     let [content, setContent] = useState<string>("")
 
@@ -28,9 +28,7 @@ function FileEditPage() {
             <p>
                 <Link to={"/files/" + filePath.substring(0, filePath.lastIndexOf("/"))}> back </Link>
             </p>
-            <pre>
-                {content}
-            </pre>
+            <textarea value={content} onChange={(e) => setContent(e.target.value)} rows={50}></textarea>
         </div>
     )
 }
