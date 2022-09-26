@@ -2,9 +2,18 @@ import React, {useEffect, useState} from 'react'
 import axios from "axios";
 import {Link, useLocation} from "react-router-dom";
 
+interface FileInfoDto {
+    name: string
+    size: string
+}
+
+interface DirectoryInfoDto {
+    name: string
+}
 
 function FilesPage() {
-    let [files, setFiles] = useState<string[]>([]);
+    let [files, setFiles] = useState<FileInfoDto[]>([]);
+    let [directories, setDirectories] = useState<DirectoryInfoDto[]>([]);
     let urlPath = useLocation();
     let [filePath, setFilePath] = useState<string>("")
 
@@ -13,31 +22,44 @@ function FilesPage() {
     }, [urlPath])
 
     useEffect(() => {
-        loadFiles(filePath)
+        loadContent(filePath)
     }, [filePath])
 
-    async function loadFiles(filePath: string) {
+    async function loadContent(filePath: string) {
         let response = await axios.get("/api/files/list", {
             params: {
                 path: filePath
             }
         });
-        let filesBody: string[] = response.data.files;
-        setFiles(filesBody)
+        setFiles(response.data.files || [])
+        setDirectories(response.data.directories || [])
     }
 
     return <div>
         {"Hello!"}
         <ul>
+            <p>
+                Total directories: {directories.length}
+            </p>
             {filePath !== "" ? (
                 <li key={".."}>
                     <Link to={".."} relative={"path"}>..</Link>
                 </li>
             ) : ("")}
             {
-                files.map((filename) =>
-                    <li key={filename}>
-                        <Link to={"./" + filename} relative={"path"}> {filename}</Link>
+                directories.map((directory) =>
+                    <li key={directory.name}>
+                        <Link to={"./" + directory.name} relative={"path"}> {directory.name}</Link>
+                    </li>
+                )
+            }
+            <p>
+                Total files: {files.length}
+            </p>
+            {
+                files.map((file) =>
+                    <li key={file.name}>
+                        {file.name} : {file.size}
                     </li>
                 )
             }
