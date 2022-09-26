@@ -57,10 +57,10 @@ function FilesPage() {
                     <li key={file.name}>
                         {file.name} : {file.size}
                         <Link to={"/edit/" + filePath + "/" + file.name} relative={"route"}>
-                            Open
+                            <button type={"button"}>Edit text</button>
                         </Link>
-                        <a href={"/api/files/show/?path=" + filePath + "/" + file.name}>
-                            Show
+                        <a href={"/api/files/show/?path=" + filePath + "/" + file.name} target={"_blank"}>
+                            <button type={"button"}>Open</button>
                         </a>
 
                     </li>
