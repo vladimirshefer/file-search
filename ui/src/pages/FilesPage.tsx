@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import axios from "axios";
-import {Link, useLocation, useParams} from "react-router-dom";
+import {Link, useParams} from "react-router-dom";
+import "styles/FilesPage.css"
 
 interface FileInfoDto {
     name: string
@@ -14,7 +15,6 @@ interface DirectoryInfoDto {
 function FilesPage() {
     let [files, setFiles] = useState<FileInfoDto[]>([]);
     let [directories, setDirectories] = useState<DirectoryInfoDto[]>([]);
-    let urlPath = useLocation();
     let {"*": filePath = ""} = useParams<string>()
 
     useEffect(() => {
@@ -32,11 +32,11 @@ function FilesPage() {
     }
 
     return <div>
-        {"Hello!"}
-        <ul>
-            <p>
-                Total directories: {directories.length}
-            </p>
+        <h1>Files tree</h1>
+        <p>
+            Total directories: {directories.length}
+        </p>
+        <ul className="file-tree_directories-list">
             {filePath !== "" ? (
                 <li key={".."}>
                     <Link to={".."} relative={"path"}>..</Link>
@@ -49,9 +49,11 @@ function FilesPage() {
                     </li>
                 )
             }
-            <p>
-                Total files: {files.length}
-            </p>
+        </ul>
+        <p>
+            Total files: {files.length}
+        </p>
+        <ul className="file-tree_files-list">
             {
                 files.map((file) =>
                     <li key={file.name}>

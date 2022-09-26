@@ -1,0 +1,14 @@
+.file-tree_directories-list li a {
+    font-style: inherit;
+    color: blue;
+    text-decoration: inherit;
+}
+
+.file-tree_files-list li {
+    padding-bottom: 5px;
+}
+
+.file-tree_files-list button {
+    margin-left: 10px;
+}
+
