@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.io.File
+import java.nio.file.Files
 
 @RestController
 @RequestMapping("/api/files")
@@ -31,6 +32,18 @@ class FileSystemController {
         return mapOf(
             "files" to files,
             "directories" to directories
+        )
+    }
+
+    @GetMapping("/content")
+    fun getFileContent(
+        @RequestParam(required = false, defaultValue = "")
+        path: String
+    ): Map<String, Any> {
+        val file = File(root + path)
+        val content = Files.readString(file.toPath())
+        return mapOf(
+            "content" to content
         )
     }
 }

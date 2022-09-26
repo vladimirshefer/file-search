@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react'
 import axios from "axios";
-import {Link, useLocation} from "react-router-dom";
+import {Link, useLocation, useParams} from "react-router-dom";
 
 interface FileInfoDto {
     name: string
@@ -15,11 +15,7 @@ function FilesPage() {
     let [files, setFiles] = useState<FileInfoDto[]>([]);
     let [directories, setDirectories] = useState<DirectoryInfoDto[]>([]);
     let urlPath = useLocation();
-    let [filePath, setFilePath] = useState<string>("")
-
-    useEffect(() => {
-        setFilePath(urlPath.pathname.substring("/files/".length));
-    }, [urlPath])
+    let {"*": filePath = ""} = useParams<string>()
 
     useEffect(() => {
         loadContent(filePath)
@@ -60,6 +56,10 @@ function FilesPage() {
                 files.map((file) =>
                     <li key={file.name}>
                         {file.name} : {file.size}
+                        <Link to={"/edit/" + filePath + "/" + file.name} relative={"route"}>
+                            Open
+                        </Link>
+
                     </li>
                 )
             }
