@@ -3,6 +3,9 @@ package dev.shefer.searchengine.controller
 import dev.shefer.searchengine.dto.DirectoryInfoDto
 import dev.shefer.searchengine.dto.FileInfoDto
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
+import org.springframework.util.MimeType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -45,5 +48,21 @@ class FileSystemController {
         return mapOf(
             "content" to content
         )
+    }
+
+    @GetMapping("/show")
+    fun showFileContent(
+        @RequestParam(required = false, defaultValue = "")
+        path: String
+    ): ResponseEntity<ByteArray> {
+        val file = File(root + path)
+        val path = file.toPath()
+        val content = Files.readAllBytes(path)
+        val contentType = Files.probeContentType(path) ?: "text/plain"
+        val mimeType = MimeType.valueOf(contentType)
+        val mediaType = MediaType.asMediaType(mimeType)
+        return ResponseEntity.ok()
+            .contentType(mediaType)
+            .body(content)
     }
 }

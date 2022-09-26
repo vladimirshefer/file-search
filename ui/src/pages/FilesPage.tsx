@@ -59,6 +59,9 @@ function FilesPage() {
                         <Link to={"/edit/" + filePath + "/" + file.name} relative={"route"}>
                             Open
                         </Link>
+                        <a href={"/api/files/show/?path=" + filePath + "/" + file.name}>
+                            Show
+                        </a>
 
                     </li>
                 )
