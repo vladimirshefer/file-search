@@ -11,7 +11,13 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.io.File
+import java.io.IOException
+import java.nio.file.FileVisitResult
 import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.SimpleFileVisitor
+import java.nio.file.attribute.BasicFileAttributes
+import kotlin.io.path.extension
 
 @RestController
 @RequestMapping("/api/files")
@@ -44,7 +50,8 @@ class FileSystemController {
         path: String
     ): Map<String, Any> {
         val file = File(root + path)
-        val content = Files.readString(file.toPath())
+        val path = file.toPath().normalize()
+        val content = Files.readString(path)
         return mapOf(
             "content" to content
         )
@@ -56,7 +63,7 @@ class FileSystemController {
         path: String
     ): ResponseEntity<ByteArray> {
         val file = File(root + path)
-        val path = file.toPath()
+        val path = file.toPath().normalize()
         val content = Files.readAllBytes(path)
         val contentType = Files.probeContentType(path) ?: "text/plain"
         val mimeType = MimeType.valueOf(contentType)
@@ -64,5 +71,51 @@ class FileSystemController {
         return ResponseEntity.ok()
             .contentType(mediaType)
             .body(content)
+    }
+
+    @GetMapping("/stats")
+    fun stats(
+        @RequestParam(required = false, defaultValue = "")
+        path: String
+    ): Map<String, Any?> {
+        val file = File(root + path)
+        val path = file.toPath().normalize()
+
+        var forbiddenDirectoriess = 0
+        var totalSize = 0L
+        val extension2count = HashMap<String, Int>()
+        val extension2totalSize = HashMap<String, Long>()
+
+        Files.walkFileTree(path, object : SimpleFileVisitor<Path?>() {
+            override fun visitFileFailed(file: Path?, e: IOException?): FileVisitResult {
+                System.err.printf("Visiting failed for %s\n", file)
+                forbiddenDirectoriess++
+                return FileVisitResult.SKIP_SUBTREE
+            }
+
+            override fun visitFile(file: Path?, attrs: BasicFileAttributes?): FileVisitResult {
+                val result = super.visitFile(file, attrs)
+                file ?: return result
+
+                val fileSize = attrs?.size() ?: 0
+                totalSize += fileSize
+
+                val extension = file.extension
+                extension2count.computeIfPresent(extension) { _, v -> v + 1 }
+                extension2count.putIfAbsent(extension, 1)
+
+                extension2totalSize.computeIfPresent(extension) { _, v -> v + fileSize }
+                extension2totalSize.putIfAbsent(extension, fileSize)
+
+                return result
+            }
+        })
+
+        return mapOf(
+            "forbiddenDirectories" to forbiddenDirectoriess,
+            "totalSize" to totalSize,
+            "extension2count" to extension2count,
+            "extension2totalSize" to extension2totalSize
+        )
     }
 }
