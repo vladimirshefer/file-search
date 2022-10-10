@@ -116,14 +116,14 @@ function FilesList(files: FileInfoDto[], root: string) {
         </li>;
     }
 
-    return <>
-        <p>
+    return <div className={"file-tree_files-list"}>
+        <p className={"files-list_header"}>
             Total files: {files.length}
         </p>
-        <ul className="file-tree_files-list">
+        <ul className="files-list_list">
             {files.map((file) => FileInfo(file))}
         </ul>
-    </>;
+    </div>;
 }
 
 export default FilesPage
