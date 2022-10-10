@@ -1,0 +1,20 @@
+.header {
+    padding: 5px;
+    display: flex;
+}
+
+.header_logo {
+    padding: 5px;
+}
+
+.header_logo_text {
+    font-size: 1.2rem;
+}
+
+.header_nav-item {
+    text-decoration: inherit;
+    color: black;
+    padding: 5px;
+    margin: 0 5px;
+    background-color: #eee;
+}
