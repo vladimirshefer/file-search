@@ -8,10 +8,6 @@
     padding-bottom: 5px;
 }
 
-.file-tree_files-list button {
-    margin-left: 10px;
-}
-
 .readme {
     padding: 10px;
 }
@@ -19,4 +15,29 @@
 .readme_text {
     white-space: pre-wrap;
     word-wrap: break-word;
+}
+
+.files-list_list {
+    list-style: none;
+}
+
+.file-info {
+    border: 1px solid #ddd;
+    padding: 5px;
+}
+
+.file-info_name {
+    margin: 0 15px 0 5px;
+}
+
+.file-info_size {
+    font-size: 0.7rem;
+    background-color: coral;
+    border-radius: 4px;
+    padding: 5px;
+    margin: 0 5px;
+}
+
+.file-info_button {
+    margin: 0 5px;
 }

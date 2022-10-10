@@ -104,13 +104,25 @@ function DirectoriesList(directories: DirectoryInfoDto[], root: string) {
 
 function FilesList(files: FileInfoDto[], root: string) {
     function FileInfo(file: FileInfoDto) {
-        return <li key={file.name}>
-            <p>{file.name}</p>
-            {ConversionUtils.getReadableSize(+file.size)}
-            <Link to={"/edit/" + root + "/" + file.name} relative={"route"}>
+        return <li key={file.name} className={"file-info"}>
+            <span className={"file-info_name"}>
+                {file.name}
+            </span>
+            <span className={"file-info_size"}>
+                {ConversionUtils.getReadableSize(+file.size)}
+            </span>
+            <Link
+                to={"/edit/" + root + "/" + file.name}
+                relative={"route"}
+                className={"file-info_button"}
+            >
                 <button type={"button"}>Edit text</button>
             </Link>
-            <a href={"/api/files/show/?path=" + root + "/" + file.name} target={"_blank"}>
+            <a
+                href={"/api/files/show/?path=" + root + "/" + file.name}
+                target={"_blank"}
+                className={"file-info_button"}
+            >
                 <button type={"button"}>Open</button>
             </a>
         </li>;
