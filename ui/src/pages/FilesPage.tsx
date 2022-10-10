@@ -17,6 +17,7 @@ function FilesPage() {
     let [files, setFiles] = useState<FileInfoDto[]>([]);
     let [directories, setDirectories] = useState<DirectoryInfoDto[]>([]);
     let [stats, setStats] = useState<{ [key: string]: any }>({});
+    let [readme, setReadme] = useState<string>("");
     let {"*": filePath = ""} = useParams<string>()
 
     useEffect(() => {
@@ -25,6 +26,7 @@ function FilesPage() {
 
     useEffect(() => {
         loadStats(filePath)
+        loadReadme(filePath)
     }, [filePath])
 
     async function loadContent(filePath: string) {
@@ -46,6 +48,15 @@ function FilesPage() {
         setStats(response.data || {})
     }
 
+    async function loadReadme(filePath: string) {
+        let response = await axios.get("/api/files/readme", {
+            params: {
+                path: filePath
+            }
+        });
+        setReadme(response.data?.content || "")
+    }
+
     function renderStats(stats: { [p: string]: any }) {
         return <>
             <p>Forbidden directories: {stats["forbiddenDirectories"]}</p>
@@ -55,6 +66,9 @@ function FilesPage() {
 
     return <div>
         <h1>Files tree</h1>
+        <pre>
+            {readme}
+        </pre>
         {renderStats(stats)}
         {DirectoriesList(directories, filePath)}
         {FilesList(files, filePath)}

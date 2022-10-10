@@ -24,7 +24,7 @@ class FileSystemService {
 
     fun listDirectories(
         path: String
-    ): Map<String, List<Any>> {
+    ): Map<String, Any?> {
         val children = File(root + path).listFiles().toList()
         val directories = children
             .filter { it.isDirectory }
@@ -105,5 +105,19 @@ class FileSystemService {
             "extension2count" to extension2count,
             "extension2totalSize" to extension2totalSize
         )
+    }
+
+    fun getReadme(path: String): Map<String, Any?> {
+        val dir = File(root + path)
+
+        if (!dir.exists() || !dir.isDirectory) {
+            throw IllegalArgumentException("Not exists or not a directory")
+        }
+
+        val indexContent = dir.listFiles()
+            .firstOrNull { it.name.lowercase() == "readme.txt" }
+            ?.readText()
+
+        return mapOf("content" to indexContent)
     }
 }

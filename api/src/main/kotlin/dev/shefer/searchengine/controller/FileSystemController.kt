@@ -21,7 +21,7 @@ class FileSystemController(
     fun listDirectories(
         @RequestParam(required = false, defaultValue = "")
         path: String
-    ): Map<String, List<Any>> {
+    ): Map<String, Any?> {
         return fileSystemService.listDirectories(path)
     }
 
@@ -29,8 +29,16 @@ class FileSystemController(
     fun getFileContent(
         @RequestParam(required = false, defaultValue = "")
         path: String
-    ): Map<String, Any> {
+    ): Map<String, Any?> {
         return fileSystemService.getFileContent(path)
+    }
+
+    @GetMapping("/readme")
+    fun readme(
+        @RequestParam(required = false, defaultValue = "")
+        path: String
+    ): Map<String, Any?> {
+        return fileSystemService.getReadme(path)
     }
 
     @GetMapping("/show")
