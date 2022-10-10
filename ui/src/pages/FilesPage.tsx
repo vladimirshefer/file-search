@@ -66,9 +66,12 @@ function FilesPage() {
 
     return <div>
         <h1>Files tree</h1>
-        <pre>
-            {readme}
-        </pre>
+        <div className={"readme"}>
+            <h3>README</h3>
+            <pre className={"readme_text"}>
+                {readme}
+            </pre>
+        </div>
         {renderStats(stats)}
         {DirectoriesList(directories, filePath)}
         {FilesList(files, filePath)}

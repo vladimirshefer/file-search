@@ -12,7 +12,11 @@
     margin-left: 10px;
 }
 
-pre {
+.readme {
+    padding: 10px;
+}
+
+.readme_text {
     white-space: pre-wrap;
     word-wrap: break-word;
 }
