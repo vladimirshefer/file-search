@@ -25,7 +25,7 @@ class FileSystemService {
     fun listDirectories(
         path: String
     ): Map<String, Any?> {
-        val children = File(root + path).listFiles().toList()
+        val children = resolve(path).toFile().listFiles()?.toList() ?: emptyList()
         val directories = children
             .filter { it.isDirectory }
             .map { DirectoryInfoDto(it.name) }
@@ -41,8 +41,7 @@ class FileSystemService {
     fun getFileContent(
         path: String
     ): Map<String, Any> {
-        val file = File(root + path)
-        val path = file.toPath().normalize()
+        val path = resolve(path)
         val content = Files.readString(path)
         return mapOf(
             "content" to content
@@ -52,8 +51,7 @@ class FileSystemService {
     fun showFileContent(
         path: String
     ): ResponseEntity<ByteArray> {
-        val file = File(root + path)
-        val path = file.toPath().normalize()
+        val path = resolve(path)
         val content = Files.readAllBytes(path)
         val contentType = Files.probeContentType(path) ?: "text/plain"
         val mimeType = MimeType.valueOf(contentType)
@@ -66,8 +64,7 @@ class FileSystemService {
     fun stats(
         path: String
     ): Map<String, Any?> {
-        val file = File(root + path)
-        val path = file.toPath().normalize()
+        val path = resolve(path)
 
         var forbiddenDirectoriess = 0
         var totalSize = 0L
@@ -108,10 +105,10 @@ class FileSystemService {
     }
 
     fun getReadme(path: String): Map<String, Any?> {
-        val dir = File(root + path)
+        val dir = resolve(path).toFile()
 
-        if (!dir.exists() || !dir.isDirectory) {
-            throw IllegalArgumentException("Not exists or not a directory")
+        if (!dir.isDirectory) {
+            throw IllegalArgumentException("Not a directory: $path")
         }
 
         val indexContent = dir.listFiles()
@@ -119,5 +116,15 @@ class FileSystemService {
             ?.readText()
 
         return mapOf("content" to indexContent)
+    }
+
+    private fun resolve(path: String): Path {
+        val file = File(root + path)
+
+        if (!file.exists()) {
+            throw IllegalArgumentException("No such file $path")
+        }
+
+        return file.toPath().normalize()
     }
 }
