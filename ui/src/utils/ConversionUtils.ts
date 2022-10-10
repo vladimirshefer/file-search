@@ -1,7 +1,15 @@
 class ConversionUtils {
-    static getReadableSize(sizeInBytes: number): string {
+    static getReadableSize(sizeInBytes: number | null): string {
         function round(num: number) {
             return Math.round(num * 100) / 100
+        }
+
+        if (sizeInBytes === 0) {
+            return "0B";
+        }
+
+        if (!sizeInBytes) {
+            return "?B"
         }
 
         if (sizeInBytes < 1_000) {

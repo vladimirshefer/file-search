@@ -127,4 +127,38 @@ class FileSystemService {
 
         return file.toPath().normalize()
     }
+
+    fun size(path: String): Map<String, Any?> {
+        val file = resolve(path)
+        if (Files.isRegularFile(file)) {
+            return mapOf("size" to Files.size(file))
+        }
+        if (Files.isDirectory(file)) {
+            var size = 0L
+            forEachAccessibleFile(file) { _, attrs ->
+                size += attrs.size()
+            }
+            return mapOf("size" to size)
+        }
+
+        throw IllegalArgumentException("Neither file not directory $path")
+    }
+
+    fun forEachAccessibleFile(path: Path, action: (Path, BasicFileAttributes) -> Unit) {
+        Files.walkFileTree(path, object : SimpleFileVisitor<Path?>() {
+            override fun visitFileFailed(file: Path?, e: IOException?): FileVisitResult {
+                return FileVisitResult.SKIP_SUBTREE
+            }
+
+            override fun visitFile(file: Path?, attrs: BasicFileAttributes): FileVisitResult {
+                val result = super.visitFile(file, attrs)
+
+                file ?: return result
+
+                action(file, attrs)
+
+                return result
+            }
+        })
+    }
 }

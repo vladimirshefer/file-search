@@ -29,6 +29,15 @@
     white-space: nowrap;
 }
 
+.directory-info_size {
+    font-size: 0.7rem;
+    border-radius: 4px;
+    padding: 5px;
+    margin: 0 5px;
+    background-color: coral;
+    cursor: pointer;
+}
+
 .files-list_list {
     list-style: none;
 }

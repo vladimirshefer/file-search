@@ -79,16 +79,42 @@ function FilesPage() {
 }
 
 function DirectoriesList(directories: DirectoryInfoDto[], root: string) {
-    function DirectoryInfo(directory: DirectoryInfoDto) {
-        return <li key={directory.name} className={"directory-info"}>
+    function DirectoryInfo(
+        {
+            name,
+            parent
+        }: {
+            name: string,
+            parent: string
+        }) {
+
+        let [size, setSize] = useState<number | null>(null)
+
+        async function requestSize() {
+            let result = await axios.get("/api/files/size", {
+                params: {
+                    path: parent + "/" + name
+                }
+            });
+
+            setSize(result.data?.size)
+        }
+
+        return <li key={name} className={"directory-info"}>
             <Link
-                to={"./" + directory.name}
+                to={"./" + name}
                 relative={"path"}
                 className={"directory-info_name"}
-                title={directory.name}
+                title={name}
             >
-                {directory.name}
+                {name}
             </Link>
+            <span
+                className={"directory-info_size"}
+                onClick={() => requestSize()}
+            >
+                {ConversionUtils.getReadableSize(size)}
+            </span>
         </li>;
     }
 
@@ -98,10 +124,12 @@ function DirectoriesList(directories: DirectoryInfoDto[], root: string) {
         </p>
         <ul className="file-tree_directories-list">
             {root !== "" ? (
-                DirectoryInfo({name: ".."} as DirectoryInfoDto)
+                <DirectoryInfo name=".." parent={root}/>
             ) : ("")}
             {
-                directories.map((directory) => DirectoryInfo(directory))
+                directories.map((directory) =>
+                    <DirectoryInfo name={directory.name} parent={root}/>
+                )
             }
         </ul>
     </>;

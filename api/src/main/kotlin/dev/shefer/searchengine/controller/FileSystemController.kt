@@ -56,4 +56,12 @@ class FileSystemController(
     ): Map<String, Any?> {
         return fileSystemService.stats(path)
     }
+
+    @GetMapping("/size")
+    fun size(
+        @RequestParam(required = false, defaultValue = "")
+        path: String
+    ): Map<String, Any?> {
+        return fileSystemService.size(path)
+    }
 }
