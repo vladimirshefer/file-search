@@ -106,7 +106,7 @@ function FilesList(files: FileInfoDto[], root: string) {
     function FileInfo(file: FileInfoDto) {
         return <li key={file.name}>
             <p>{file.name}</p>
-            Size: {file.size}b.
+            {ConversionUtils.getReadableSize(+file.size)}
             <Link to={"/edit/" + root + "/" + file.name} relative={"route"}>
                 <button type={"button"}>Edit text</button>
             </Link>
