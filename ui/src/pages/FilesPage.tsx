@@ -80,8 +80,15 @@ function FilesPage() {
 
 function DirectoriesList(directories: DirectoryInfoDto[], root: string) {
     function DirectoryInfo(directory: DirectoryInfoDto) {
-        return <li key={directory.name}>
-            <Link to={"./" + directory.name} relative={"path"}> {directory.name}</Link>
+        return <li key={directory.name} className={"directory-info"}>
+            <Link
+                to={"./" + directory.name}
+                relative={"path"}
+                className={"directory-info_name"}
+                title={directory.name}
+            >
+                {directory.name}
+            </Link>
         </li>;
     }
 
@@ -91,9 +98,7 @@ function DirectoriesList(directories: DirectoryInfoDto[], root: string) {
         </p>
         <ul className="file-tree_directories-list">
             {root !== "" ? (
-                <li key={".."}>
-                    <Link to={".."} relative={"path"}>..</Link>
-                </li>
+                DirectoryInfo({name: ".."} as DirectoryInfoDto)
             ) : ("")}
             {
                 directories.map((directory) => DirectoryInfo(directory))

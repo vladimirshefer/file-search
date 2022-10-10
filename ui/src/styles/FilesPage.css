@@ -17,6 +17,18 @@
     word-wrap: break-word;
 }
 
+.directory-info {
+    border: 1px solid #ddd;
+    padding: 5px;
+    display: flex;
+}
+
+.directory-info_name {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
 .files-list_list {
     list-style: none;
 }
