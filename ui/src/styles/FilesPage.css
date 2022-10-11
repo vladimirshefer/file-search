@@ -17,9 +17,16 @@
     word-wrap: break-word;
 }
 
+.file-tree_directories-list {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-gap: 10px;
+}
+
 .directory-info {
     border: 1px solid #ddd;
     padding: 5px;
+    grid-column: span 6;
     display: flex;
 }
 
@@ -36,6 +43,8 @@
     margin: 0 5px;
     background-color: coral;
     cursor: pointer;
+    min-width: 30px;
+    text-align: center;
 }
 
 .files-list_list {
