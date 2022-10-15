@@ -2,17 +2,14 @@ package dev.shefer.searchengine.bash
 
 import dev.shefer.searchengine.bash.BashExecutor.Companion.FULLHD_PIXELS
 import dev.shefer.searchengine.bash.dto.Resolution
-import org.junit.jupiter.api.Assertions.assertArrayEquals
+import dev.shefer.test_internal.TestFilesUtil.assertFilesEquals
+import dev.shefer.test_internal.TestFilesUtil.placeTestFile
+import dev.shefer.test_internal.TestFilesUtil.testFile
+import dev.shefer.test_internal.TestFilesUtil.withTempDirectory
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
-import org.springframework.util.FileSystemUtils
-import org.springframework.util.ResourceUtils
-import java.awt.Desktop
 import java.io.FileNotFoundException
-import java.nio.file.Files
-import java.nio.file.Path
-import kotlin.io.path.readBytes
 
 class BashExecutorTest {
 
@@ -94,36 +91,4 @@ class BashExecutorTest {
         }
     }
 
-    private fun placeTestFile(dir: Path, testFileName: String) {
-        val testFile = testFile(testFileName)
-        Files.copy(testFile, dir.resolve(testFile.fileName))
-    }
-
-    private fun withTempDirectory(action: (dir: Path) -> Unit) {
-        val OPEN_DIRECTORY_ON_START = false
-
-        val dir: Path = Files.createTempDirectory(this.javaClass.simpleName)
-        try {
-            if (OPEN_DIRECTORY_ON_START) {
-                Desktop.getDesktop().open(dir.toFile())
-            }
-            action(dir)
-        } finally {
-            if (dir.toFile().exists()) {
-                FileSystemUtils.deleteRecursively(dir)
-            }
-        }
-    }
-
-    private fun assertFilesEquals(expectedImg: Path, actualImg: Path) {
-        assertArrayEquals(expectedImg.readBytes(), actualImg.readBytes())
-    }
-
-    private fun resource(path: String): Path {
-        return ResourceUtils.getFile(path).toPath()
-    }
-
-    private fun testFile(name: String): Path {
-        return resource("./src/test/resources/test_files/$name").normalize()
-    }
 }
