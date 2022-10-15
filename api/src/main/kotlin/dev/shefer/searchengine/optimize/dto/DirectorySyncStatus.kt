@@ -1,6 +1,18 @@
 package dev.shefer.searchengine.optimize.dto
 
 enum class DirectorySyncStatus {
+
+    /**
+     * Status is undefined or unknown yet.
+     * Usually used for new directories which were not scanned yet.
+     */
+    NONE,
+
+    /**
+     * Directory has no media in files subtree ot directory does not exist.
+     * */
+    EMPTY,
+
     /**
      * Only source files exist. No optimized media exist.
      */
@@ -12,7 +24,7 @@ enum class DirectorySyncStatus {
     OPTIMIZATION_PARTIALLY_COMPLETED,
 
     /**
-     * The set of optimized media equals the ser of sources media.
+     * The set of optimized media equals the set of sources media.
      */
     FULLY_OPTIMIZED,
 
