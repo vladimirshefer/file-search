@@ -1,7 +1,9 @@
 package dev.shefer.searchengine.service
 
-import dev.shefer.searchengine.dto.DirectoryInfoDto
 import dev.shefer.searchengine.dto.FileInfoDto
+import dev.shefer.searchengine.optimize.MediaOptimizationManager
+import dev.shefer.searchengine.optimize.dto.MediaDirectoryInfo
+import dev.shefer.searchengine.util.FileUtil.forEachAccessibleFile
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -17,40 +19,37 @@ import java.nio.file.attribute.BasicFileAttributes
 import kotlin.io.path.extension
 
 @Service
-class FileSystemService {
+class FileSystemService(
+    private val mediaOptimizationManager: MediaOptimizationManager
+) {
 
     @Value("\${app.rootDirectory}")
     lateinit var root: String
 
-    fun listDirectories(
-        path: String
-    ): Map<String, Any?> {
-        val children = resolve(path).toFile().listFiles()?.toList() ?: emptyList()
+    fun listDirectories(path: String): Map<String, Any?> {
+        val dir = resolve(path)
+        val children = dir.toFile().listFiles()?.toList() ?: emptyList()
         val directories = children
             .filter { it.isDirectory }
-            .map { DirectoryInfoDto(it.name) }
+            .map { mediaOptimizationManager.getMediaDirectoryInfo(dir.resolve(it.name)) }
         val files = children
             .filter { it.isFile }
-            .map { FileInfoDto(it.name, it.length()) }
+            .map { FileInfoDto(it.name, it.length(), mediaOptimizationManager.getMediaInfo(dir.resolve(it.name)).status) }
         return mapOf(
             "files" to files,
             "directories" to directories
         )
     }
 
-    fun getFileContent(
-        path: String
-    ): Map<String, Any> {
-        val path = resolve(path)
-        val content = Files.readString(path)
-        return mapOf(
-            "content" to content
-        )
+    fun list(path: String): MediaDirectoryInfo {
+        return mediaOptimizationManager.getMediaDirectoryInfo(Path.of(path))
     }
 
-    fun showFileContent(
-        path: String
-    ): ResponseEntity<ByteArray> {
+    fun getTextFileContent(path: String): String {
+        return Files.readString(resolve(path))
+    }
+
+    fun showFileContent(path: String): ResponseEntity<ByteArray> {
         val path = resolve(path)
         val content = Files.readAllBytes(path)
         val contentType = Files.probeContentType(path) ?: "text/plain"
@@ -61,9 +60,7 @@ class FileSystemService {
             .body(content)
     }
 
-    fun stats(
-        path: String
-    ): Map<String, Any?> {
+    fun stats(path: String): Map<String, Any?> {
         val path = resolve(path)
 
         var forbiddenDirectoriess = 0
@@ -128,37 +125,24 @@ class FileSystemService {
         return file.toPath().normalize()
     }
 
-    fun size(path: String): Map<String, Any?> {
+    fun size(path: String): Long {
         val file = resolve(path)
         if (Files.isRegularFile(file)) {
-            return mapOf("size" to Files.size(file))
+            return Files.size(file)
         }
         if (Files.isDirectory(file)) {
             var size = 0L
             forEachAccessibleFile(file) { _, attrs ->
                 size += attrs.size()
             }
-            return mapOf("size" to size)
+            return size
         }
 
         throw IllegalArgumentException("Neither file not directory $path")
     }
 
-    fun forEachAccessibleFile(path: Path, action: (Path, BasicFileAttributes) -> Unit) {
-        Files.walkFileTree(path, object : SimpleFileVisitor<Path?>() {
-            override fun visitFileFailed(file: Path?, e: IOException?): FileVisitResult {
-                return FileVisitResult.SKIP_SUBTREE
-            }
 
-            override fun visitFile(file: Path?, attrs: BasicFileAttributes): FileVisitResult {
-                val result = super.visitFile(file, attrs)
-
-                file ?: return result
-
-                action(file, attrs)
-
-                return result
-            }
-        })
+    fun bigFiles(path: String): Map<String, Any?> {
+        TODO("Not yet implemented")
     }
 }
