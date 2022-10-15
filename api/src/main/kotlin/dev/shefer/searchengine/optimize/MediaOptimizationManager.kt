@@ -34,9 +34,38 @@ class MediaOptimizationManager(
     }
 
     fun getMediaDirectoryInfo(directory: Path): MediaDirectoryInfo {
+        val path = normalizePath(directory)
+
+        return MediaDirectoryInfo(
+            path.fileName.toString(),
+            path.toString(),
+            withTimer("dirstatus") { directorySyncStatus(path) } ?: DirectorySyncStatus.EMPTY,
+            withTimer("listmedia") { listMedia(path) }.toList(),
+            withTimer("listdirectories") { listDirectories(path) },
+        )
+    }
+
+    private fun <T : Any?> withTimer(name: String, action: () -> T): T {
+        val before = System.currentTimeMillis()
+        val result = action()
+        val after = System.currentTimeMillis()
+        println(">>> Timer $name ${after - before}")
+        return result
+    }
+
+    /**
+     * Normalizes path and throws exception if out of media root directories
+     */
+    private fun normalizePath(directory: Path): Path {
+        val path = directory.normalize()
+        resolveSource(path)
+        resolveOptimized(path)
+        return path
+    }
+
+    private fun directorySyncStatus(directory: Path): DirectorySyncStatus? {
         val sourceDir = resolveSource(directory)
         val optimizedDir = resolveOptimized(directory)
-
         var status: DirectorySyncStatus? = null
         FileUtil.forEachAccessibleFile(sourceDir) { file, _ ->
             val fileStatus = getMediaInfo(sourceMediaRoot.relativize(file))
@@ -46,13 +75,7 @@ class MediaOptimizationManager(
             val fileStatus = getMediaInfo(optimizedMediaRoot.relativize(file))
             status += fileStatus.status
         }
-        return MediaDirectoryInfo(
-            directory.fileName.toString(),
-            directory.toString(),
-            status ?: DirectorySyncStatus.EMPTY,
-            listMedia(directory).toList(),
-            listDirectories(directory),
-        )
+        return status
     }
 
     private fun resolveOptimized(path: Path): Path {
