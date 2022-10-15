@@ -5,6 +5,7 @@ import dev.shefer.searchengine.optimize.dto.FileInfo
 import dev.shefer.searchengine.optimize.dto.MediaDirectoryInfo
 import dev.shefer.searchengine.optimize.dto.MediaInfo
 import dev.shefer.searchengine.optimize.dto.MediaStatus
+import dev.shefer.searchengine.optimize.exceptions.IllegalFileAccessException
 import dev.shefer.searchengine.util.FileUtil
 import java.nio.file.Files
 import java.nio.file.Path
@@ -23,18 +24,18 @@ class MediaOptimizationManager(
 ) {
 
     fun getMediaInfo(file: Path): MediaInfo {
-        val sourcePath = sourceMediaRoot.resolve(file)
+        val sourcePath = resolveSource(file)
         val sourceFileInfo = getFileInfo(sourcePath)
 
-        val optimizePath = optimizedMediaRoot.resolve(file)
+        val optimizePath = resolveOptimized(file)
         val optimizedFileInfo = getFileInfo(optimizePath)
 
         return MediaInfo(sourceFileInfo, optimizedFileInfo)
     }
 
     fun getMediaDirectoryInfo(directory: Path): MediaDirectoryInfo {
-        val sourceDir = sourceMediaRoot.resolve(directory)
-        val optimizedDir = optimizedMediaRoot.resolve(directory)
+        val sourceDir = resolveSource(directory)
+        val optimizedDir = resolveOptimized(directory)
 
         var status: DirectorySyncStatus? = null
         FileUtil.forEachAccessibleFile(sourceDir) { file, _ ->
@@ -49,16 +50,30 @@ class MediaOptimizationManager(
             directory.fileName.toString(),
             directory.toString(),
             status ?: DirectorySyncStatus.EMPTY,
-            Files.list(directory).filter { it.isRegularFile() }.count().toInt(),
-            Files.list(directory).filter { it.isDirectory() }.count().toInt(),
             listMedia(directory).toList(),
             listDirectories(directory),
         )
     }
 
+    private fun resolveOptimized(path: Path): Path {
+        val result = optimizedMediaRoot.resolve(path).normalize()
+        if (!result.startsWith(optimizedMediaRoot)) {
+            throw IllegalFileAccessException("Path is out of media root folder: $path")
+        }
+        return result
+    }
+
+    private fun resolveSource(path: Path): Path {
+        val result = sourceMediaRoot.resolve(path).normalize()
+        if (!result.startsWith(sourceMediaRoot)) {
+            throw IllegalFileAccessException("Path is out of media root folder: $path")
+        }
+        return result
+    }
+
     private fun listDirectories(directory: Path): List<MediaDirectoryInfo> {
-        val sourceDir = sourceMediaRoot.resolve(directory)
-        val optimizedDir = optimizedMediaRoot.resolve(directory)
+        val sourceDir = resolveSource(directory)
+        val optimizedDir = resolveOptimized(directory)
         val sourceSubdirs = Files.list(sourceDir)
             .filter { it.isDirectory() }
             .map { sourceMediaRoot.relativize(it) }
@@ -75,8 +90,6 @@ class MediaOptimizationManager(
                 subdir.fileName.toString(),
                 directory.toString(),
                 DirectorySyncStatus.NONE,
-                listMedia(directory).size,
-                -1, // TODO
                 emptyList(),
                 emptyList()
             )
@@ -84,8 +97,8 @@ class MediaOptimizationManager(
     }
 
     fun listMedia(directory: Path): Set<MediaInfo> {
-        val sourceDir = sourceMediaRoot.resolve(directory)
-        val optimizedDir = optimizedMediaRoot.resolve(directory)
+        val sourceDir = resolveSource(directory)
+        val optimizedDir = resolveOptimized(directory)
         val sourceFiles = Files.list(sourceDir)
             .filter { it.isRegularFile() }
             .map { sourceMediaRoot.relativize(it) }
@@ -97,13 +110,17 @@ class MediaOptimizationManager(
             .toMutableSet()
         val sourceFileMappings: Set<Pair<Path, Path?>> = sourceFiles
             .map { sourceFile ->
-                val optimizedFile = optimizedFiles.firstOrNull { it.fileName.startsWith(sourceFile.fileName) }
+                val optimizedFile = optimizedFiles.firstOrNull {
+                    it.fileName.toString().startsWith(sourceFile.fileName.toString())
+                }
                 sourceFile to optimizedFile
             }
             .toSet()
         val optimizedFilesMapping: Set<Pair<Path?, Path>> = optimizedFiles
             .map { optimizedFile ->
-                val sourceFile = sourceFiles.firstOrNull { optimizedFile.fileName.startsWith(it.fileName) }
+                val sourceFile = sourceFiles.firstOrNull {
+                    optimizedFile.fileName.toString().startsWith(it.fileName.toString())
+                }
                 sourceFile to optimizedFile
             }
             .toSet()
@@ -112,8 +129,8 @@ class MediaOptimizationManager(
         return allFilesMappings
             .map { (source, optimized) ->
                 MediaInfo(
-                    source?.let { getFileInfo(sourceMediaRoot.resolve(source)) },
-                    optimized?.let { getFileInfo(optimizedMediaRoot.resolve(optimized)) }
+                    source?.let { getFileInfo(resolveSource(source)) },
+                    optimized?.let { getFileInfo(resolveOptimized(optimized)) }
                 )
             }
             .toSet()
