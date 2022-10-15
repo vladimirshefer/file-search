@@ -27,17 +27,17 @@ class FileSystemService(
     lateinit var root: String
 
     fun listDirectories(path: String): Map<String, Any?> {
-        val dir = resolve(path)
-        val children = dir.toFile().listFiles()?.toList() ?: emptyList()
-        val directories = children
-            .filter { it.isDirectory }
-            .map { mediaOptimizationManager.getMediaDirectoryInfo(dir.resolve(it.name)) }
-        val files = children
-            .filter { it.isFile }
-            .map { FileInfoDto(it.name, it.length(), mediaOptimizationManager.getMediaInfo(dir.resolve(it.name)).status) }
+        val mediaDirectoryInfo = mediaOptimizationManager.getMediaDirectoryInfo(Path.of(path))
         return mapOf(
-            "files" to files,
-            "directories" to directories
+            "files" to mediaDirectoryInfo.files
+                .map {
+                    FileInfoDto(
+                        it.source!!.name,
+                        it.source!!.size,
+                        it.status
+                    )
+                },
+            "directories" to mediaDirectoryInfo.directories
         )
     }
 
