@@ -4,9 +4,10 @@ import {Link, useNavigate, useParams} from "react-router-dom";
 import "styles/FilesPage.css"
 import ConversionUtils from "utils/ConversionUtils";
 import {MediaDirectoryInfo, MediaInfo} from "lib/Api";
-import MediaCardGrid from "../components/FilesPage/MediaCardGrid";
-import Breadcrumbs from "../components/files/BreadCrumbs";
-import DirectoryCard from "../components/FilesPage/DirectoryCard";
+import MediaCardGrid from "components/FilesPage/MediaCardGrid";
+import Breadcrumbs from "components/files/BreadCrumbs";
+import DirectoryCard from "components/FilesPage/DirectoryCard";
+import {Readme} from "components/files/Readme";
 
 function FilesPage() {
     let [content, setContent] = useState<MediaDirectoryInfo | null>(null);
@@ -72,15 +73,11 @@ function FilesPage() {
     }
 
     return <div>
-        <Breadcrumbs names={["/", ...pathSegments]} selectFn={n => {
-            goToPathSegment(n)
-        }}/>
-        <div className={"readme"}>
-            <h3>README</h3>
-            <pre className={"readme_text"}>
-                {readme}
-            </pre>
-        </div>
+        <Breadcrumbs
+            names={["/", ...pathSegments]}
+            selectFn={i => goToPathSegment(i)}
+        />
+        <Readme readme={readme}/>
         {renderStats(stats)}
         {DirectoriesList(content?.directories || [], filePath)}
         <MediaCardGrid imageMedias={imageFiles || []} path={filePath} actionOpen={(fileName) => openMedia(fileName)}/>
