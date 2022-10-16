@@ -1,37 +1,7 @@
-.file-tree_files-list li {
-    padding-bottom: 5px;
-}
-
 .file-tree_directories-list {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
     grid-gap: 10px;
     margin: 10px;
-}
-
-
-.files-list_list {
-    list-style: none;
-}
-
-.file-info {
-    border: 1px solid #ddd;
-    padding: 5px;
-}
-
-.file-info_name {
-    margin: 0 15px 0 5px;
-}
-
-.file-info_size {
-    font-size: 0.7rem;
-    background-color: coral;
-    border-radius: 4px;
-    padding: 5px;
-    margin: 0 5px;
-}
-
-.file-info_button {
-    margin: 0 5px;
 }
 

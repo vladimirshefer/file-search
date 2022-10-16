@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react'
 import axios from "axios";
-import {Link, useNavigate, useParams} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import "styles/FilesPage.css"
 import ConversionUtils from "utils/ConversionUtils";
 import {MediaDirectoryInfo, MediaInfo} from "lib/Api";
@@ -8,6 +8,7 @@ import MediaCardGrid from "components/FilesPage/MediaCardGrid";
 import Breadcrumbs from "components/files/BreadCrumbs";
 import DirectoryCard from "components/FilesPage/DirectoryCard";
 import {Readme} from "components/files/Readme";
+import {FilesList} from "../components/FilesPage/FilesList";
 
 function FilesPage() {
     let [content, setContent] = useState<MediaDirectoryInfo | null>(null);
@@ -81,7 +82,7 @@ function FilesPage() {
         {renderStats(stats)}
         {DirectoriesList(content?.directories || [], filePath)}
         <MediaCardGrid imageMedias={imageFiles || []} path={filePath} actionOpen={(fileName) => openMedia(fileName)}/>
-        {FilesList(content?.files || [], filePath)}
+        <FilesList files={content?.files || []} root={filePath}/>
     </div>
 }
 
@@ -96,53 +97,6 @@ function DirectoriesList(directories: MediaDirectoryInfo[], root: string) {
             )}
         </ul>
     </>;
-}
-
-function FilesList(files: MediaInfo[], root: string) {
-    function FileInfo(file: MediaInfo) {
-        let filename = file.source?.name || file.optimized?.name;
-        return <li key={filename} className={"file-info"}>
-            <span className={"file-info_name"}>
-                {filename}
-            </span>
-            <span className={"file-info_name"}>
-                {filename}
-            </span>
-            {(!!file.optimized) ?
-                <span className={"file-info_name-optimized"}>
-                    file.optimized.name
-                </span>
-                : null}
-            <span className={"file-info_size"}>
-                {ConversionUtils.getReadableSize(file.source?.size || null)}
-                /
-                {ConversionUtils.getReadableSize(file.optimized?.size || null)}
-            </span>
-            <Link
-                to={"/edit/" + root + "/" + filename}
-                relative={"route"}
-                className={"file-info_button"}
-            >
-                <button type={"button"}>Edit text</button>
-            </Link>
-            <a
-                href={"/api/files/show/?path=" + root + "/" + filename}
-                target={"_blank"}
-                className={"file-info_button"}
-            >
-                <button type={"button"}>Open</button>
-            </a>
-        </li>;
-    }
-
-    return <div className={"file-tree_files-list"}>
-        <p className={"files-list_header"}>
-            Total files: {files.length}
-        </p>
-        <ul className="files-list_list">
-            {files.map((file) => FileInfo(file))}
-        </ul>
-    </div>;
 }
 
 export default FilesPage
