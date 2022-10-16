@@ -4,7 +4,7 @@ import {Link, useNavigate, useParams} from "react-router-dom";
 import "styles/FilesPage.css"
 import ConversionUtils from "utils/ConversionUtils";
 import {MediaDirectoryInfo, MediaInfo} from "lib/Api";
-import MediaCard from "../components/FilesPage/MediaCard";
+import MediaCardGrid from "../components/FilesPage/MediaCardGrid";
 import Breadcrumbs from "../components/files/BreadCrumbs";
 import DirectoryCard from "../components/FilesPage/DirectoryCard";
 
@@ -62,19 +62,13 @@ function FilesPage() {
         return ["jpg", "png", "jpeg"].includes(type)
     }) || []
 
-    function renderImageGallery(imageMedias: MediaInfo[], path: string) {
-        return <ul className={"media-cards"}>
-            {
-                imageMedias.map(it => {
-                    let name = (it.source || it.optimized)!!.name;
-                    return <MediaCard name={name} path={path} key={name} status={it.status}/>
-                })
-            }
-        </ul>
-    }
-
     function goToPathSegment(n: number) {
         navigate("/files/" + pathSegments.slice(0, n).join("/"))
+    }
+
+    function openMedia(fileName: string) {
+        let url = "/api/files/show/?path=" + filePath + "/" + fileName;
+        window.open(url, '_blank')?.focus()
     }
 
     return <div>
@@ -89,7 +83,7 @@ function FilesPage() {
         </div>
         {renderStats(stats)}
         {DirectoriesList(content?.directories || [], filePath)}
-        {renderImageGallery(imageFiles || [], filePath)}
+        <MediaCardGrid imageMedias={imageFiles || []} path={filePath} actionOpen={(fileName) => openMedia(fileName)}/>
         {FilesList(content?.files || [], filePath)}
     </div>
 }
@@ -101,7 +95,7 @@ function DirectoriesList(directories: MediaDirectoryInfo[], root: string) {
         </p>
         <ul className="file-tree_directories-list">
             {directories.map((directory) =>
-                <DirectoryCard name={directory.name} parent={root}/>
+                <DirectoryCard name={directory.name} parent={root} key={directory.name}/>
             )}
         </ul>
     </>;

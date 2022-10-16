@@ -13,6 +13,7 @@ export interface MediaInfo {
     source: FileInfo | null
     optimized: FileInfo | null
     status: MediaStatus
+    displayName: string
 }
 
 export interface FileInfo {

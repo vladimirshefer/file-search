@@ -1,0 +1,6 @@
+.media-card-grid {
+    display: grid;
+    max-width: 100%;
+    list-style: none;
+    grid-template-columns: repeat(12, 1fr);
+}
