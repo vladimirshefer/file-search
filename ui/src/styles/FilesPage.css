@@ -23,20 +23,21 @@
     grid-gap: 10px;
 }
 
-.directory-info {
+.directory-card {
     border: 1px solid #ddd;
-    padding: 5px;
+    padding: 10px 15px;
     grid-column: span 6;
     display: flex;
 }
 
-.directory-info_name {
+.directory-card_name {
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
+    margin: 0 10px;
 }
 
-.directory-info_size {
+.directory-card_size {
     font-size: 0.7rem;
     border-radius: 4px;
     padding: 5px;
