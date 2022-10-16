@@ -45,14 +45,25 @@ export default function DirectoryCard(
                         {name}
                     </span>
             </div>
-            <div className={"directory-card_status-line"}>
+        </Link>
+        <div className={"directory-card_status-line"}>
                 <span
-                    className={"directory-card_size"}
-                    onClick={(e) => {e.preventDefault(); requestSize()}}
+                    className={"directory-card_status-item directory-card_size"}
+                    onClick={(e) => {
+                        e.preventDefault()
+                    }}
+                    onDoubleClick={(e) => {
+                        e.preventDefault();
+                        requestSize()
+                    }}
                 >
                     {ConversionUtils.getReadableSize(size)}
                 </span>
-            </div>
-        </Link>
+            <span
+                className={"directory-card_status-item directory-card_select"}
+            >
+                    <input type={"checkbox"}/>
+                </span>
+        </div>
     </li>;
 }

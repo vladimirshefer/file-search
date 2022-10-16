@@ -12,18 +12,18 @@
 }
 
 .directory-card_main-line {
-    margin: 10px 15px 5px 15px;
+    padding: 15px;
     display: flex;
-    height: 40px;
+    border-bottom: 1px solid #eee;
 }
 
 .directory-card_status-line {
     display: flex;
     justify-content: end;
     overflow: hidden;
-    height: 20px;
     font-size: 0.7rem;
     margin: 0;
+    user-select: none;
 }
 
 .directory-card_name {
@@ -33,17 +33,23 @@
     margin: 0 10px;
 }
 
-.directory-card_size {
+.directory-card_status-item {
     font-size: 0.7rem;
     padding: 0 10px;
     margin: 0;
-    background-color: coral;
     cursor: pointer;
     height: 100%;
     text-align: center;
-
 }
 
-.directory-card_size span {
+.directory-card_size {
+    background-color: #9ca3af;
+}
+
+.directory-card_select {
+    display: none;
+}
+
+.directory-card_status-item * {
     align-self: center;
 }
