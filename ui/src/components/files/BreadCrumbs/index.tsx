@@ -17,10 +17,11 @@ export default function Breadcrumbs(
                         e.preventDefault();
                         selectFn(index)
                     }}
+                    key={name}
                 >
                     {name}
                 </li>
-            <li className={"breadcrumbs_delimiter"}>
+            <li className={"breadcrumbs_delimiter"} key={name+"_delimiter"}>
                 {">"}
             </li>
             </>
