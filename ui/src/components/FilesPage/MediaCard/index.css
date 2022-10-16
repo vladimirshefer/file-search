@@ -9,6 +9,10 @@
     @apply rounded-md
 }
 
+.media-card__selected {
+    background-color: #ccd;
+}
+
 .media-card_image {
     max-width: 100%;
     aspect-ratio: 1/1;

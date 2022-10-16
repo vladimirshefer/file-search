@@ -17,9 +17,11 @@ function FilesPage() {
     let {"*": filePath = ""} = useParams<string>()
     let [pathSegments, setPathSegments] = useState<string[]>([])
     let navigate = useNavigate();
+    let [selectedFiles, setSelectedFiles] = useState<string[]>([])
 
     useEffect(() => {
         setPathSegments(filePath.split("/"))
+        setSelectedFiles([])
         loadContent(filePath)
         loadStats(filePath)
         loadReadme(filePath)
@@ -81,7 +83,20 @@ function FilesPage() {
         <Readme readme={readme}/>
         {renderStats(stats)}
         {DirectoriesList(content?.directories || [], filePath)}
-        <MediaCardGrid imageMedias={imageFiles || []} path={filePath} actionOpen={(fileName) => openMedia(fileName)}/>
+        <MediaCardGrid
+            imageMedias={imageFiles || []}
+            path={filePath}
+            selectedItems={selectedFiles}
+            actionOpen={(fileName) => openMedia(fileName)}
+            actionSelect={(filename) => {
+                let filesSelected = selectedFiles;
+                if (!filesSelected.includes(filename)) {
+                    setSelectedFiles([filename, ...filesSelected])
+                } else {
+                    setSelectedFiles(filesSelected.filter(it => it!=filename))
+                }
+            }}
+        />
         <FilesList files={content?.files || []} root={filePath}/>
     </div>
 }

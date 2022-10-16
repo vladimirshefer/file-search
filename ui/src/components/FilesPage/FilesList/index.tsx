@@ -14,19 +14,18 @@ export function FilesList(
     }
 ) {
     function FileInfo(file: MediaInfo) {
-        let filename = file.source?.name || file.optimized?.name;
+        let filename = file.displayName;
         return <li key={filename} className={"file-info"}>
             <span className={"file-info_name"}>
                 {filename}
             </span>
-            <span className={"file-info_name"}>
-                {filename}
-            </span>
-            {(!!file.optimized) ?
-                <span className={"file-info_name-optimized"}>
-                    file.optimized.name
-                </span>
-                : null}
+            {
+                (!!file.optimized) ?
+                    <span className={"file-info_name-optimized"}>
+                        file.optimized.name
+                    </span>
+                    : null
+            }
             <span className={"file-info_size"}>
                 {ConversionUtils.getReadableSize(file.source?.size || null)}
                 /

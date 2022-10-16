@@ -7,11 +7,15 @@ export default function MediaCardGrid(
     {
         imageMedias,
         path,
-        actionOpen = (_) => {},
+        selectedItems,
+        actionOpen = (_) => undefined,
+        actionSelect = (_) => undefined,
     }: {
         imageMedias: MediaInfo[],
         path: string,
+        selectedItems: string[],
         actionOpen?: (nane: string) => void
+        actionSelect?: (nane: string) => void
     }
 ) {
     return <ul className={"media-card-grid"}>
@@ -22,7 +26,9 @@ export default function MediaCardGrid(
                     name={it.displayName}
                     path={path}
                     status={it.status}
+                    isSelected={selectedItems.includes(it.displayName)}
                     actionOpen={() => actionOpen(it.displayName)}
+                    actionSelect={() => actionSelect(it.displayName)}
                 />
             })
         }
