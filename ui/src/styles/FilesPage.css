@@ -2,15 +2,6 @@
     padding-bottom: 5px;
 }
 
-.readme {
-    padding: 10px;
-}
-
-.readme_text {
-    white-space: pre-wrap;
-    word-wrap: break-word;
-}
-
 .file-tree_directories-list {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
