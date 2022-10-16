@@ -1,9 +1,3 @@
-.file-tree_directories-list li a {
-    font-style: inherit;
-    color: blue;
-    text-decoration: inherit;
-}
-
 .file-tree_files-list li {
     padding-bottom: 5px;
 }
@@ -23,30 +17,6 @@
     grid-gap: 10px;
 }
 
-.directory-card {
-    border: 1px solid #ddd;
-    padding: 10px 15px;
-    grid-column: span 6;
-    display: flex;
-}
-
-.directory-card_name {
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-    margin: 0 10px;
-}
-
-.directory-card_size {
-    font-size: 0.7rem;
-    border-radius: 4px;
-    padding: 5px;
-    margin: 0 5px;
-    background-color: coral;
-    cursor: pointer;
-    min-width: 30px;
-    text-align: center;
-}
 
 .files-list_list {
     list-style: none;
