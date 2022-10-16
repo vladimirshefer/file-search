@@ -6,6 +6,8 @@ data class MediaInfo(
     val status: MediaStatus = mediaStatus(source, optimized)
 ) {
 
+    val displayName: String = source?.name ?: optimized?.name!!
+
     companion object {
         private fun mediaStatus(source: FileInfo?, optimized: FileInfo?) =
             if (source != null) {
