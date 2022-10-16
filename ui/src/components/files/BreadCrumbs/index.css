@@ -1,0 +1,26 @@
+.breadcrumbs {
+    display: flex;
+    padding: 0 10px;
+    border-bottom: 1px solid #dde;
+    border-top: 1px solid #dde;
+    user-select: none;
+}
+
+.breadcrumb {
+    padding: 10px;
+    @apply rounded-md;
+    margin: 0px;
+    cursor: pointer;
+}
+
+.breadcrumb:hover {
+    background-color: #dde;
+}
+
+.breadcrumbs_delimiter {
+    padding: 10px;
+}
+
+.breadcrumbs_delimiter:last-child {
+    display: none;
+}

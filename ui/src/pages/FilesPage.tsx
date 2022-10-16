@@ -1,18 +1,22 @@
 import React, {useEffect, useState} from 'react'
 import axios from "axios";
-import {Link, useParams} from "react-router-dom";
+import {Link, useNavigate, useParams} from "react-router-dom";
 import "styles/FilesPage.css"
 import ConversionUtils from "utils/ConversionUtils";
 import {MediaDirectoryInfo, MediaInfo} from "lib/Api";
 import MediaCard from "../components/FilesPage/MediaCard";
+import Breadcrumbs from "../components/files/BreadCrumbs";
 
 function FilesPage() {
     let [content, setContent] = useState<MediaDirectoryInfo | null>(null);
     let [stats, setStats] = useState<{ [key: string]: any }>({});
     let [readme, setReadme] = useState<string>("");
     let {"*": filePath = ""} = useParams<string>()
+    let [pathSegments, setPathSegments] = useState<string[]>([])
+    let navigate = useNavigate();
 
     useEffect(() => {
+        setPathSegments(filePath.split("/"))
         loadContent(filePath)
         loadStats(filePath)
         loadReadme(filePath)
@@ -68,9 +72,14 @@ function FilesPage() {
         </ul>
     }
 
+    function goToPathSegment(n: number) {
+        navigate("/files/" + pathSegments.slice(0, n).join("/"))
+    }
+
     return <div>
-        <h1>{content?.name || "Files tree"}</h1>
-        <span>{content?.path}</span>
+        <Breadcrumbs names={["/", ...pathSegments]} selectFn={n => {
+            goToPathSegment(n)
+        }}/>
         <div className={"readme"}>
             <h3>README</h3>
             <pre className={"readme_text"}>
@@ -85,7 +94,7 @@ function FilesPage() {
 }
 
 function DirectoriesList(directories: MediaDirectoryInfo[], root: string) {
-    function DirectoryInfo(
+    function DirectoryCard(
         {
             name,
             parent
