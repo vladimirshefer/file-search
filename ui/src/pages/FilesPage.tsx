@@ -4,6 +4,7 @@ import {Link, useParams} from "react-router-dom";
 import "styles/FilesPage.css"
 import ConversionUtils from "utils/ConversionUtils";
 import {MediaDirectoryInfo, MediaInfo} from "lib/Api";
+import MediaCard from "../components/FilesPage/MediaCard";
 
 function FilesPage() {
     let [content, setContent] = useState<MediaDirectoryInfo | null>(null);
@@ -13,9 +14,6 @@ function FilesPage() {
 
     useEffect(() => {
         loadContent(filePath)
-    }, [filePath])
-
-    useEffect(() => {
         loadStats(filePath)
         loadReadme(filePath)
     }, [filePath])
@@ -54,6 +52,22 @@ function FilesPage() {
         </>
     }
 
+    let imageFiles: MediaInfo[] = content?.files?.filter(it => {
+        let type: string = (it.source || it.optimized)!!.type;
+        return ["jpg", "png", "jpeg"].includes(type)
+    }) || []
+
+    function renderImageGallery(imageMedias: MediaInfo[], path: string) {
+        return <ul className={"media-cards"}>
+            {
+                imageMedias.map(it => {
+                    let name = (it.source || it.optimized)!!.name;
+                    return <MediaCard name={name} path={path} key={name} status={it.status}/>
+                })
+            }
+        </ul>
+    }
+
     return <div>
         <h1>{content?.name || "Files tree"}</h1>
         <span>{content?.path}</span>
@@ -65,6 +79,7 @@ function FilesPage() {
         </div>
         {renderStats(stats)}
         {DirectoriesList(content?.directories || [], filePath)}
+        {renderImageGallery(imageFiles || [], filePath)}
         {FilesList(content?.files || [], filePath)}
     </div>
 }

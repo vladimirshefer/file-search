@@ -71,3 +71,11 @@
 .file-info_button {
     margin: 0 5px;
 }
+
+.media-cards {
+    display: grid;
+    max-width: 100%;
+    list-style: none;
+    grid-template-columns: repeat(12, 1fr);
+}
+
