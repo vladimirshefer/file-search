@@ -5,30 +5,25 @@ import dev.shefer.searchengine.optimize.dto.FileInfo
 import dev.shefer.searchengine.optimize.dto.MediaDirectoryInfo
 import dev.shefer.searchengine.optimize.dto.MediaInfo
 import dev.shefer.searchengine.optimize.dto.MediaStatus
-import dev.shefer.searchengine.optimize.exceptions.IllegalFileAccessException
 import dev.shefer.searchengine.util.FileUtil
-import java.nio.file.Files
 import java.nio.file.Path
-import java.util.stream.Collectors
 import kotlin.io.path.exists
 import kotlin.io.path.extension
-import kotlin.io.path.isDirectory
-import kotlin.io.path.isRegularFile
 
 /**
  * Files migrate only from source to optimized root and never backwards.
  */
 class MediaOptimizationManager(
-    private val sourceMediaRoot: Path,
-    private val optimizedMediaRoot: Path
+    sourceMediaRoot: Path,
+    optimizedMediaRoot: Path
 ) {
 
-    fun getMediaInfo(file: Path): MediaInfo {
-        val sourcePath = resolveSource(file)
-        val sourceFileInfo = getFileInfo(sourcePath)
+    private val sourceMediaSubtree = FileSystemSubtree(sourceMediaRoot)
+    private val optimizedMediaSubtree = FileSystemSubtree(optimizedMediaRoot)
 
-        val optimizePath = resolveOptimized(file)
-        val optimizedFileInfo = getFileInfo(optimizePath)
+    fun getMediaInfo(file: Path): MediaInfo {
+        val sourceFileInfo = sourceMediaSubtree.getFileInfo(file)
+        val optimizedFileInfo = optimizedMediaSubtree.getFileInfo(file)
 
         return MediaInfo(sourceFileInfo, optimizedFileInfo)
     }
@@ -58,54 +53,29 @@ class MediaOptimizationManager(
      */
     private fun normalizePath(directory: Path): Path {
         val path = directory.normalize()
-        resolveSource(path)
-        resolveOptimized(path)
+        sourceMediaSubtree.resolve(path)
+        optimizedMediaSubtree.resolve(path)
         return path
     }
 
     private fun directorySyncStatus(directory: Path): DirectorySyncStatus? {
-        val sourceDir = resolveSource(directory)
-        val optimizedDir = resolveOptimized(directory)
+        val sourceDir = sourceMediaSubtree.resolve(directory)
+        val optimizedDir = optimizedMediaSubtree.resolve(directory)
         var status: DirectorySyncStatus? = null
         FileUtil.forEachAccessibleFile(sourceDir) { file, _ ->
-            val fileStatus = getMediaInfo(sourceMediaRoot.relativize(file))
+            val fileStatus = getMediaInfo(sourceMediaSubtree.relativize(file))
             status += fileStatus.status
         }
         FileUtil.forEachAccessibleFile(optimizedDir) { file, _ ->
-            val fileStatus = getMediaInfo(optimizedMediaRoot.relativize(file))
+            val fileStatus = getMediaInfo(optimizedMediaSubtree.relativize(file))
             status += fileStatus.status
         }
         return status
     }
 
-    private fun resolveOptimized(path: Path): Path {
-        val result = optimizedMediaRoot.resolve(path).normalize()
-        if (!result.startsWith(optimizedMediaRoot)) {
-            throw IllegalFileAccessException("Path is out of media root folder: $path")
-        }
-        return result
-    }
-
-    private fun resolveSource(path: Path): Path {
-        val result = sourceMediaRoot.resolve(path).normalize()
-        if (!result.startsWith(sourceMediaRoot)) {
-            throw IllegalFileAccessException("Path is out of media root folder: $path")
-        }
-        return result
-    }
-
     private fun listDirectories(directory: Path): List<MediaDirectoryInfo> {
-        val sourceDir = resolveSource(directory)
-        val optimizedDir = resolveOptimized(directory)
-        val sourceSubdirs = Files.list(sourceDir)
-            .filter { it.isDirectory() }
-            .map { sourceMediaRoot.relativize(it) }
-            .collect(Collectors.toSet())
-        val optimizedSubdirs = Files.list(optimizedDir)
-            .filter { it.isDirectory() }
-            .map { optimizedMediaRoot.relativize(it) }
-            .collect(Collectors.toSet())
-
+        val sourceSubdirs = sourceMediaSubtree.listDirectoriesOrEmpty(directory)
+        val optimizedSubdirs = optimizedMediaSubtree.listDirectoriesOrEmpty(directory)
         val subdirs = sourceSubdirs + optimizedSubdirs
 
         return subdirs.map { subdir ->
@@ -119,18 +89,9 @@ class MediaOptimizationManager(
         }
     }
 
-    fun listMedia(directory: Path): Set<MediaInfo> {
-        val sourceDir = resolveSource(directory)
-        val optimizedDir = resolveOptimized(directory)
-        val sourceFiles = Files.list(sourceDir)
-            .filter { it.isRegularFile() }
-            .map { sourceMediaRoot.relativize(it) }
-            .collect(Collectors.toSet())
-        val optimizedFiles = Files.list(optimizedDir)
-            .filter { it.isRegularFile() }
-            .map { optimizedMediaRoot.relativize(it) }
-            .collect(Collectors.toSet())
-            .toMutableSet()
+    private fun listMedia(directory: Path): Set<MediaInfo> {
+        val sourceFiles = sourceMediaSubtree.listFilesOrEmpty(directory)
+        val optimizedFiles = optimizedMediaSubtree.listFilesOrEmpty(directory)
         val sourceFileMappings: Set<Pair<Path, Path?>> = sourceFiles
             .map { sourceFile ->
                 val optimizedFile = optimizedFiles.firstOrNull {
@@ -152,19 +113,20 @@ class MediaOptimizationManager(
         return allFilesMappings
             .map { (source, optimized) ->
                 MediaInfo(
-                    source?.let { getFileInfo(resolveSource(source)) },
-                    optimized?.let { getFileInfo(resolveOptimized(optimized)) }
+                    source?.let { sourceMediaSubtree.getFileInfo(source) },
+                    optimized?.let { optimizedMediaSubtree.getFileInfo(optimized) }
                 )
             }
             .toSet()
     }
 
-    private fun getFileInfo(absolutePath: Path): FileInfo? {
-        return if (absolutePath.exists()) {
-            val size = Files.size(absolutePath)
-            val name = absolutePath.fileName.toString()
-            val type = absolutePath.extension
-            return FileInfo(name, size, type)
+    private fun FileSystemSubtree.getFileInfo(file: Path): FileInfo? {
+        val optimizePath = resolve(file)
+        return if (optimizePath.exists()) {
+            val size = fileSize(file)
+            val name = file.fileName.toString()
+            val type = file.extension
+            FileInfo(name, size, type)
         } else {
             null
         }
