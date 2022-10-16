@@ -18,12 +18,12 @@ export interface MediaInfo {
 export interface FileInfo {
     name: string
     size: number
-    type: String
+    type: string
 }
 
-type MediaStatus = "SOURCE_ONLY" | "OPTIMIZED" | "OPTIMIZED_ONLY";
+export type MediaStatus = "SOURCE_ONLY" | "OPTIMIZED" | "OPTIMIZED_ONLY";
 
-type DirectorySyncStatus =
+export type DirectorySyncStatus =
 /**
  * Status is undefined or unknown yet.
  * Usually used for new directories which were not scanned yet.
