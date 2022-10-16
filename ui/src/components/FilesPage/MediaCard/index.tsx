@@ -12,7 +12,7 @@ export default function MediaCard(
         path: string,
         status: MediaStatus,
     }) {
-    return <li className={"media-card"}>
+    return <li className={"media-card"} title={name}>
         <div className={"media-card_image"}
              style={{backgroundImage: "url('/api/files/show/?path=" + path + "/" + name + "')"}}
         />

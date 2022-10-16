@@ -15,7 +15,11 @@
     background-size:cover;
     background-position:center;
 }
+
 .media-card_name {
     margin: 5px 10px;
     font-size: 0.8rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
