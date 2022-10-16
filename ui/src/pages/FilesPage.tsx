@@ -2,20 +2,11 @@ import React, {useEffect, useState} from 'react'
 import axios from "axios";
 import {Link, useParams} from "react-router-dom";
 import "styles/FilesPage.css"
-import ConversionUtils from "../utils/ConversionUtils";
-
-interface FileInfoDto {
-    name: string
-    size: string
-}
-
-interface DirectoryInfoDto {
-    name: string
-}
+import ConversionUtils from "utils/ConversionUtils";
+import {MediaDirectoryInfo, MediaInfo} from "lib/Api";
 
 function FilesPage() {
-    let [files, setFiles] = useState<FileInfoDto[]>([]);
-    let [directories, setDirectories] = useState<DirectoryInfoDto[]>([]);
+    let [content, setContent] = useState<MediaDirectoryInfo | null>(null);
     let [stats, setStats] = useState<{ [key: string]: any }>({});
     let [readme, setReadme] = useState<string>("");
     let {"*": filePath = ""} = useParams<string>()
@@ -35,8 +26,7 @@ function FilesPage() {
                 path: filePath
             }
         });
-        setFiles(response.data.files || [])
-        setDirectories(response.data.directories || [])
+        setContent(response.data)
     }
 
     async function loadStats(filePath: string) {
@@ -65,7 +55,8 @@ function FilesPage() {
     }
 
     return <div>
-        <h1>Files tree</h1>
+        <h1>{content?.name || "Files tree"}</h1>
+        <span>{content?.path}</span>
         <div className={"readme"}>
             <h3>README</h3>
             <pre className={"readme_text"}>
@@ -73,12 +64,12 @@ function FilesPage() {
             </pre>
         </div>
         {renderStats(stats)}
-        {DirectoriesList(directories, filePath)}
-        {FilesList(files, filePath)}
+        {DirectoriesList(content?.directories || [], filePath)}
+        {FilesList(content?.files || [], filePath)}
     </div>
 }
 
-function DirectoriesList(directories: DirectoryInfoDto[], root: string) {
+function DirectoriesList(directories: MediaDirectoryInfo[], root: string) {
     function DirectoryInfo(
         {
             name,
@@ -135,24 +126,35 @@ function DirectoriesList(directories: DirectoryInfoDto[], root: string) {
     </>;
 }
 
-function FilesList(files: FileInfoDto[], root: string) {
-    function FileInfo(file: FileInfoDto) {
-        return <li key={file.name} className={"file-info"}>
+function FilesList(files: MediaInfo[], root: string) {
+    function FileInfo(file: MediaInfo) {
+        let filename = file.source?.name || file.optimized?.name;
+        return <li key={filename} className={"file-info"}>
             <span className={"file-info_name"}>
-                {file.name}
+                {filename}
             </span>
+            <span className={"file-info_name"}>
+                {filename}
+            </span>
+            {(!!file.optimized) ?
+                <span className={"file-info_name-optimized"}>
+                    file.optimized.name
+                </span>
+                : null}
             <span className={"file-info_size"}>
-                {ConversionUtils.getReadableSize(+file.size)}
+                {ConversionUtils.getReadableSize(file.source?.size || null)}
+                /
+                {ConversionUtils.getReadableSize(file.optimized?.size || null)}
             </span>
             <Link
-                to={"/edit/" + root + "/" + file.name}
+                to={"/edit/" + root + "/" + filename}
                 relative={"route"}
                 className={"file-info_button"}
             >
                 <button type={"button"}>Edit text</button>
             </Link>
             <a
-                href={"/api/files/show/?path=" + root + "/" + file.name}
+                href={"/api/files/show/?path=" + root + "/" + filename}
                 target={"_blank"}
                 className={"file-info_button"}
             >
