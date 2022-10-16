@@ -1,6 +1,5 @@
 package dev.shefer.searchengine.service
 
-import dev.shefer.searchengine.dto.FileInfoDto
 import dev.shefer.searchengine.optimize.MediaOptimizationManager
 import dev.shefer.searchengine.optimize.dto.MediaDirectoryInfo
 import dev.shefer.searchengine.util.FileUtil.forEachAccessibleFile
@@ -25,21 +24,6 @@ class FileSystemService(
 
     @Value("\${app.rootDirectory}")
     lateinit var root: String
-
-    fun listDirectories(path: String): Map<String, Any?> {
-        val mediaDirectoryInfo = mediaOptimizationManager.getMediaDirectoryInfo(Path.of(path))
-        return mapOf(
-            "files" to mediaDirectoryInfo.files
-                .map {
-                    FileInfoDto(
-                        it.source!!.name,
-                        it.source!!.size,
-                        it.status
-                    )
-                },
-            "directories" to mediaDirectoryInfo.directories
-        )
-    }
 
     fun list(path: String): MediaDirectoryInfo {
         return mediaOptimizationManager.getMediaDirectoryInfo(Path.of(path))
