@@ -1,24 +1,27 @@
 .breadcrumbs {
     display: flex;
     padding: 0 10px;
-    border-bottom: 1px solid #dde;
-    border-top: 1px solid #dde;
     user-select: none;
 }
 
 .breadcrumb {
-    padding: 10px;
-    @apply rounded-md;
-    margin: 0px;
+    margin: 0;
     cursor: pointer;
-}
-
-.breadcrumb:hover {
-    background-color: #dde;
+    max-width: 10rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    @apply rounded-md;
+    @apply p-3;
+    @apply rounded-md;
+    @apply bg-blue-100;
+    @apply hover:bg-blue-200;
+    @apply mx-1;
+    @apply h-12;
 }
 
 .breadcrumbs_delimiter {
-    padding: 10px;
+    padding: var(--breadcrumbs-px);
 }
 
 .breadcrumbs_delimiter:last-child {
