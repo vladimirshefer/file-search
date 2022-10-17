@@ -20,6 +20,10 @@ class BashExecutor {
             println(executeForFile(image, listOf("mogrify", "-resize", "$pixelsLimit@>")))
         }
 
+        fun optimizeJpegToMaxSize(image: Path, maxSizeKb: Int) {
+            println(executeForFile(image, listOf("jpegoptim", "--size=${maxSizeKb}K")))
+        }
+
         fun videoResolution(video: Path): Resolution {
             val output: String = executeForFile(
                 video,
