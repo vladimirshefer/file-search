@@ -1,5 +1,6 @@
 package dev.shefer.searchengine.service
 
+import dev.shefer.searchengine.dto.OptimizeRequest
 import dev.shefer.searchengine.optimize.MediaOptimizationManager
 import dev.shefer.searchengine.optimize.dto.MediaDirectoryInfo
 import dev.shefer.searchengine.util.FileUtil.forEachAccessibleFile
@@ -100,6 +101,7 @@ class FileSystemService(
     }
 
     private fun resolve(path: String): Path {
+        val path = if (path.startsWith("/")) path.substring(1) else path
         val file = Path.of(root).resolve(path).normalize()
 
         if (!file.exists()) {
@@ -125,8 +127,11 @@ class FileSystemService(
         throw IllegalArgumentException("Neither file not directory $path")
     }
 
-
     fun bigFiles(path: String): Map<String, Any?> {
+        TODO("Not yet implemented")
+    }
+
+    fun optimize(optimizeRequest: OptimizeRequest) {
         TODO("Not yet implemented")
     }
 }

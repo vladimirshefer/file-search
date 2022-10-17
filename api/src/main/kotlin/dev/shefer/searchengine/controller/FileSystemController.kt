@@ -1,9 +1,12 @@
 package dev.shefer.searchengine.controller
 
+import dev.shefer.searchengine.dto.OptimizeRequest
 import dev.shefer.searchengine.optimize.dto.MediaDirectoryInfo
 import dev.shefer.searchengine.service.FileSystemService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -70,5 +73,13 @@ class FileSystemController(
         path: String
     ): Map<String, Any?> {
         return fileSystemService.bigFiles(path)
+    }
+
+    @PostMapping("/optimize")
+    fun optimize(
+        @RequestBody
+        optimizeRequest: OptimizeRequest
+    ) {
+        fileSystemService.optimize(optimizeRequest)
     }
 }
