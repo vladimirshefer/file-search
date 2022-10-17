@@ -105,6 +105,7 @@ abstract class E2eBaseTest {
     }
 
     private fun assertJsonFilesEqual(fileInOther: Path, file: Path) {
+        if (OVERRIDE_TEST_DATA) return
         val readTree1 = ObjectMapper().readTree(fileInOther.toFile())
         val readTree2 = ObjectMapper().readTree(file.toFile())
         if (!readTree1.equals(readTree2)) {
