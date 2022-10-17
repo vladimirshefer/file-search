@@ -75,11 +75,33 @@ function FilesPage() {
         window.open(url, '_blank')?.focus()
     }
 
+    async function initOptimizationForSelected() {
+        try {
+            let response = await axios.post("/api/files/optimize", {
+                basePath: filePath,
+                paths: selectedFiles
+            });
+        } catch (e) {
+          alert("Could not init optimization")
+        }
+
+    }
+
     return <div>
-        <Breadcrumbs
-            names={["/", ...pathSegments]}
-            selectFn={i => goToPathSegment(i)}
-        />
+        <div className="toolbar flex">
+            <Breadcrumbs
+                names={["/", ...pathSegments]}
+                selectFn={i => goToPathSegment(i)}
+            />
+            <div className={"file-actions-bar"}>
+                <button
+                    className={"file-actions-bar_optimize"}
+                    onClick={initOptimizationForSelected}
+                    title={"Optimize"}
+                >Optimize</button>
+                <button title={"Delete"}>Delete</button>
+            </div>
+        </div>
         <Readme readme={readme}/>
         {renderStats(stats)}
         {DirectoriesList(content?.directories || [], filePath)}
@@ -93,7 +115,7 @@ function FilesPage() {
                 if (!filesSelected.includes(filename)) {
                     setSelectedFiles([filename, ...filesSelected])
                 } else {
-                    setSelectedFiles(filesSelected.filter(it => it!=filename))
+                    setSelectedFiles(filesSelected.filter(it => it != filename))
                 }
             }}
         />
