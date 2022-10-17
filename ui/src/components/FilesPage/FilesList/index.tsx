@@ -22,7 +22,7 @@ export function FilesList(
             {
                 (!!file.optimized) ?
                     <span className={"file-info_name-optimized"}>
-                        file.optimized.name
+                        {file.optimized.name}
                     </span>
                     : null
             }
