@@ -80,6 +80,9 @@ class FileSystemSubtree(
         return root.relativize(normalized).normalize()
     }
 
+    /**
+     * @param filePath relative path
+     */
     fun fileSize(filePath: Path): Long {
         return resolve(filePath).fileSize()
     }
