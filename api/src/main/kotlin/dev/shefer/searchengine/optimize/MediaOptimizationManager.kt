@@ -125,7 +125,7 @@ class MediaOptimizationManager(
         return if (optimizePath.exists()) {
             val size = fileSize(file)
             val name = file.fileName.toString()
-            val type = file.extension
+            val type = file.extension.lowercase()
             FileInfo(name, size, type)
         } else {
             null
