@@ -9,59 +9,29 @@ class BashExecutor {
         val FULLHD_PIXELS = 2073600
 
         fun toJpg(image: Path) {
-            assertFileExists(image)
-
-            val process = ProcessBuilder()
-                .directory(image.parent.toFile())
-                .command("mogrify", "-format", "jpg", image.fileName.toString())
-                .start()
-                .also { it.waitFor() }
-
-            println(process.inputReader().readText())
-
+            println(executeForFile(image, listOf("mogrify", "-format", "jpg")))
         }
 
         fun optimizeJpeg(image: Path) {
-            assertFileExists(image)
-
-            ProcessBuilder()
-                .directory(image.parent.toFile())
-                .command("jpegoptim", image.fileName.toString())
-                .start()
-                .waitFor()
+            println(executeForFile(image, listOf("jpegoptim")))
         }
 
         fun resizeDown(image: Path, pixelsLimit: Int) {
-            assertFileExists(image)
-
-            ProcessBuilder()
-                .directory(image.parent.toFile())
-                .command("mogrify", "-resize", "$pixelsLimit@>", image.fileName.toString())
-                .start()
-                .waitFor()
+            println(executeForFile(image, listOf("mogrify", "-resize", "$pixelsLimit@>")))
         }
 
         fun videoResolution(video: Path): Resolution {
-            assertFileExists(video)
-            val start = ProcessBuilder()
-                .directory(video.parent.toFile())
-                .command(
+            val output: String = executeForFile(
+                video,
+                listOf(
                     "ffprobe",
                     "-v", "error",
                     "-select_streams", "v:0",
                     "-show_entries", "stream=width,height",
-                    "-of", "csv=s=x:p=0", video.fileName.toString()
+                    "-of", "csv=s=x:p=0"
                 )
-                .start()
+            )
 
-            val statusCode = start.waitFor()
-
-            if (statusCode != 0) {
-                val errorText = start.errorReader().use { it.readText() }
-                throw RuntimeException("Could not execute bash command. Status: $statusCode. Error: $errorText")
-            }
-
-            val output: String = start.inputReader().use { it.readText() }
             return Resolution(
                 output.substringBefore('x').toInt(),
                 output.substringAfter('x').substringBefore('\n').toInt()
@@ -72,6 +42,24 @@ class BashExecutor {
             if (image.toFile().exists().not()) {
                 throw FileNotFoundException("No such file $image")
             }
+        }
+
+        private fun executeForFile(path: Path, command: List<String>): String {
+            assertFileExists(path)
+
+            val process = ProcessBuilder()
+                .directory(path.parent.toFile())
+                .command(command + path.fileName.toString())
+                .start()
+
+            val statusCode = process.waitFor()
+            val output = process.inputReader().readText()
+            val error = process.errorReader().readText()
+            if (statusCode != 0) {
+                throw RuntimeException("Could not execute bash command. Status: $statusCode. Error: $error")
+            }
+
+            return output
         }
 
     }
