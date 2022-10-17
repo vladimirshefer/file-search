@@ -7,6 +7,7 @@ import dev.shefer.searchengine.optimize.dto.MediaInfo
 import dev.shefer.searchengine.optimize.dto.MediaStatus
 import dev.shefer.searchengine.util.FileUtil
 import java.nio.file.Path
+import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.extension
 
@@ -14,6 +15,7 @@ import kotlin.io.path.extension
  * Files migrate only from source to optimized root and never backwards.
  */
 class MediaOptimizationManager(
+    val mediaOptimizer: MediaOptimizer,
     sourceMediaRoot: Path,
     optimizedMediaRoot: Path
 ) {
@@ -130,6 +132,20 @@ class MediaOptimizationManager(
         } else {
             null
         }
+    }
+
+    fun optimize(optimizePaths: List<Path>) {
+        optimizePaths.map { optimize(it) }
+    }
+
+    private fun optimize(optimizePath: Path) {
+        val path = normalizePath(optimizePath)
+        optimizedMediaSubtree.resolve(path.parent).createDirectories()
+        mediaOptimizer.optimize(
+            sourceMediaSubtree.resolve(path),
+            optimizedMediaSubtree.resolve(path)
+        )
+
     }
 
 }

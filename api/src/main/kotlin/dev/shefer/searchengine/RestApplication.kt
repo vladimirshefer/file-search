@@ -1,6 +1,7 @@
 package dev.shefer.searchengine
 
 import dev.shefer.searchengine.optimize.MediaOptimizationManager
+import dev.shefer.searchengine.optimize.MediaOptimizer
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -14,9 +15,11 @@ class RestApplication {
         @Value("\${app.sourceMediaRootPath}")
         sourceMediaRootPath: String,
         @Value("\${app.optimizedMediaRootPath}")
-        optimizedMediaRootPath: String
+        optimizedMediaRootPath: String,
+        mediaOptimizer: MediaOptimizer
     ): MediaOptimizationManager {
         return MediaOptimizationManager(
+            mediaOptimizer,
             Path.of(sourceMediaRootPath),
             Path.of(optimizedMediaRootPath)
         )

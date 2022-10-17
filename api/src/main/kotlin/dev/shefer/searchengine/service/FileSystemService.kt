@@ -132,6 +132,7 @@ class FileSystemService(
     }
 
     fun optimize(optimizeRequest: OptimizeRequest) {
-        TODO("Not yet implemented")
+        val optimizePaths = optimizeRequest.paths.map { Path.of(optimizeRequest.basePath, it) }
+        mediaOptimizationManager.optimize(optimizePaths)
     }
 }
