@@ -17,7 +17,7 @@
 
 .file-info_size {
     font-size: 0.7rem;
-    background-color: coral;
+    @apply bg-secondary-200;
     border-radius: 4px;
     padding: 5px;
     margin: 0 5px;

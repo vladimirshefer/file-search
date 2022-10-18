@@ -1,10 +1,12 @@
 .directory-card {
     border: 1px solid #ddd;
-    grid-column: span 6;
+    grid-column: span 4;
     overflow: hidden;
-    @apply rounded-md;
     display: flex;
     flex-direction: column;
+    @apply rounded-md;
+    @apply text-default-600;
+    @apply font-medium;
 }
 
 .directory-card a {
@@ -21,20 +23,16 @@
     display: flex;
     justify-content: end;
     overflow: hidden;
-    font-size: 0.7rem;
     margin: 0;
     user-select: none;
 }
 
 .directory-card_name {
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
+    @apply truncate;
     margin: 0 10px;
 }
 
 .directory-card_status-item {
-    font-size: 0.7rem;
     padding: 0 10px;
     margin: 0;
     cursor: pointer;
@@ -43,7 +41,7 @@
 }
 
 .directory-card_size {
-    background-color: #9ca3af;
+    @apply bg-primary-300;
 }
 
 .directory-card_select {

@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react'
 import axios from "axios";
 import {useNavigate, useParams} from "react-router-dom";
 import "styles/FilesPage.css"
+import "components/toolbox/Toolbox.css"
 import ConversionUtils from "utils/ConversionUtils";
 import {MediaDirectoryInfo, MediaInfo} from "lib/Api";
 import MediaCardGrid from "components/FilesPage/MediaCardGrid";
@@ -88,18 +89,18 @@ function FilesPage() {
     }
 
     return <div>
-        <div className="toolbar flex">
+        <div className="toolbox flex">
             <Breadcrumbs
                 names={["/", ...pathSegments]}
                 selectFn={i => goToPathSegment(i)}
             />
             <div className={"file-actions-bar"}>
                 <button
-                    className={"file-actions-bar_optimize"}
+                    className={"toolbox_item"}
                     onClick={initOptimizationForSelected}
                     title={"Optimize"}
                 >Optimize</button>
-                <button title={"Delete"}>Delete</button>
+                <button className={"toolbox_item"} title={"Delete"}>Delete</button>
             </div>
         </div>
         <Readme readme={readme}/>

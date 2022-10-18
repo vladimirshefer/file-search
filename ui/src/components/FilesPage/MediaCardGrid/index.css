@@ -3,4 +3,7 @@
     max-width: 100%;
     list-style: none;
     grid-template-columns: repeat(12, 1fr);
+    @apply text-default-600;
+    @apply font-medium;
+    font-size: 13px;
 }

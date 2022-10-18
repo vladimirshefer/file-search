@@ -1,0 +1,30 @@
+.toolbox {
+    border-bottom: 1px solid #dde;
+    border-top: 1px solid #dde;
+    display: flex;
+    justify-content: space-between;
+    font-size: 18px;
+}
+
+.toolbox_item {
+    margin: 0;
+    cursor: pointer;
+    max-width: 10rem;
+    user-select: none;
+    @apply truncate;
+    @apply rounded-md;
+    @apply mx-1 py-1 px-3;
+    @apply bg-white;
+    @apply hover:bg-default-200;
+}
+
+.toolbox_delimiter {
+    margin: 0;
+    cursor: auto;
+    max-width: 10rem;
+    user-select: none;
+    @apply truncate;
+    @apply rounded-md;
+    @apply py-1;
+    @apply bg-white;
+}

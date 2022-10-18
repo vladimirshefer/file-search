@@ -1,4 +1,5 @@
 import "./index.css"
+import "components/toolbox/Toolbox.css"
 
 export default function Breadcrumbs(
     {
@@ -12,7 +13,7 @@ export default function Breadcrumbs(
     return <ul className={"breadcrumbs"}>
         {names.map((name, index) => <>
                 <li
-                    className="breadcrumb"
+                    className="breadcrumb toolbox_item"
                     onClick={e => {
                         e.preventDefault();
                         selectFn(index)
@@ -21,7 +22,7 @@ export default function Breadcrumbs(
                 >
                     {name}
                 </li>
-            <li className={"breadcrumbs_delimiter"} key={name+"_delimiter"}>
+            <li className={"breadcrumbs_delimiter toolbox_delimiter "} key={name+"_delimiter"}>
                 {">"}
             </li>
             </>

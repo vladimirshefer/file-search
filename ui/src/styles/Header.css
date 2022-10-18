@@ -1,5 +1,6 @@
 .header {
-    padding: 5px;
+    padding: 8px;
+    height: 47.958px; /* Copied from GD */
     display: flex;
 }
 
@@ -8,7 +9,7 @@
 }
 
 .header_logo_text {
-    font-size: 1.2rem;
+    font-size: 22px;
 }
 
 .header_nav-item {
@@ -16,5 +17,5 @@
     color: black;
     padding: 5px;
     margin: 0 5px;
-    background-color: #eee;
+    @apply bg-default-50;
 }
