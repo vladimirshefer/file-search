@@ -21,7 +21,7 @@ function FilesPage() {
     let [selectedFiles, setSelectedFiles] = useState<string[]>([])
 
     useEffect(() => {
-        setPathSegments(filePath.split("/"))
+        setPathSegments(filePath.split("/").filter(it => !!it))
         setSelectedFiles([])
         loadContent(filePath)
         loadStats(filePath)

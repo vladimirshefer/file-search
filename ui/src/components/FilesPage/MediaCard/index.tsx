@@ -1,6 +1,8 @@
 import React from "react";
 import "./index.css"
 import {MediaStatus} from "lib/Api";
+import {IoCheckmarkDoneOutline} from "react-icons/io5";
+import {AiOutlineCheck, AiOutlineClose} from "react-icons/ai";
 
 export default function MediaCard(
     {
@@ -19,16 +21,25 @@ export default function MediaCard(
         actionSelect?: () => void
     }) {
     return (
-        <li className={"media-card" + " " + (isSelected?"media-card__selected":"")} title={name}
+        <li className={"media-card" + " " + (isSelected ? "media-card__selected" : "")} title={name}
             onDoubleClick={actionOpen}
             onClick={actionSelect}
         >
             <div className={"media-card_image"}
                  style={{backgroundImage: "url('/api/files/show/?path=" + path + "/" + name + "')"}}
             />
-            <span className={"media-card_name"}>
-            {name} {status}
-        </span>
+            <div className={"media-card_info"}>
+                <span className={"media-card_icon"}>
+                    {
+                        status == "OPTIMIZED_ONLY" ? <IoCheckmarkDoneOutline/> :
+                            status == "OPTIMIZED" ? <AiOutlineCheck/> :
+                                status == "SOURCE_ONLY" ? <AiOutlineClose/> : null
+                    }
+                </span>
+                <span className={"media-card_name"}>
+                    {name}
+                </span>
+            </div>
         </li>
     )
 }
