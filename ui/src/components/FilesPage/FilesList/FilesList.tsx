@@ -8,17 +8,19 @@ export default function FilesList(
     {
         files,
         root,
+        filesSelected = [],
     }: {
         files: MediaInfo[],
         root: string,
+        filesSelected?: string[],
     }
 ) {
 
     return <div className={"file-tree_files-list"}>
-        <p className={"files-list_header"}>
-            Total files: {files.length}
-        </p>
         <ul className="files-list">
+            <p className={"files-list_header"}>
+                All files ({files.length})
+            </p>
             {files.map((file) => {
                     let sourceSize = ConversionUtils.getReadableSize(file.source?.size || null);
                     let optimizedSize = ConversionUtils.getReadableSize(file.optimized?.size || null);
@@ -31,6 +33,7 @@ export default function FilesList(
                         size={size}
                         editLink={editLink}
                         openLink={openLink}
+                        isSelected={filesSelected.includes(file.displayName)}
                     />;
                 }
             )}
@@ -46,17 +49,19 @@ function FileInfo(
         size,
         editLink,
         openLink,
+        isSelected,
     }: {
         displayName: string,
         secondaryName: string | null,
         size: string,
         editLink: string,
         openLink: string,
+        isSelected: boolean
     }
 ) {
     return <li
         key={displayName}
-        className={"file-info drag-selectable"}
+        className={`file-info drag-selectable ${isSelected?"file-info__selected":""}`}
         data-selection-id={displayName}
     >
             <span className={"file-info_name"}>

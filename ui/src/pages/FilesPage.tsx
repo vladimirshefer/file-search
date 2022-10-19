@@ -104,6 +104,7 @@ function FilesPage() {
             <FilesList
                 files={content?.files || []}
                 root={filePath}
+                filesSelected={selectedFiles}
             />
         </DragArea>
     </div>
