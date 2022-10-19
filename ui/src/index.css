@@ -5,6 +5,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-align: left;
   font-size: 13px;
+  font-weight: 500;
+  @apply text-default-600;
 }
 
 code {
