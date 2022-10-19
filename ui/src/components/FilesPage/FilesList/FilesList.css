@@ -9,6 +9,11 @@
 .file-info {
     border: 1px solid #ddd;
     padding: 5px;
+    user-select: none;
+}
+
+.file-info__selected {
+    @apply bg-primary-200;
 }
 
 .file-info_name {
@@ -27,3 +32,6 @@
     margin: 0 5px;
 }
 
+.files-list_header {
+    padding: 0.7em;
+}
