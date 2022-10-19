@@ -8,10 +8,12 @@ export default function DirectoryCard(
     {
         name,
         parent,
+        isSelected = false,
         actionOpen = () => {},
     }: {
         name: string,
         parent: string,
+        isSelected?: boolean,
         actionOpen?: () => void
     }) {
 
@@ -27,7 +29,11 @@ export default function DirectoryCard(
         setSize(result.data?.size)
     }
 
-    return <li key={name} className={"directory-card"}>
+    return <li
+        key={name}
+        className={`directory-card drag-selectable ${isSelected?"directory-card__selected":""}`}
+        data-selection-id={name}
+    >
         <Link
             to={"./" + name}
             relative={"path"}

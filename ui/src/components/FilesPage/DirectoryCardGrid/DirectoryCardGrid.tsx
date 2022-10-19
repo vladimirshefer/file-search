@@ -7,10 +7,12 @@ export default function DirectoryCardGrid(
     {
         directories,
         path,
+        selectedDirectories = [],
         actionOpen = (_) => null,
     }: {
         directories: MediaDirectoryInfo[],
         path: string,
+        selectedDirectories?: string[]
         actionOpen: (directoryName: string) => void
     }
 ) {
@@ -25,6 +27,7 @@ export default function DirectoryCardGrid(
                     name={directory.name}
                     parent={path}
                     key={directory.name}
+                    isSelected={selectedDirectories.includes(directory.name)}
                     actionOpen={() => actionOpen(directory.name)}
                 />
             )}

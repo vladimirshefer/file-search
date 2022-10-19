@@ -19,7 +19,7 @@ export default function MediaCard(
         actionOpen?: () => void
     }) {
     return (
-        <li className={"media-card" + " " + (isSelected ? "media-card__selected" : "")} title={name}
+        <li className={`media-card drag-selectable ${isSelected ? "media-card__selected" : ""}`} title={name}
             onDoubleClick={actionOpen}
             data-selection-id={name} // used for drag-select.
         >

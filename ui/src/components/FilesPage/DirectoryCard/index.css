@@ -9,6 +9,10 @@
     @apply font-medium;
 }
 
+.directory-card__selected {
+    @apply bg-primary-200;
+}
+
 .directory-card a {
     text-decoration: inherit;
 }

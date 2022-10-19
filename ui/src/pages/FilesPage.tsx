@@ -10,7 +10,7 @@ import DirectoryCardGrid from "components/FilesPage/DirectoryCardGrid/DirectoryC
 import {Readme} from "components/files/Readme";
 import {FilesList} from "components/FilesPage/FilesList";
 import FileApiService from "../lib/service/FileApiService";
-import useDragSelect from "lib/react/hooks/useDragSelect";
+import DragArea from "components/drag/DragArea";
 
 function FilesPage() {
     let [content, setContent] = useState<MediaDirectoryInfo | null>(null);
@@ -28,8 +28,6 @@ function FilesPage() {
         loadStats(filePath)
         loadReadme(filePath)
     }, [filePath])
-
-    useDragSelect("media-card", "media-card-grid", setSelectedFiles)
 
     async function loadContent(filePath: string) {
         setContent(await fileApiService.loadContent(filePath))
@@ -88,19 +86,26 @@ function FilesPage() {
             </div>
         </div>
         <Readme readme={readme}/>
-        {renderStats(stats)}
-        <DirectoryCardGrid
-            directories={content?.directories || []}
-            path={filePath}
-            actionOpen={(dirname) => {}}
-        />
-        <MediaCardGrid
-            imageMedias={imageFiles || []}
-            path={filePath}
-            selectedItems={selectedFiles}
-            actionOpen={(fileName) => openMedia(fileName)}
-        />
-        <FilesList files={content?.files || []} root={filePath}/>
+        <DragArea
+            setSelectedItems={setSelectedFiles}
+        >
+            <DirectoryCardGrid
+                directories={content?.directories || []}
+                path={filePath}
+                selectedDirectories={selectedFiles}
+                actionOpen={(dirname) => null}
+            />
+            <MediaCardGrid
+                imageMedias={imageFiles || []}
+                path={filePath}
+                selectedItems={selectedFiles}
+                actionOpen={(fileName) => openMedia(fileName)}
+            />
+            <FilesList
+                files={content?.files || []}
+                root={filePath}
+            />
+        </DragArea>
     </div>
 }
 
