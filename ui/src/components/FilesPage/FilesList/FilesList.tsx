@@ -19,52 +19,68 @@ export default function FilesList(
             Total files: {files.length}
         </p>
         <ul className="files-list">
-            {files.map((file) =>
-                <FileInfo file={file} root={root}/>
+            {files.map((file) => {
+                    let sourceSize = ConversionUtils.getReadableSize(file.source?.size || null);
+                    let optimizedSize = ConversionUtils.getReadableSize(file.optimized?.size || null);
+                    let size = `${sourceSize}/${optimizedSize}`;
+                    let editLink = "/edit/" + root + "/" + file.displayName;
+                    let openLink = "/api/files/show/?path=" + root + "/" + file.displayName;
+                    return <FileInfo
+                        displayName={file.displayName}
+                        secondaryName={file.optimized?.name || null}
+                        size={size}
+                        editLink={editLink}
+                        openLink={openLink}
+                    />;
+                }
             )}
         </ul>
     </div>;
 }
 
+/** Pure component **/
 function FileInfo(
     {
-        file,
-        root,
+        displayName,
+        secondaryName,
+        size,
+        editLink,
+        openLink,
     }: {
-        file: MediaInfo,
-        root: string,
+        displayName: string,
+        secondaryName: string | null,
+        size: string,
+        editLink: string,
+        openLink: string,
     }
 ) {
-    let filename = file.displayName;
     return <li
-        key={filename}
+        key={displayName}
         className={"file-info drag-selectable"}
-        data-selection-id={file.displayName}
+        data-selection-id={displayName}
     >
             <span className={"file-info_name"}>
-                {filename}
+                {displayName}
             </span>
         {
-            (!!file.optimized) ?
+            (!secondaryName) ?
                 <span className={"file-info_name-optimized"}>
-                        {file.optimized.name}
+                        {secondaryName}
                     </span>
                 : null
         }
         <span className={"file-info_size"}>
-                {ConversionUtils.getReadableSize(file.source?.size || null)}
-            /
-            {ConversionUtils.getReadableSize(file.optimized?.size || null)}
-            </span>
+            {size}
+        </span>
         <Link
-            to={"/edit/" + root + "/" + filename}
+            to={editLink}
             relative={"route"}
             className={"file-info_button"}
         >
             <button type={"button"}>Edit text</button>
         </Link>
         <a
-            href={"/api/files/show/?path=" + root + "/" + filename}
+            href={openLink}
             target={"_blank"}
             className={"file-info_button"}
         >
