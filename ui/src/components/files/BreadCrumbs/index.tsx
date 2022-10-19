@@ -4,7 +4,7 @@ import "components/toolbox/Toolbox.css"
 export default function Breadcrumbs(
     {
         names,
-        selectFn = (_) => {},
+        selectFn = (_) => null,
     }: {
         names: string[],
         selectFn?: ((n: number) => any)
@@ -22,9 +22,10 @@ export default function Breadcrumbs(
                 >
                     {name}
                 </li>
-            <li className={"breadcrumbs_delimiter toolbox_delimiter "} key={name+"_delimiter"}>
-                {">"}
-            </li>
+                <li className={"breadcrumbs_delimiter toolbox_delimiter"}
+                    key={name + "_delimiter"}>
+                    {">"}
+                </li>
             </>
         )}
     </ul>
