@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from 'react'
-import axios from "axios";
 import {useNavigate, useParams} from "react-router-dom";
 import "styles/FilesPage.css"
 import "components/toolbox/Toolbox.css"
@@ -10,6 +9,7 @@ import Breadcrumbs from "components/files/BreadCrumbs";
 import DirectoryCardGrid from "components/FilesPage/DirectoryCardGrid/DirectoryCardGrid";
 import {Readme} from "components/files/Readme";
 import {FilesList} from "components/FilesPage/FilesList";
+import FileApiService from "../lib/service/FileApiService";
 import useDragSelect from "lib/react/hooks/useDragSelect";
 
 function FilesPage() {
@@ -20,6 +20,7 @@ function FilesPage() {
     let [pathSegments, setPathSegments] = useState<string[]>([])
     let navigate = useNavigate();
     let [selectedFiles, setSelectedFiles] = useState<string[]>([])
+    let fileApiService = new FileApiService()
 
     useEffect(() => {
         setPathSegments(filePath.split("/").filter(it => !!it))
@@ -31,30 +32,15 @@ function FilesPage() {
     useDragSelect("media-card", "media-card-grid", setSelectedFiles)
 
     async function loadContent(filePath: string) {
-        let response = await axios.get("/api/files/list", {
-            params: {
-                path: filePath
-            }
-        });
-        setContent(response.data)
+        setContent(await fileApiService.loadContent(filePath))
     }
 
     async function loadStats(filePath: string) {
-        let response = await axios.get("/api/files/stats", {
-            params: {
-                path: filePath
-            }
-        });
-        setStats(response.data || {})
+        setStats(await fileApiService.loadStats(filePath) || {})
     }
 
     async function loadReadme(filePath: string) {
-        let response = await axios.get("/api/files/readme", {
-            params: {
-                path: filePath
-            }
-        });
-        setReadme(response.data?.content || "")
+        setReadme(await fileApiService.loadReadme(filePath) || "")
     }
 
     function renderStats(stats: { [p: string]: any }) {
@@ -80,14 +66,10 @@ function FilesPage() {
 
     async function initOptimizationForSelected() {
         try {
-            let response = await axios.post("/api/files/optimize", {
-                basePath: filePath,
-                paths: selectedFiles
-            });
+            await fileApiService.optimize(filePath, selectedFiles)
         } catch (e) {
-          alert("Could not init optimization")
+            alert("Could not init optimization")
         }
-
     }
 
     return <div>
