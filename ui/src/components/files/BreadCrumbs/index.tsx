@@ -18,6 +18,7 @@ export default function Breadcrumbs(
                         e.preventDefault();
                         selectFn(index)
                     }}
+                    title={name}
                     key={name}
                 >
                     {name}
