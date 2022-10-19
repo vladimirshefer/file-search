@@ -9,7 +9,8 @@ import MediaCardGrid from "components/FilesPage/MediaCardGrid";
 import Breadcrumbs from "components/files/BreadCrumbs";
 import DirectoryCard from "components/FilesPage/DirectoryCard";
 import {Readme} from "components/files/Readme";
-import {FilesList} from "../components/FilesPage/FilesList";
+import {FilesList} from "components/FilesPage/FilesList";
+import useDragSelect from "lib/react/hooks/useDragSelect";
 
 function FilesPage() {
     let [content, setContent] = useState<MediaDirectoryInfo | null>(null);
@@ -22,11 +23,12 @@ function FilesPage() {
 
     useEffect(() => {
         setPathSegments(filePath.split("/").filter(it => !!it))
-        setSelectedFiles([])
-        loadContent(filePath)
+        loadContent(filePath);
         loadStats(filePath)
         loadReadme(filePath)
     }, [filePath])
+
+    useDragSelect("media-card", "media-card-grid", setSelectedFiles)
 
     async function loadContent(filePath: string) {
         let response = await axios.get("/api/files/list", {
@@ -111,14 +113,6 @@ function FilesPage() {
             path={filePath}
             selectedItems={selectedFiles}
             actionOpen={(fileName) => openMedia(fileName)}
-            actionSelect={(filename) => {
-                let filesSelected = selectedFiles;
-                if (!filesSelected.includes(filename)) {
-                    setSelectedFiles([filename, ...filesSelected])
-                } else {
-                    setSelectedFiles(filesSelected.filter(it => it != filename))
-                }
-            }}
         />
         <FilesList files={content?.files || []} root={filePath}/>
     </div>
