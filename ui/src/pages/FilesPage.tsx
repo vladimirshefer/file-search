@@ -8,7 +8,7 @@ import MediaCardGrid from "components/FilesPage/MediaCardGrid";
 import Breadcrumbs from "components/files/BreadCrumbs";
 import DirectoryCardGrid from "components/FilesPage/DirectoryCardGrid/DirectoryCardGrid";
 import {Readme} from "components/files/Readme";
-import {FilesList} from "components/FilesPage/FilesList";
+import FilesList from "components/FilesPage/FilesList/FilesList";
 import FileApiService from "../lib/service/FileApiService";
 import DragArea from "components/drag/DragArea";
 
