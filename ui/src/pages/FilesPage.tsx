@@ -7,7 +7,7 @@ import ConversionUtils from "utils/ConversionUtils";
 import {MediaDirectoryInfo, MediaInfo} from "lib/Api";
 import MediaCardGrid from "components/FilesPage/MediaCardGrid";
 import Breadcrumbs from "components/files/BreadCrumbs";
-import DirectoryCard from "components/FilesPage/DirectoryCard";
+import DirectoryCardGrid from "components/FilesPage/DirectoryCardGrid/DirectoryCardGrid";
 import {Readme} from "components/files/Readme";
 import {FilesList} from "components/FilesPage/FilesList";
 import useDragSelect from "lib/react/hooks/useDragSelect";
@@ -107,7 +107,11 @@ function FilesPage() {
         </div>
         <Readme readme={readme}/>
         {renderStats(stats)}
-        {DirectoriesList(content?.directories || [], filePath)}
+        <DirectoryCardGrid
+            directories={content?.directories || []}
+            path={filePath}
+            actionOpen={(dirname) => {}}
+        />
         <MediaCardGrid
             imageMedias={imageFiles || []}
             path={filePath}
@@ -116,19 +120,6 @@ function FilesPage() {
         />
         <FilesList files={content?.files || []} root={filePath}/>
     </div>
-}
-
-function DirectoriesList(directories: MediaDirectoryInfo[], root: string) {
-    return <>
-        <p>
-            Total directories: {directories.length}
-        </p>
-        <ul className="file-tree_directories-list">
-            {directories.map((directory) =>
-                <DirectoryCard name={directory.name} parent={root} key={directory.name}/>
-            )}
-        </ul>
-    </>;
 }
 
 export default FilesPage

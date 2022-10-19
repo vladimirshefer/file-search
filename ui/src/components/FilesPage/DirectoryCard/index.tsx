@@ -7,10 +7,12 @@ import "./index.css"
 export default function DirectoryCard(
     {
         name,
-        parent
+        parent,
+        actionOpen = () => {},
     }: {
         name: string,
-        parent: string
+        parent: string,
+        actionOpen?: () => void
     }) {
 
     let [size, setSize] = useState<number | null>(null)
@@ -43,7 +45,7 @@ export default function DirectoryCard(
                 </div>
                 <span className={"directory-card_name"}>
                         {name}
-                    </span>
+                </span>
             </div>
         </Link>
         <div className={"directory-card_status-line"}>

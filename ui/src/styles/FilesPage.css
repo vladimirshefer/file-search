@@ -1,7 +1,0 @@
-.file-tree_directories-list {
-    display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    grid-gap: 10px;
-    margin: 10px;
-}
-

@@ -1,0 +1,12 @@
+.directory-card-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-gap: 10px;
+    margin: 10px;
+}
+
+.directory-card-grid_header {
+    grid-column: span 12;
+    display: flex;
+    font-weight: 500;
+}
