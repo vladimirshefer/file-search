@@ -18,6 +18,9 @@ export default function MediaCardGrid(
 ) {
 
     return <ul className={"media-card-grid"}>
+        <div className={"media-card-grid_header"}>
+            Media ({imageMedias.length})
+        </div>
         {
             imageMedias.map(it => {
                 return <MediaCard
