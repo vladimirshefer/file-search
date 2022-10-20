@@ -4,6 +4,7 @@
 
 .files-list {
     list-style: none;
+    padding-bottom: 40px;
 }
 
 .file-info {
