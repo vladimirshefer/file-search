@@ -6,10 +6,12 @@ import dev.shefer.searchengine.optimize.dto.MediaDirectoryInfo
 import dev.shefer.searchengine.optimize.dto.MediaInfo
 import dev.shefer.searchengine.optimize.dto.MediaStatus
 import dev.shefer.searchengine.util.FileUtil
+import org.slf4j.LoggerFactory
 import java.nio.file.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.extension
+import kotlin.io.path.isDirectory
 
 /**
  * Files migrate only from source to optimized root and never backwards.
@@ -19,6 +21,8 @@ class MediaOptimizationManager(
     sourceMediaRoot: Path,
     optimizedMediaRoot: Path
 ) {
+
+    val LOG = LoggerFactory.getLogger(this.javaClass)
 
     private val sourceMediaSubtree = FileSystemSubtree(sourceMediaRoot)
     private val optimizedMediaSubtree = FileSystemSubtree(optimizedMediaRoot)
@@ -138,14 +142,23 @@ class MediaOptimizationManager(
         optimizePaths.map { optimize(it) }
     }
 
-    private fun optimize(optimizePath: Path) {
-        val path = normalizePath(optimizePath)
-        optimizedMediaSubtree.resolve(path.parent).createDirectories()
-        mediaOptimizer.optimize(
-            sourceMediaSubtree.resolve(path),
-            optimizedMediaSubtree.resolve(path)
-        )
-
+    private fun optimize(relPath: Path) {
+        val path = normalizePath(relPath)
+        val sourceFile = sourceMediaSubtree.resolve(path)
+        val optimizedMedia = optimizedMediaSubtree.resolve(path)
+        LOG.info("Start optimizing $path")
+        if (sourceFile.isDirectory()) {
+            sourceMediaSubtree.listFilesOrEmpty(path).forEach { optimize(it) }
+            return
+        }
+        optimizedMedia.parent.createDirectories()
+        if (path.extension.lowercase() in listOf("jpg", "jpeg", "png")) {
+            mediaOptimizer.optimizeImage(
+                sourceFile,
+                optimizedMedia
+            )
+        }
+        LOG.info("End optimizing $path")
     }
 
 }

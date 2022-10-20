@@ -10,7 +10,7 @@ import kotlin.random.Random
 
 @Component
 class MediaOptimizer {
-    fun optimize(source: Path, target: Path) {
+    fun optimizeImage(source: Path, target: Path) {
         withTempDirectory { workDir ->
             val workingFile = workDir.resolve(source.fileName)
             Files.copy(source, workingFile)
