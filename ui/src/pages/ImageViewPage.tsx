@@ -13,13 +13,15 @@ export default function ImageViewPage() {
     let zoomOptimizedIdR = `zoomOptimized${zoomOptimizedId}`;
 
     useEffect(() => {
-        let cleanupSource = imageZoom(sourceIdR, zoomSourceIdR);
-        let cleanupOptimized = imageZoom(optimizedIdR, zoomOptimizedIdR)
+        let imageZoomer = new MultipleImageZoomer([
+            {imageId: sourceIdR, viewId: zoomSourceIdR},
+            {imageId: optimizedIdR, viewId: zoomOptimizedIdR},
+        ]);
+        imageZoomer.mount()
         return () => {
-            cleanupSource();
-            cleanupOptimized()
+            imageZoomer.unmount();
         }
-    })
+    }, [])
 
     let sourceUrl = "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__480.jpg";
     let optimizedUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThJv66ZNB5dva_CLQC49ZgiCIxhzsjN0VJPigpZNE0AGR_-2Svj39J3tm_gDH0WdDUgDE&usqp=CAU";
@@ -34,12 +36,12 @@ export default function ImageViewPage() {
     }
 
     return <>
-        <div className={"img-zoom-container"}>
+        <div>
             <div className={"flex"}>
-                <div>
+                <div className={"img-zoom-container"}>
                     {renderImage(sourceIdR, sourceUrl)}
                 </div>
-                <div>
+                <div className={"img-zoom-container"}>
                     {renderImage(optimizedIdR, optimizedUrl)}
                 </div>
             </div>
@@ -62,87 +64,151 @@ function getMouseCoords(e: MouseEvent | TouchEvent): { x: number, y: number } {
     return coords;
 }
 
-function createLensForImage(img: HTMLImageElement) {
-    /*create lens:*/
-    let lens = document.createElement("DIV");
-    lens.setAttribute("class", "img-zoom-lens");
-    lens.setAttribute("id", img.id + "_lens")
 
-    /*insert lens:*/
-    img.parentElement!!.insertBefore(lens, img);
-    return lens;
-}
+class SingleImageZoomer {
+    imageId: string
+    viewId: string
+    positionListener: (x: number, y: number) => void
+    lensId!: string
+    image!: HTMLImageElement
+    view!: HTMLElement
+    lens!: HTMLElement
+    cx!: number
+    cy!: number
 
-function imageZoom(imgID: string, resultID: string) {
-    let img: HTMLImageElement = document.getElementById(imgID) as HTMLImageElement;
-    let result = document.getElementById(resultID) as HTMLElement;
+    position: { x: number, y: number } = {x: 0.5, y: 0.5};
 
-    let lens = createLensForImage(img);
+    constructor(
+        imageId: string,
+        viewId: string,
+        positionListener: (x: number, y: number) => void
+    ) {
+        this.imageId = imageId;
+        this.viewId = viewId;
+        this.positionListener = positionListener
+    }
 
-    /*calculate the ratio between result DIV and lens:*/
-    let cx = result.offsetWidth / lens.offsetWidth;
-    let cy = result.offsetHeight / lens.offsetHeight;
-    console.log({
-        ow: result.offsetWidth,
-        low: lens.offsetWidth
-    })
-    console.log({cx, cy})
+    mount() {
+        console.log("mount")
+        this.image = document.getElementById(this.imageId) as HTMLImageElement
+        this.view = document.getElementById(this.viewId) as HTMLElement
+        this.lens = this.createLensForImage();
+        this.cx = this.view.offsetWidth / this.lens.offsetWidth;
+        this.cy = this.view.offsetHeight / this.lens.offsetHeight;
+        this.view.style.backgroundImage = "url('" + this.image.src + "')";
+        let viewBackgroundWidth = this.image.width * this.cx;
+        let viewBackgroundHeight = this.image.height * this.cy;
+        this.view.style.backgroundSize = viewBackgroundWidth + "px " + viewBackgroundHeight + "px";
 
-    /*set background properties for the result DIV:*/
-    result.style.backgroundImage = "url('" + img.src + "')";
-    result.style.backgroundSize = (img.width * cx) + "px " + (img.height * cy) + "px";
+        this.lens.addEventListener("mousemove", this.moveLens);
+        this.image.addEventListener("mousemove", this.moveLens);
 
-    /*execute a function when someone moves the cursor over the image, or the lens:*/
-    lens.addEventListener("click", moveLens);
-    img.addEventListener("click", moveLens);
+        /*and also for touch screens:*/
+        this.lens.addEventListener("touchmove", this.moveLens);
+        this.image.addEventListener("touchmove", this.moveLens);
+        console.log(`image size : ${this.image.width} ${this.image.height}`)
+    }
 
-    /*and also for touch screens:*/
-    // lens.addEventListener("touchmove", moveLens);
-    // img.addEventListener("touchmove", moveLens);
-    // img.removeEventListener("mousemove", moveLens)
+    private createLensForImage() {
+        /*create lens:*/
+        let lens = document.createElement("DIV");
+        lens.setAttribute("class", "img-zoom-lens");
+        lens.setAttribute("id", this.lensId || this.imageId + "_lens")
 
-    function moveLens(e: MouseEvent | TouchEvent) {
-        /*prevent any other actions that may occur when moving over the image:*/
+        /*insert lens:*/
+        this.image.parentElement!!.insertBefore(lens, this.image);
+        return lens;
+    }
+
+    moveLens = (e: MouseEvent | TouchEvent) => {
         e.preventDefault();
-
         let mouseCoords = getMouseCoords(e);
+        this.calculateRelativeCursorPosition(mouseCoords)
+        console.log("position sending " + this.position.x + " " + this.position.y)
+        this.positionListener(this.position.x, this.position.y)
+    };
 
-        console.log("click " + img.id + " _ " + lens.id)
-        /*get the cursor's x and y positions:*/
-        let pos = getRelativeCursorPos(img, mouseCoords);
-        /*prevent the lens from being positioned outside the image:*/
-
-        /*calculate the position of the lens:*/
-        let x = bound(0, pos.x - (lens.offsetWidth / 2), img.width - lens.offsetWidth);
-        let y = bound(0, pos.y - (lens.offsetHeight / 2), img.height - lens.offsetHeight);
-        /*set the position of the lens:*/
-        lens.style.left = x + "px";
-        lens.style.top = y + "px";
-        /*display what the lens "sees":*/
+    private calculateRelativeCursorPosition(mouseCoords: { x: number, y: number }) {
+        /*get the x and y positions of the image:*/
+        let imgBorderCoordinates: DOMRect = this.image.getBoundingClientRect();
+        /*calculate the cursor's x and y coordinates, relative to the image:*/
+        let x: number = mouseCoords.x - window.scrollX - imgBorderCoordinates.left;
+        let y: number = mouseCoords.y - window.scrollY - imgBorderCoordinates.top;
+        x = bound(0, x, this.image.width);
+        y = bound(0, y, this.image.height);
         console.log({x, y})
-        let backgroundPosition = "-" + (x * cx) + "px -" + (y * cy) + "px";
-        console.log(backgroundPosition)
-        result.style.backgroundPosition = backgroundPosition;
+        let imgW = imgBorderCoordinates.width;
+        let imgh = imgBorderCoordinates.height;
+        this.position = {x: x / imgW, y: y / imgh};
     }
 
-    return function cleanup() {
-        img.removeEventListener("mousemove", moveLens)
-        lens.remove()
+    private updateLens() {
+        let {x, y} = this.position
+        let lensX = this.image.offsetWidth * x - this.lens.offsetWidth / 2
+        let lensY = this.image.offsetHeight * y - this.lens.offsetHeight / 2
+        lensX = bound(0, lensX, this.image.offsetWidth - this.lens.offsetWidth)
+        lensY = bound(0, lensY, this.image.offsetHeight - this.lens.offsetHeight)
+        this.lens.style.left = lensX + "px";
+        this.lens.style.top = lensY + "px";
+        console.log(`lens position ${x} ${y}}`);
     }
 
+    private updateViewBackground() {
+        let {x, y} = this.position
+        let backgroundX = x * this.image.width  * this.cx - (this.view.offsetWidth/2);
+        let backgroundY = y * this.image.height * this.cy - (this.view.offsetHeight/2);
+        backgroundX = bound(0, backgroundX, this.image.width  * this.cx - (this.view.offsetWidth))
+        backgroundY = bound(0, backgroundY, this.image.height  * this.cy - (this.view.offsetHeight))
+        let backgroundPosition = "-" + backgroundX + "px -" + backgroundY + "px";
+        console.log(`background position:${backgroundPosition}`)
+        this.view.style.backgroundPosition = backgroundPosition;
+    }
+
+    setPositionPercent(x: number, y: number) {
+        this.position = {x, y};
+        this.updateLens()
+        this.updateViewBackground()
+    }
+
+    unmount() {
+        this.lens.removeEventListener("mousemove", this.moveLens);
+        this.image.removeEventListener("mousemove", this.moveLens);
+
+        /*and also for touch screens:*/
+        this.lens.removeEventListener("touchmove", this.moveLens);
+        this.image.removeEventListener("touchmove", this.moveLens);
+        this.lens.remove()
+    }
 }
 
-function getRelativeCursorPos(
-    img: HTMLImageElement,
-    mouseCoords: { x: number; y: number }
-) {
-    /*get the x and y positions of the image:*/
-    let imgBorderCoordinates: DOMRect = img.getBoundingClientRect();
-    /*calculate the cursor's x and y coordinates, relative to the image:*/
-    let x: number = mouseCoords.x - window.scrollX - imgBorderCoordinates.left;
-    let y: number = mouseCoords.y - window.scrollY - imgBorderCoordinates.top;
-    console.log({x, y})
-    return {x, y};
+class MultipleImageZoomer {
+
+    zoomers: SingleImageZoomer[] = [];
+
+    setCurrentPosition(x: number, y: number) {
+        this.zoomers.forEach(zoomer => {
+            zoomer.setPositionPercent(x, y)
+        })
+    }
+
+    constructor(elements: { imageId: string, viewId: string, controlId?: string }[] = []) {
+        this.zoomers = elements.map(element =>
+            new SingleImageZoomer(
+                element.imageId,
+                element.viewId,
+                (x, y) => this.setCurrentPosition(x, y)
+            )
+        )
+    }
+
+    mount() {
+        this.zoomers.forEach(zoomer => zoomer.mount())
+    }
+
+    unmount() {
+        this.zoomers.forEach(zoomer => zoomer.unmount())
+    }
+
 }
 
 /**
@@ -160,17 +226,3 @@ function bound(lowerBound: number, value: number, upperBound: number): number {
     }
     return value
 }
-
-// function getRelativeCursorPos2(img: HTMLImageElement, e: MouseEvent) {
-//     e = e || window.event as MouseEvent; // TODO ?
-//     /*get the x and y positions of the image:*/
-//     let imgBorderCoordinates: DOMRect = img.getBoundingClientRect();
-//     /*calculate the cursor's x and y coordinates, relative to the image:*/
-//     let x: number = e.pageX - imgBorderCoordinates.left;
-//     let y: number = e.pageY - imgBorderCoordinates.top;
-//     /*consider any page scrolling:*/
-//     x = x - window.scrollX;
-//     y = y - window.scrollY;
-//     console.log({x, y})
-//     return {x, y};
-// }
