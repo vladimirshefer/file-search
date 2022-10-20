@@ -1,5 +1,5 @@
 import {ReactNode, useId} from "react";
-import useDragSelect from "../../lib/react/hooks/useDragSelect";
+import useDragSelect from "lib/react/hooks/useDragSelect";
 
 export default function DragArea(
     {
