@@ -28,6 +28,7 @@ export default function FilesList(
                     let editLink = "/edit/" + root + "/" + file.displayName;
                     let openLink = "/api/files/show/?path=" + root + "/" + file.displayName;
                     return <FileInfo
+                        key={file.displayName}
                         displayName={file.displayName}
                         secondaryName={file.optimized?.name || null}
                         size={size}
