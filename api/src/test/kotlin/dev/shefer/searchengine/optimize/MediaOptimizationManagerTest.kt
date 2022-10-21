@@ -13,6 +13,7 @@ import dev.shefer.test_internal.TestFilesUtil.withTempDirectory
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.mockito.Mockito
 import java.nio.file.Path
 
 class MediaOptimizationManagerTest {
@@ -24,10 +25,14 @@ class MediaOptimizationManagerTest {
             placeTestFile(sourcesRoot, "4K.webp", "file1.webp")
             val optimizedRoot = dir.resolve("optimized")
             placeTestFile(optimizedRoot, "4K.webp", "file1.webp")
-            val mom = MediaOptimizationManager(sourcesRoot, optimizedRoot)
+            val mom = MediaOptimizationManager(mock(), sourcesRoot, optimizedRoot)
             val mediaInfo = mom.getMediaInfo(Path.of("file1.webp"))
             assertEquals(OPTIMIZED, mediaInfo.status)
         }
+    }
+
+    private inline fun <reified T> mock(): T {
+        return Mockito.mock(T::class.java) as T
     }
 
     @Test
@@ -36,7 +41,7 @@ class MediaOptimizationManagerTest {
             val sourcesRoot = dir.resolve("sources")
             val optimizedRoot = dir.resolve("optimized")
             placeTestFile(optimizedRoot, "4K.webp", "file1.webp")
-            val mom = MediaOptimizationManager(sourcesRoot, optimizedRoot)
+            val mom = MediaOptimizationManager(mock(), sourcesRoot, optimizedRoot)
             val mediaInfo = mom.getMediaInfo(Path.of("file1.webp"))
             assertEquals(MediaStatus.OPTIMIZED_ONLY, mediaInfo.status)
         }
@@ -48,7 +53,7 @@ class MediaOptimizationManagerTest {
             val sourcesRoot = dir.resolve("sources")
             placeTestFile(sourcesRoot, "4K.webp", "file1.webp")
             val optimizedRoot = dir.resolve("optimized")
-            val mom = MediaOptimizationManager(sourcesRoot, optimizedRoot)
+            val mom = MediaOptimizationManager(mock(), sourcesRoot, optimizedRoot)
             val mediaInfo = mom.getMediaInfo(Path.of("file1.webp"))
             assertEquals(SOURCE_ONLY, mediaInfo.status)
         }
@@ -59,7 +64,7 @@ class MediaOptimizationManagerTest {
         withTempDirectory { dir ->
             val sourcesRoot = dir.resolve("sources")
             val optimizedRoot = dir.resolve("optimized")
-            val mom = MediaOptimizationManager(sourcesRoot, optimizedRoot)
+            val mom = MediaOptimizationManager(mock(), sourcesRoot, optimizedRoot)
 
             assertThrows<RuntimeException> {
                 mom.getMediaInfo(Path.of("notExisting.webp"))
@@ -72,7 +77,7 @@ class MediaOptimizationManagerTest {
         withTempDirectory { dir ->
             val sourcesRoot = dir.resolve("sources")
             val optimizedRoot = dir.resolve("optimized")
-            val mom = MediaOptimizationManager(sourcesRoot, optimizedRoot)
+            val mom = MediaOptimizationManager(mock(), sourcesRoot, optimizedRoot)
 
             placeTestFile(sourcesRoot, "4K.webp", "sourceOnly.webp")
             placeTestFile(sourcesRoot, "4K.webp", "optimized.webp")
@@ -110,7 +115,7 @@ class MediaOptimizationManagerTest {
         withTempDirectory { dir ->
             val sourcesRoot = dir.resolve("sources")
             val optimizedRoot = dir.resolve("optimized")
-            val mom = MediaOptimizationManager(sourcesRoot, optimizedRoot)
+            val mom = MediaOptimizationManager(mock(), sourcesRoot, optimizedRoot)
 
             assertThrows<IllegalFileAccessException> {
                 mom.getMediaDirectoryInfo(Path.of(".."))
