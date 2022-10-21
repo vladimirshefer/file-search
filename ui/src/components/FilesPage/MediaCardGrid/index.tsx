@@ -8,12 +8,18 @@ export default function MediaCardGrid(
         imageMedias,
         path,
         selectedItems,
-        actionOpen = (_) => undefined,
+        actionOpenSource = (_) => undefined,
+        actionOpenOptimized = (_) => undefined,
+        actionDeleteSource = (_) => undefined,
+        actionDeleteOptimized = (_) => undefined,
     }: {
         imageMedias: MediaInfo[],
         path: string,
         selectedItems: string[],
-        actionOpen?: (name: string) => void
+        actionOpenSource?: (name: string) => void
+        actionOpenOptimized?: (name: string) => void
+        actionDeleteSource?: (name: string) => void
+        actionDeleteOptimized?: (name: string) => void
     }
 ) {
 
@@ -29,7 +35,10 @@ export default function MediaCardGrid(
                     path={path}
                     status={it.status}
                     isSelected={selectedItems.includes(it.displayName)}
-                    actionOpen={() => actionOpen(it.displayName)}
+                    actionOpenSource={() => actionOpenSource(it.displayName)}
+                    actionOpenOptimized={() => actionOpenOptimized(it.displayName)}
+                    actionDeleteSource={() => actionDeleteSource(it.displayName)}
+                    actionDeleteOptimized={() => actionDeleteOptimized(it.displayName)}
                 />
             })
         }

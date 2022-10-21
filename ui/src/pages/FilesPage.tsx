@@ -82,6 +82,11 @@ function FilesPage() {
         window.open(url, '_blank')?.focus()
     }
 
+    function openMediaOptimized(fileName: string): void {
+        alert(`Going to open ${fileName}`)
+        return;
+    }
+
     async function initOptimizationForSelected() {
         try {
             await fileApiService.optimize(filePath, selectedFiles)
@@ -121,7 +126,8 @@ function FilesPage() {
                 imageMedias={imageFiles || []}
                 path={filePath}
                 selectedItems={selectedFiles}
-                actionOpen={(fileName) => openMedia(fileName)}
+                actionOpenSource={(fileName) => openMedia(fileName)}
+                actionOpenOptimized={(fileName) => openMediaOptimized(fileName)}
             />
             <FilesList
                 files={content?.files || []}
