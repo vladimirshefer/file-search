@@ -21,13 +21,33 @@ function FilesPage() {
     let navigate = useNavigate();
     let [selectedFiles, setSelectedFiles] = useState<string[]>([])
     let fileApiService = new FileApiService()
+    let [isLoading, setIsLoading] = useState<boolean>(true);
+
+
+    async function init() {
+        setIsLoading(true);
+        setPathSegments(filePath.split("/").filter(it => !!it))
+        try {
+            await loadContent(filePath)
+            await loadStats(filePath)
+            await loadReadme(filePath)
+        } catch (e) {
+            console.log(e);
+        }
+        setIsLoading(false);
+
+        return function cleanup() {
+            setSelectedFiles([]);
+            setContent(null);
+            setStats({})
+            setReadme("")
+        }
+    }
 
     useEffect(() => {
-        setPathSegments(filePath.split("/").filter(it => !!it))
-        loadContent(filePath);
-        loadStats(filePath)
-        loadReadme(filePath)
+        init();
     }, [filePath])
+
 
     async function loadContent(filePath: string) {
         setContent(await fileApiService.loadContent(filePath))
@@ -69,6 +89,8 @@ function FilesPage() {
             alert("Could not init optimization")
         }
     }
+
+    if (isLoading) return <span>LOADING...</span>
 
     return <div>
         <div className="toolbox flex">
