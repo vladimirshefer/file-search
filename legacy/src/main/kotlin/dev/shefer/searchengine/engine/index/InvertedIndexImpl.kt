@@ -7,18 +7,18 @@ import dev.shefer.searchengine.engine.dto.FileLocation
 import dev.shefer.searchengine.engine.dto.LineLocation
 import dev.shefer.searchengine.engine.dto.Token
 import dev.shefer.searchengine.engine.dto.TokenLocation
-import java.io.IOException
 import java.nio.file.Path
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantReadWriteLock
+import kotlin.io.path.createDirectories
 import kotlin.io.path.createFile
 import kotlin.io.path.deleteIfExists
-import kotlin.io.path.notExists
+import kotlin.io.path.exists
 
-private typealias LineIndex = MutableMap<Int, MutableSet<Int>>
-private typealias FileIndex = MutableMap<String, LineIndex>
-private typealias DirectoryIndex = MutableMap<String, FileIndex>
-private typealias TokenIndex = MutableMap<String, DirectoryIndex>
+internal typealias LineIndex = MutableMap<Int, MutableSet<Int>>
+internal typealias FileIndex = MutableMap<String, LineIndex>
+internal typealias DirectoryIndex = MutableMap<String, FileIndex>
+internal typealias TokenIndex = MutableMap<String, DirectoryIndex>
 
 /**
  * Inverted index for text tokens.
@@ -77,6 +77,7 @@ class InvertedIndexImpl(
     override fun save() {
         writeLock {
             dataFile.deleteIfExists()
+            dataFile.parent.createDirectories()
             dataFile.createFile()
             OBJECT_MAPPER.writeValue(dataFile.toFile(), index)
         }
@@ -84,10 +85,9 @@ class InvertedIndexImpl(
 
     override fun load() {
         writeLock {
-            if (dataFile.notExists()) {
-                throw IOException("No such file $dataFile")
+            if (dataFile.exists()) {
+                index = OBJECT_MAPPER.readValue(dataFile.toFile(), INDEX_DATA_TYPE_REFERENCE)
             }
-            index = OBJECT_MAPPER.readValue(dataFile.toFile(), INDEX_DATA_TYPE_REFERENCE)
         }
     }
 
