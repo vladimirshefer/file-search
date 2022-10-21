@@ -95,6 +95,12 @@ function FilesPage() {
         }
     }
 
+    function deleteSelected() {
+        alert(`TODO delete ${selectedFiles}`)
+        return null;
+        // return fileApiService.delete();
+    }
+
     if (isLoading) return <span>LOADING...</span>
 
     return <div>
@@ -108,8 +114,16 @@ function FilesPage() {
                     className={"toolbox_item"}
                     onClick={initOptimizationForSelected}
                     title={"Optimize"}
-                >Optimize</button>
-                <button className={"toolbox_item"} title={"Delete"}>Delete</button>
+                >
+                    Optimize
+                </button>
+                <button
+                    className={"toolbox_item"}
+                    title={"Delete"}
+                    onClick={deleteSelected}
+                >
+                    Delete
+                </button>
             </div>
         </div>
         <Readme readme={readme}/>
