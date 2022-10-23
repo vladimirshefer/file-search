@@ -7,6 +7,8 @@ import dev.shefer.searchengine.optimize.dto.MediaInfo
 import dev.shefer.searchengine.optimize.dto.MediaStatus
 import dev.shefer.searchengine.util.FileUtil
 import org.slf4j.LoggerFactory
+import java.io.FileNotFoundException
+import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
@@ -50,7 +52,7 @@ class MediaOptimizationManager(
         val before = System.currentTimeMillis()
         val result = action()
         val after = System.currentTimeMillis()
-        println(">>> Timer $name ${after - before}")
+        LOG.info("Timer $name ${after - before}")
         return result
     }
 
@@ -159,6 +161,26 @@ class MediaOptimizationManager(
             )
         }
         LOG.info("End optimizing $path")
+    }
+
+    /**
+     * @param path relative unsafe path.
+     */
+    fun find(rootName: String, path: Path): Path {
+        if (rootName != "optimized") {
+            return sourceMediaSubtree.resolve(path)
+        }
+
+        val exactMatch = optimizedMediaSubtree.resolve(path)
+        if (exactMatch.exists()) {
+            return exactMatch
+        }
+
+        return Files
+            .list(exactMatch.parent)
+            .filter { it.fileName.startsWith(path.fileName) }
+            .findAny()
+            .orElseThrow { FileNotFoundException("No optimized file for path $path") }
     }
 
 }

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react'
-import {useNavigate, useParams} from "react-router-dom";
+import {useNavigate, useParams, useSearchParams} from "react-router-dom";
 import "styles/FilesPage.css"
 import "components/toolbox/Toolbox.css"
 import ConversionUtils from "utils/ConversionUtils";
@@ -11,6 +11,8 @@ import {Readme} from "components/files/Readme";
 import FilesList from "components/FilesPage/FilesList/FilesList";
 import FileApiService from "lib/service/FileApiService";
 import DragArea from "components/drag/DragArea";
+import Sidebar from "components/modal/Sidebar";
+import ImageView from "components/FilesPage/ImageView/ImageView";
 
 function FilesPage() {
     let [content, setContent] = useState<MediaDirectoryInfo | null>(null);
@@ -22,7 +24,7 @@ function FilesPage() {
     let [selectedFiles, setSelectedFiles] = useState<string[]>([])
     let fileApiService = new FileApiService()
     let [isLoading, setIsLoading] = useState<boolean>(true);
-
+    let [searchParams, setSearchParams] = useSearchParams()
 
     async function init() {
         setIsLoading(true);
@@ -48,6 +50,9 @@ function FilesPage() {
         init();
     }, [filePath])
 
+    let openedMedia: string | null = null;
+    let openedMediaCandidate = searchParams.get("open");
+    if (!!openedMediaCandidate) openedMedia = openedMediaCandidate
 
     async function loadContent(filePath: string) {
         setContent(await fileApiService.loadContent(filePath))
@@ -78,13 +83,13 @@ function FilesPage() {
     }
 
     function openMedia(fileName: string) {
-        let url = "/api/files/show/?path=" + filePath + "/" + fileName;
-        window.open(url, '_blank')?.focus()
+        setSearchParams({...searchParams, open: fileName})
     }
 
-    function openMediaOptimized(fileName: string): void {
-        alert(`Going to open ${fileName}`)
-        return;
+    function closeMedia() {
+        let newParams = {...searchParams} as any;
+        delete newParams.open
+        setSearchParams(newParams)
     }
 
     async function initOptimizationForSelected() {
@@ -104,6 +109,18 @@ function FilesPage() {
     if (isLoading) return <span>LOADING...</span>
 
     return <div>
+        {(!!openedMedia) ? (
+            <Sidebar
+                isVisible={!!openedMedia}
+                actionClose={() => closeMedia()}
+            >
+                <ImageView
+                    image1Url={"/api/files/show/?path=" + filePath + "/" + openedMedia}
+                    image2Url={"/api/files/show/?rootName=optimized&path=" + filePath + "/" + openedMedia}
+                />
+            </Sidebar>
+        ) : null
+        }
         <div className="toolbox flex">
             <Breadcrumbs
                 names={["/", ...pathSegments]}
@@ -140,8 +157,7 @@ function FilesPage() {
                 imageMedias={imageFiles || []}
                 path={filePath}
                 selectedItems={selectedFiles}
-                actionOpenSource={(fileName) => openMedia(fileName)}
-                actionOpenOptimized={(fileName) => openMediaOptimized(fileName)}
+                actionOpen={(fileName) => openMedia(fileName)}
             />
             <FilesList
                 files={content?.files || []}

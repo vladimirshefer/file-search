@@ -1,0 +1,21 @@
+.sidebar {
+    position: fixed;
+    @apply bg-white;
+    z-index: 50;
+}
+
+.sidebar__right {
+    height: 100vh;
+    right: 0;
+    top: 0;
+}
+
+.sidebar_background {
+    z-index: 49;
+    position: fixed;
+    height: 100vh;
+    right: 0;
+    top: 0;
+    width: 100vw;
+    background-color: rgba(0,0,0,0.5);
+}

@@ -10,19 +10,17 @@ export default function MediaCard(
         path,
         status,
         isSelected,
-        actionOpenSource = () => undefined,
-        actionOpenOptimized = () => undefined,
+        actionOpen = () => undefined,
         actionDeleteSource = () => undefined,
         actionDeleteOptimized = () => undefined,
     }: {
         name: string,
         path: string,
         status: MediaStatus,
-        isSelected: boolean
-        actionOpenSource?: () => void
-        actionOpenOptimized?: () => void
-        actionDeleteSource?: () => void
-        actionDeleteOptimized?: () => void
+        isSelected: boolean,
+        actionOpen?: () => void,
+        actionDeleteSource?: () => void,
+        actionDeleteOptimized?: () => void,
     }) {
 
     let [isOptionsOpened, setOptionsOpened] = useState<boolean>(false)
@@ -30,7 +28,7 @@ export default function MediaCard(
     return (<>
             <li className={`media-card ${isSelected ? "media-card__selected" : ""}`}
                 title={name}
-                onDoubleClick={actionOpenSource}
+                onDoubleClick={actionOpen}
                 data-selection-id={name} // used for drag-select.
                 key={name}
             >
@@ -71,8 +69,7 @@ export default function MediaCard(
                      }}
                 >
                     <ul>
-                        <li onClick={actionOpenSource}>Open source</li>
-                        <li onClick={actionOpenOptimized}>Open optimized</li>
+                        <li onClick={actionOpen}>Open</li>
                         <li onClick={actionDeleteSource}>Delete source</li>
                         <li onClick={actionDeleteOptimized}>Delete optimized</li>
                     </ul>

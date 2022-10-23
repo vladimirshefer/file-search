@@ -34,8 +34,8 @@ class FileSystemService(
         return Files.readString(resolve(path))
     }
 
-    fun showFileContent(path: String): ResponseEntity<ByteArray> {
-        val path = resolve(path)
+    fun showFileContent(path: String, rootName: String): ResponseEntity<ByteArray> {
+        val path = mediaOptimizationManager.find(rootName, Path.of(path))
         val content = Files.readAllBytes(path)
         val contentType = Files.probeContentType(path) ?: "text/plain"
         val mimeType = MimeType.valueOf(contentType)

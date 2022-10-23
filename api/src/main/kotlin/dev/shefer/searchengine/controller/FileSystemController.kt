@@ -45,9 +45,11 @@ class FileSystemController(
     @GetMapping("/show")
     fun showFileContent(
         @RequestParam(required = false, defaultValue = "")
-        path: String
+        path: String,
+        @RequestParam(required = false, defaultValue = "source")
+        rootName: String
     ): ResponseEntity<ByteArray> {
-        return fileSystemService.showFileContent(path)
+        return fileSystemService.showFileContent(path, rootName)
     }
 
     @GetMapping("/stats")
