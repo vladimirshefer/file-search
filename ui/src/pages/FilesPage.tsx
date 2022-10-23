@@ -163,6 +163,7 @@ function FilesPage() {
                 files={content?.files || []}
                 root={filePath}
                 filesSelected={selectedFiles}
+                actionOpen={(filename) => openMedia(filename)}
             />
         </DragArea>
     </div>

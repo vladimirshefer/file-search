@@ -9,10 +9,12 @@ export default function FilesList(
         files,
         root,
         filesSelected = [],
+        actionOpen = (_) => undefined
     }: {
         files: MediaInfo[],
         root: string,
         filesSelected?: string[],
+        actionOpen: (filename: string) => void,
     }
 ) {
 
@@ -35,6 +37,7 @@ export default function FilesList(
                         editLink={editLink}
                         openLink={openLink}
                         isSelected={filesSelected.includes(file.displayName)}
+                        actionOpen={() => actionOpen(file.displayName)}
                     />;
                 }
             )}
@@ -51,18 +54,20 @@ function FileInfo(
         editLink,
         openLink,
         isSelected,
+        actionOpen = () => undefined,
     }: {
         displayName: string,
         secondaryName: string | null,
         size: string,
         editLink: string,
         openLink: string,
-        isSelected: boolean
+        isSelected: boolean,
+        actionOpen: () => void,
     }
 ) {
     return <li
         key={displayName}
-        className={`file-info drag-selectable ${isSelected?"file-info__selected":""}`}
+        className={`file-info drag-selectable ${isSelected ? "file-info__selected" : ""}`}
         data-selection-id={displayName}
     >
             <span className={"file-info_name"}>
@@ -90,7 +95,12 @@ function FileInfo(
             target={"_blank"}
             className={"file-info_button"}
         >
-            <button type={"button"}>Open</button>
+            <button type={"button"}>Open source</button>
         </a>
+        <button type={"button"}
+                onClick={actionOpen}
+        >
+            Open
+        </button>
     </li>;
 }
