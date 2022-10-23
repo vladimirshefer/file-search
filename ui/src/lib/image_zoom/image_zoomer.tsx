@@ -49,6 +49,9 @@ export class SingleImageZoomer {
     cx!: number
     cy!: number
 
+    isRunning: boolean = true
+    id = Math.floor(Math.random() * 100000)
+
     position: { x: number, y: number } = {x: 0.5, y: 0.5};
 
     constructor(
@@ -56,15 +59,38 @@ export class SingleImageZoomer {
         viewId: string,
         positionListener: (x: number, y: number) => void
     ) {
+        if (!imageId) throw "Zoomer: imageId is not set"
+        if (!viewId) throw `Zoomer: viewId is not set for image ${imageId}`
         this.imageId = imageId;
         this.viewId = viewId;
         this.positionListener = positionListener
     }
 
-    mount() {
-        console.log("mount")
+    mount = () => {
+        console.log(`Zoomer ${this.id} ${this.imageId}: mount init`)
+        this.isRunning = true;
         this.image = document.getElementById(this.imageId) as HTMLImageElement
         this.view = document.getElementById(this.viewId) as HTMLElement
+        this.waitAndMount()
+    };
+
+    private waitAndMount = () => {
+        if (!this.isRunning) {
+            console.log(`Zoomer ${this.id} ${this.imageId}: is unmounted. Mount cancelled.`)
+            return
+        }
+        console.log(`Zoomer ${this.id} ${this.imageId}: Trying to mount if loaded`)
+        if (!this.imageId) console.log(this)
+        if (this.image?.complete) {
+            this.doMount()
+        } else {
+            console.log(`Zoomer ${this.id} ${this.imageId}: Image is not ready... waiting...`)
+            setTimeout(this.waitAndMount, 300)
+        }
+    }
+
+    private doMount = () => {
+        // while (!this.image.complete) {}
         this.lens = this.createLensForImage();
         this.cx = this.view.offsetWidth / this.lens.offsetWidth;
         this.cy = this.view.offsetHeight / this.lens.offsetHeight;
@@ -79,7 +105,7 @@ export class SingleImageZoomer {
         /*and also for touch screens:*/
         this.lens.addEventListener("touchmove", this.moveLens);
         this.image.addEventListener("touchmove", this.moveLens);
-        console.log(`image size : ${this.image.width} ${this.image.height}`)
+        console.debug(`Zoomer ${this.id} ${this.imageId}: Image size : ${this.image.width} ${this.image.height}`)
     }
 
     private createLensForImage() {
@@ -97,7 +123,7 @@ export class SingleImageZoomer {
         e.preventDefault();
         let mouseCoords = getMouseCoords(e);
         this.calculateRelativeCursorPosition(mouseCoords)
-        console.log("position sending " + this.position.x + " " + this.position.y)
+        console.debug("position sending " + this.position.x + " " + this.position.y)
         this.positionListener(this.position.x, this.position.y)
     };
 
@@ -109,7 +135,7 @@ export class SingleImageZoomer {
         let y: number = mouseCoords.y - window.scrollY - imgBorderCoordinates.top;
         x = bound(0, x, this.image.width);
         y = bound(0, y, this.image.height);
-        console.log({x, y})
+        console.debug({x, y})
         let imgW = imgBorderCoordinates.width;
         let imgh = imgBorderCoordinates.height;
         this.position = {x: x / imgW, y: y / imgh};
@@ -123,17 +149,17 @@ export class SingleImageZoomer {
         lensY = bound(0, lensY, this.image.offsetHeight - this.lens.offsetHeight)
         this.lens.style.left = lensX + "px";
         this.lens.style.top = lensY + "px";
-        console.log(`lens position ${x} ${y}}`);
+        console.debug(`lens position ${x} ${y}}`);
     }
 
     private updateViewBackground() {
         let {x, y} = this.position
-        let backgroundX = x * this.image.width  * this.cx - (this.view.offsetWidth/2);
-        let backgroundY = y * this.image.height * this.cy - (this.view.offsetHeight/2);
-        backgroundX = bound(0, backgroundX, this.image.width  * this.cx - (this.view.offsetWidth))
-        backgroundY = bound(0, backgroundY, this.image.height  * this.cy - (this.view.offsetHeight))
+        let backgroundX = x * this.image.width * this.cx - (this.view.offsetWidth / 2);
+        let backgroundY = y * this.image.height * this.cy - (this.view.offsetHeight / 2);
+        backgroundX = bound(0, backgroundX, this.image.width * this.cx - (this.view.offsetWidth))
+        backgroundY = bound(0, backgroundY, this.image.height * this.cy - (this.view.offsetHeight))
         let backgroundPosition = "-" + backgroundX + "px -" + backgroundY + "px";
-        console.log(`background position:${backgroundPosition}`)
+        console.debug(`background position:${backgroundPosition}`)
         this.view.style.backgroundPosition = backgroundPosition;
     }
 
@@ -143,15 +169,18 @@ export class SingleImageZoomer {
         this.updateViewBackground()
     }
 
-    unmount() {
-        this.lens.removeEventListener("mousemove", this.moveLens);
-        this.image.removeEventListener("mousemove", this.moveLens);
+    unmount = () => {
+        console.log(`Zoomer ${this.id} ${this.imageId}: unmount`)
+        this.isRunning = false;
+
+        this.lens?.removeEventListener("mousemove", this.moveLens);
+        this.image?.removeEventListener("mousemove", this.moveLens);
 
         /*and also for touch screens:*/
-        this.lens.removeEventListener("touchmove", this.moveLens);
-        this.image.removeEventListener("touchmove", this.moveLens);
-        this.lens.remove()
-    }
+        this.lens?.removeEventListener("touchmove", this.moveLens);
+        this.image?.removeEventListener("touchmove", this.moveLens);
+        this.lens?.remove()
+    };
 }
 
 /**
