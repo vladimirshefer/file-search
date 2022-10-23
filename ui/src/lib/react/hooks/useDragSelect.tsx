@@ -23,10 +23,11 @@ export default function useDragSelect(
     function enableSelection(): () => void {
         try {
             let dragselect = new DragSelect({
-                selectables: document.getElementsByClassName(selectablesClassName),
-                area: document.getElementsByClassName(areaClassName)[0],
+                selectables: Array.from(document.getElementsByClassName(selectablesClassName)) as Array<HTMLElement>,
+                area: document.getElementsByClassName(areaClassName)[0] as HTMLElement,
                 draggability: false,
-            } as unknown as Settings);
+                immediateDrag: false,
+            });
 
             let itemsSelected = function () {
                 let selectedItems = dragselect.getSelection()
