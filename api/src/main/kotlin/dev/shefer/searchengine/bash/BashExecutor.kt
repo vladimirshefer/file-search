@@ -92,7 +92,7 @@ class BashExecutor {
         private fun executeForFile(path: Path, command: List<String>): String {
             assertFileExists(path)
 
-            return execute(path.parent, *command.toTypedArray())
+            return execute(path.parent, *command.toTypedArray(), path.fileName.toString())
         }
 
         private fun execute(workingDirectory: Path, vararg command: String): String {
