@@ -39,20 +39,20 @@ export default class MultipleImageZoomer {
  * element as the magnifying glass for this image.
  */
 export class SingleImageZoomer {
-    imageId: string
-    viewId: string
-    positionListener: (x: number, y: number) => void
-    lensId!: string
-    image!: HTMLImageElement
-    view!: HTMLElement
-    lens!: HTMLElement
-    cx!: number
-    cy!: number
+    private readonly imageId: string
+    private readonly viewId: string
+    private lensId!: string
+    private image!: HTMLImageElement
+    private view!: HTMLElement
+    private lens!: HTMLElement
+    private zoomRate: number = 3
 
-    isRunning: boolean = true
-    id = Math.floor(Math.random() * 100000)
+    private readonly positionListener: (x: number, y: number) => void
 
-    position: { x: number, y: number } = {x: 0.5, y: 0.5};
+    private isRunning: boolean = true
+    private id = Math.floor(Math.random() * 100000)
+
+    private position: { x: number, y: number } = {x: 0.5, y: 0.5};
 
     constructor(
         imageId: string,
@@ -66,7 +66,7 @@ export class SingleImageZoomer {
         this.positionListener = positionListener
     }
 
-    mount = () => {
+    readonly mount = () => {
         console.log(`Zoomer ${this.id} ${this.imageId}: mount init`)
         this.isRunning = true;
         this.image = document.getElementById(this.imageId) as HTMLImageElement
@@ -90,13 +90,10 @@ export class SingleImageZoomer {
     }
 
     private doMount = () => {
-        // while (!this.image.complete) {}
         this.lens = this.createLensForImage();
-        this.cx = this.view.offsetWidth / this.lens.offsetWidth;
-        this.cy = this.view.offsetHeight / this.lens.offsetHeight;
         this.view.style.backgroundImage = "url('" + this.image.src + "')";
-        let viewBackgroundWidth = this.image.width * this.cx;
-        let viewBackgroundHeight = this.image.height * this.cy;
+        let viewBackgroundWidth = this.image.width * this.zoomRate;
+        let viewBackgroundHeight = this.image.height * this.zoomRate;
         this.view.style.backgroundSize = viewBackgroundWidth + "px " + viewBackgroundHeight + "px";
 
         this.lens.addEventListener("mousemove", this.moveLens);
@@ -113,13 +110,15 @@ export class SingleImageZoomer {
         let lens = document.createElement("DIV");
         lens.setAttribute("class", "img-zoom-lens");
         lens.setAttribute("id", this.lensId || this.imageId + "_lens")
+        lens.style.width = this.view.offsetWidth / this.zoomRate + "px"
+        lens.style.height = this.view.offsetHeight / this.zoomRate + "px"
 
         /*insert lens:*/
         this.image.parentElement!!.insertBefore(lens, this.image);
         return lens;
     }
 
-    moveLens = (e: MouseEvent | TouchEvent) => {
+    private moveLens = (e: MouseEvent | TouchEvent) => {
         e.preventDefault();
         let mouseCoords = getMouseCoords(e);
         this.calculateRelativeCursorPosition(mouseCoords)
@@ -154,10 +153,10 @@ export class SingleImageZoomer {
 
     private updateViewBackground() {
         let {x, y} = this.position
-        let backgroundX = x * this.image.width * this.cx - (this.view.offsetWidth / 2);
-        let backgroundY = y * this.image.height * this.cy - (this.view.offsetHeight / 2);
-        backgroundX = bound(0, backgroundX, this.image.width * this.cx - (this.view.offsetWidth))
-        backgroundY = bound(0, backgroundY, this.image.height * this.cy - (this.view.offsetHeight))
+        let backgroundX = x * this.image.width * this.zoomRate - (this.view.offsetWidth / 2);
+        let backgroundY = y * this.image.height * this.zoomRate - (this.view.offsetHeight / 2);
+        backgroundX = bound(0, backgroundX, this.image.width * this.zoomRate - (this.view.offsetWidth))
+        backgroundY = bound(0, backgroundY, this.image.height * this.zoomRate - (this.view.offsetHeight))
         let backgroundPosition = "-" + backgroundX + "px -" + backgroundY + "px";
         console.debug(`background position:${backgroundPosition}`)
         this.view.style.backgroundPosition = backgroundPosition;
@@ -169,7 +168,16 @@ export class SingleImageZoomer {
         this.updateViewBackground()
     }
 
-    unmount = () => {
+    /**
+     *
+     * @param zoomRate >=1.
+     */
+    setZoomRate(zoomRate: number) {
+        this.zoomRate = zoomRate
+
+    }
+
+    readonly unmount = () => {
         console.log(`Zoomer ${this.id} ${this.imageId}: unmount`)
         this.isRunning = false;
 
