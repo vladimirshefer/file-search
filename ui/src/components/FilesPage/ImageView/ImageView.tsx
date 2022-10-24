@@ -1,4 +1,4 @@
-import {useEffect, useId} from "react";
+import {useEffect, useId, useState} from "react";
 import "./ImageView.css"
 import MultipleImageZoomer from "lib/image_zoom/image_zoomer";
 
@@ -14,6 +14,7 @@ export default function ImageView(
     let optimizedId = useId();
     let zoomSourceId = useId();
     let zoomOptimizedId = useId();
+    let [imageZoomer, setImageZoomer] = useState<MultipleImageZoomer>()
 
     let sourceIdR = `source${sourceId}`;
     let optimizedIdR = `optimized${optimizedId}`;
@@ -25,6 +26,7 @@ export default function ImageView(
             {imageId: sourceIdR, viewId: zoomSourceIdR},
             {imageId: optimizedIdR, viewId: zoomOptimizedIdR},
         ]);
+        setImageZoomer(imageZoomer)
         imageZoomer.mount()
         return () => {
             imageZoomer.unmount();
@@ -41,7 +43,13 @@ export default function ImageView(
     }
 
     return <>
-        <div>
+        <div className={"image-view"}
+             onWheel={(e) => {
+                 let zoomIn = e.deltaY < 0;
+                 let zoomStep = zoomIn ? 1.2 : 1 / 1.2;
+                 imageZoomer?.setZoomRate(imageZoomer?.getZoomRate() * zoomStep)
+                 return;
+             }}>
             <div className={"flex"}>
                 <div className={"img-zoom-container"}>
                     {renderImage(sourceIdR, image1Url)}

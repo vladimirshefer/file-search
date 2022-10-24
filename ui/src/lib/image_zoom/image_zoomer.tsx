@@ -14,6 +14,16 @@ export default class MultipleImageZoomer {
         })
     }
 
+    getZoomRate(): number {
+        return this.zoomers[0].getZoomRate()
+    }
+
+    setZoomRate(zoomRate: number) {
+        this.zoomers.forEach(zoomer => {
+            zoomer.setZoomRate(zoomRate)
+        })
+    }
+
     constructor(elements: { imageId: string, viewId: string, controlId?: string }[] = []) {
         this.zoomers = elements.map(element =>
             new SingleImageZoomer(
@@ -50,9 +60,23 @@ export class SingleImageZoomer {
     private readonly positionListener: (x: number, y: number) => void
 
     private isRunning: boolean = true
-    private id = Math.floor(Math.random() * 100000)
+    private readonly id = Math.floor(Math.random() * 100000)
 
     private position: { x: number, y: number } = {x: 0.5, y: 0.5};
+
+
+    /**
+     * @param zoomRate >=1.
+     */
+    setZoomRate = (zoomRate: number) => {
+        this.zoomRate = zoomRate
+        this.updateLensSize();
+        this.updateLensPosition()
+        this.updateViewBackgroundSize()
+        this.updateViewBackgroundPosition()
+    };
+
+    getZoomRate: () => number = () => this.zoomRate;
 
     constructor(
         imageId: string,
@@ -74,6 +98,19 @@ export class SingleImageZoomer {
         this.waitAndMount()
     };
 
+    readonly unmount = () => {
+        console.log(`Zoomer ${this.id} ${this.imageId}: unmount`)
+        this.isRunning = false;
+
+        this.lens?.removeEventListener("mousemove", this.moveLens);
+        this.image?.removeEventListener("mousemove", this.moveLens);
+
+        /*and also for touch screens:*/
+        this.lens?.removeEventListener("touchmove", this.moveLens);
+        this.image?.removeEventListener("touchmove", this.moveLens);
+        this.lens?.remove()
+    };
+
     private waitAndMount = () => {
         if (!this.isRunning) {
             console.log(`Zoomer ${this.id} ${this.imageId}: is unmounted. Mount cancelled.`)
@@ -92,9 +129,7 @@ export class SingleImageZoomer {
     private doMount = () => {
         this.lens = this.createLensForImage();
         this.view.style.backgroundImage = "url('" + this.image.src + "')";
-        let viewBackgroundWidth = this.image.width * this.zoomRate;
-        let viewBackgroundHeight = this.image.height * this.zoomRate;
-        this.view.style.backgroundSize = viewBackgroundWidth + "px " + viewBackgroundHeight + "px";
+        this.updateViewBackgroundSize();
 
         this.lens.addEventListener("mousemove", this.moveLens);
         this.image.addEventListener("mousemove", this.moveLens);
@@ -102,7 +137,6 @@ export class SingleImageZoomer {
         /*and also for touch screens:*/
         this.lens.addEventListener("touchmove", this.moveLens);
         this.image.addEventListener("touchmove", this.moveLens);
-        console.debug(`Zoomer ${this.id} ${this.imageId}: Image size : ${this.image.width} ${this.image.height}`)
     }
 
     private createLensForImage() {
@@ -122,7 +156,6 @@ export class SingleImageZoomer {
         e.preventDefault();
         let mouseCoords = getMouseCoords(e);
         this.calculateRelativeCursorPosition(mouseCoords)
-        console.debug("position sending " + this.position.x + " " + this.position.y)
         this.positionListener(this.position.x, this.position.y)
     };
 
@@ -134,13 +167,12 @@ export class SingleImageZoomer {
         let y: number = mouseCoords.y - window.scrollY - imgBorderCoordinates.top;
         x = bound(0, x, this.image.width);
         y = bound(0, y, this.image.height);
-        console.debug({x, y})
         let imgW = imgBorderCoordinates.width;
         let imgh = imgBorderCoordinates.height;
         this.position = {x: x / imgW, y: y / imgh};
     }
 
-    private updateLens() {
+    private updateLensPosition = () => {
         let {x, y} = this.position
         let lensX = this.image.offsetWidth * x - this.lens.offsetWidth / 2
         let lensY = this.image.offsetHeight * y - this.lens.offsetHeight / 2
@@ -148,47 +180,37 @@ export class SingleImageZoomer {
         lensY = bound(0, lensY, this.image.offsetHeight - this.lens.offsetHeight)
         this.lens.style.left = lensX + "px";
         this.lens.style.top = lensY + "px";
-        console.debug(`lens position ${x} ${y}}`);
+    };
+
+    private updateLensSize() {
+        let lensWidth = this.view.offsetWidth / this.zoomRate;
+        let lensHeight = this.view.offsetHeight / this.zoomRate;
+        this.lens.style.width = lensWidth + "px"
+        this.lens.style.height = lensHeight + "px"
     }
 
-    private updateViewBackground() {
+    private updateViewBackgroundPosition = () => {
         let {x, y} = this.position
         let backgroundX = x * this.image.width * this.zoomRate - (this.view.offsetWidth / 2);
         let backgroundY = y * this.image.height * this.zoomRate - (this.view.offsetHeight / 2);
         backgroundX = bound(0, backgroundX, this.image.width * this.zoomRate - (this.view.offsetWidth))
         backgroundY = bound(0, backgroundY, this.image.height * this.zoomRate - (this.view.offsetHeight))
         let backgroundPosition = "-" + backgroundX + "px -" + backgroundY + "px";
-        console.debug(`background position:${backgroundPosition}`)
         this.view.style.backgroundPosition = backgroundPosition;
-    }
-
-    setPositionPercent(x: number, y: number) {
-        this.position = {x, y};
-        this.updateLens()
-        this.updateViewBackground()
-    }
-
-    /**
-     *
-     * @param zoomRate >=1.
-     */
-    setZoomRate(zoomRate: number) {
-        this.zoomRate = zoomRate
-
-    }
-
-    readonly unmount = () => {
-        console.log(`Zoomer ${this.id} ${this.imageId}: unmount`)
-        this.isRunning = false;
-
-        this.lens?.removeEventListener("mousemove", this.moveLens);
-        this.image?.removeEventListener("mousemove", this.moveLens);
-
-        /*and also for touch screens:*/
-        this.lens?.removeEventListener("touchmove", this.moveLens);
-        this.image?.removeEventListener("touchmove", this.moveLens);
-        this.lens?.remove()
     };
+
+    private updateViewBackgroundSize = () => {
+        let viewBackgroundWidth = this.image.width * this.zoomRate;
+        let viewBackgroundHeight = this.image.height * this.zoomRate;
+        this.view.style.backgroundSize = viewBackgroundWidth + "px " + viewBackgroundHeight + "px";
+    };
+
+    setPositionPercent = (x: number, y: number) => {
+        this.position = {x, y};
+        this.updateLensPosition()
+        this.updateViewBackgroundPosition()
+    };
+
 }
 
 /**
