@@ -6,6 +6,7 @@ import org.springframework.util.FileSystemUtils
 import java.awt.Desktop
 import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.io.path.createDirectories
 import kotlin.random.Random
 
 @Component
@@ -37,6 +38,8 @@ class MediaOptimizer {
         withTempDirectory { workDir ->
             val workingFile = workDir.resolve("source").resolve(source.fileName)
             val resultFile = workDir.resolve("result").resolve(source.fileName)
+            workDir.resolve("source").createDirectories()
+            workDir.resolve("result").createDirectories()
             Files.copy(source, workingFile)
             val output = BashExecutor.toMp4WithQuality28(workingFile, resultFile)
 
