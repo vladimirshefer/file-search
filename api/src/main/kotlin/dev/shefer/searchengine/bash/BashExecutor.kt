@@ -46,6 +46,24 @@ class BashExecutor {
                 .also { LOG.info(it) }
         }
 
+        fun toMp4WithQuality28(source: Path, target: Path): String {
+            assertFileExists(source)
+            return execute(
+                source.parent,
+                "ffmpeg",
+                "-n",
+                "-i",
+                source.toString(),
+                "-c:v",
+                "libx265",
+                "-crf",
+                "28",
+                "-c:a",
+                "copy",
+                target.toString()
+            )
+        }
+
         fun videoResolution(video: Path): Resolution {
             val output: String = executeForFile(
                 video,

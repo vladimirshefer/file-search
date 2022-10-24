@@ -14,7 +14,8 @@ class MediaOptimizer {
         withTempDirectory { workDir ->
             val workingFile = workDir.resolve(source.fileName)
             Files.copy(source, workingFile)
-            BashExecutor.toJpg(workingFile)
+            var output = ""
+            output += BashExecutor.toJpg(workingFile)
 
             val orElse =
                 Files.list(workDir)
@@ -22,15 +23,31 @@ class MediaOptimizer {
                     .findAny()
                     .orElse(workingFile)
 
-            BashExecutor.optimizeJpeg(orElse)
-            BashExecutor.resizeDown(orElse, BashExecutor.FULLHD_PIXELS)
-            BashExecutor.optimizeJpegToMaxSize(orElse, 500)
+            output += BashExecutor.optimizeJpeg(orElse)
+            output += "\n"
+            output += BashExecutor.resizeDown(orElse, BashExecutor.FULLHD_PIXELS)
+            output += BashExecutor.optimizeJpegToMaxSize(orElse, 500)
             Files.copy(orElse, target)
+
+            output
+        }
+    }
+
+    fun optimizeVideo(source: Path, target: Path) {
+        withTempDirectory { workDir ->
+            val workingFile = workDir.resolve("source").resolve(source.fileName)
+            val resultFile = workDir.resolve("result").resolve(source.fileName)
+            Files.copy(source, workingFile)
+            val output = BashExecutor.toMp4WithQuality28(workingFile, resultFile)
+
+            Files.copy(resultFile, target)
+
+            output
         }
     }
 
     companion object {
-        fun withTempDirectory(action: (dir: Path) -> Unit) {
+        fun <T : Any?> withTempDirectory(action: (dir: Path) -> T): T {
             val OPEN_DIRECTORY_ON_START = false
 
             val dir: Path = Files.createTempDirectory(Random.nextInt().toString())
@@ -38,7 +55,7 @@ class MediaOptimizer {
                 if (OPEN_DIRECTORY_ON_START) {
                     Desktop.getDesktop().open(dir.toFile())
                 }
-                action(dir)
+                return action(dir)
             } finally {
                 if (dir.toFile().exists()) {
                     FileSystemUtils.deleteRecursively(dir)

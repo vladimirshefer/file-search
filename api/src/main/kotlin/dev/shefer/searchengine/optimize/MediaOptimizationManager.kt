@@ -160,11 +160,18 @@ class MediaOptimizationManager(
                 optimizedMedia
             )
         }
+        if (path.extension.lowercase() in listOf("mp4", "avi", "flv")) {
+            mediaOptimizer.optimizeVideo(
+                sourceFile,
+                optimizedMedia
+            )
+        }
         LOG.info("End optimizing $path")
     }
 
     /**
      * @param path relative unsafe path.
+     * @return absolute path
      */
     fun find(rootName: String, path: Path): Path {
         if (rootName != "optimized") {

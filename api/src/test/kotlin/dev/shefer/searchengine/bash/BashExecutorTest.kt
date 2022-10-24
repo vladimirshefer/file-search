@@ -77,6 +77,23 @@ class BashExecutorTest {
     }
 
     @Test
+    fun testToMp4WithQuality28__4K_30FPS() {
+        withTempDirectory { testDir ->
+            /* GIVEN */
+            placeTestFile(testDir, "4K_30FPS.mp4")
+
+            /* WHEN */
+            val sourceImg = testDir.resolve("4K_30FPS.mp4")
+            val targetVideo = testDir.resolve("4K_30FPS.mp4.crf28.mp4")
+            BashExecutor.toMp4WithQuality28(sourceImg, targetVideo)
+
+            /* THEN */
+            val expectedVideo = testFile("4K_30FPS.mp4.crf28.mp4")
+            assertFilesEquals(expectedVideo, targetVideo)
+        }
+    }
+
+    @Test
     fun testVideoResolution__FULLHD_60FPS() {
         withTempDirectory { testDir ->
             /* GIVEN */
