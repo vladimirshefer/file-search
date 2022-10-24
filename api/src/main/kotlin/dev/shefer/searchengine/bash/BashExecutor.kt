@@ -1,27 +1,49 @@
 package dev.shefer.searchengine.bash
 
 import dev.shefer.searchengine.bash.dto.Resolution
+import org.slf4j.LoggerFactory
 import java.io.FileNotFoundException
 import java.nio.file.Path
+import kotlin.io.path.exists
 
 class BashExecutor {
     companion object {
+
+        private val LOG = LoggerFactory.getLogger(BashExecutor::class.java);
+
         val FULLHD_PIXELS = 2073600
 
-        fun toJpg(image: Path) {
-            println(executeForFile(image, listOf("mogrify", "-format", "jpg")))
+        /**
+         * @param image absolute path to image
+         */
+        fun toJpg(image: Path): String {
+            return executeForFile(image, listOf("mogrify", "-monitor", "-format", "jpg"))
+                .also { LOG.info(it) }
         }
 
-        fun optimizeJpeg(image: Path) {
-            println(executeForFile(image, listOf("jpegoptim")))
+        /**
+         * @param image absolute path to image
+         */
+        fun optimizeJpeg(image: Path): String {
+            return executeForFile(image, listOf("jpegoptim"))
+                .also { LOG.info(it) }
         }
 
-        fun resizeDown(image: Path, pixelsLimit: Int) {
-            println(executeForFile(image, listOf("mogrify", "-resize", "$pixelsLimit@>")))
+        /**
+         * @param image absolute path to image
+         */
+        fun resizeDown(image: Path, pixelsLimit: Int): String {
+            return executeForFile(image, listOf("mogrify", "-monitor", "-resize", "$pixelsLimit@>"))
+                .also { LOG.info(it) }
         }
 
-        fun optimizeJpegToMaxSize(image: Path, maxSizeKb: Int) {
-            println(executeForFile(image, listOf("jpegoptim", "--size=${maxSizeKb}K")))
+        /**
+         * @param image absolute path to image
+         * @param maxSizeKb maximum size of output file.
+         */
+        fun optimizeJpegToMaxSize(image: Path, maxSizeKb: Int): String {
+            return executeForFile(image, listOf("jpegoptim", "--size=${maxSizeKb}K"))
+                .also { LOG.info(it) }
         }
 
         fun videoResolution(video: Path): Resolution {
@@ -35,6 +57,7 @@ class BashExecutor {
                     "-of", "csv=s=x:p=0"
                 )
             )
+                .also { LOG.info(it) }
 
             return Resolution(
                 output.substringBefore('x').toInt(),
@@ -43,7 +66,7 @@ class BashExecutor {
         }
 
         private fun assertFileExists(image: Path) {
-            if (image.toFile().exists().not()) {
+            if (!image.exists()) {
                 throw FileNotFoundException("No such file $image")
             }
         }
@@ -51,9 +74,17 @@ class BashExecutor {
         private fun executeForFile(path: Path, command: List<String>): String {
             assertFileExists(path)
 
+            return execute(path.parent, *command.toTypedArray())
+        }
+
+        private fun execute(workingDirectory: Path, vararg command: String): String {
+            if (!workingDirectory.exists()) {
+                throw FileNotFoundException("No such directory $workingDirectory")
+            }
+
             val process = ProcessBuilder()
-                .directory(path.parent.toFile())
-                .command(command + path.fileName.toString())
+                .directory(workingDirectory.toFile())
+                .command(*command)
                 .start()
 
             val statusCode = process.waitFor()
