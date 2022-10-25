@@ -49,6 +49,7 @@ class ActivatedBashProcess(
         } else {
             process.waitFor(timeoutMs, TimeUnit.MILLISECONDS)
         }
+        update()
     }
 
     override fun onComplete(action: (Process) -> Unit) {
@@ -63,7 +64,9 @@ class ActivatedBashProcess(
     override fun update() {
         synchronized(process) {
             status = process.processStatus()
-            statusCode = process.exitValue()
+            if (!process.isAlive) {
+                statusCode = process.exitValue()
+            }
             error.append(process.errorReader().readText())
             stdout.append(process.inputReader().readText())
         }
