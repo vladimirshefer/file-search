@@ -3,36 +3,51 @@ package dev.shefer.searchengine.bash.process
 import dev.shefer.searchengine.bash.process.BashProcess.Companion.ProcessStatus
 
 class PreparedBashProcess(
-    private val processBuilder: ProcessBuilder
+    private val processBuilder: () -> ProcessBuilder
 ) : BashProcess {
 
-    private val onCompleteList = ArrayList<(Process) -> Unit>()
+    constructor(processBuilder: ProcessBuilder) : this({ processBuilder })
 
+    private val onCompleteList = ArrayList<() -> Unit>()
+
+    @Volatile
     private var activatedBashProcess: ActivatedBashProcess? = null
+
+    @Volatile
+    var isCanceledBeforeStart = false
 
     override val errorOutput: String = activatedBashProcess?.errorOutput ?: ""
 
     override val output: String = activatedBashProcess?.output ?: ""
 
+
     override var status: ProcessStatus =
-        activatedBashProcess?.status ?: ProcessStatus.PENDING
+        activatedBashProcess?.status ?: if (isCanceledBeforeStart) ProcessStatus.CANCELED else ProcessStatus.PENDING
 
     override fun cancel() {
-        activatedBashProcess?.cancel()
+        synchronized(this) {
+            activatedBashProcess?.cancel()
+                ?: run { isCanceledBeforeStart = true }
+        }
     }
 
-    override fun start() = synchronized(this) {
+    override fun start(): BashProcess = synchronized(this) {
         activatedBashProcess?.also { return it }
 
-        ActivatedBashProcess(processBuilder.start())
+        if (isCanceledBeforeStart) {
+            return this
+        }
+
+        ActivatedBashProcess(processBuilder().start())
             .also {
                 onCompleteList.forEach(it::onComplete)
+                activatedBashProcess = it
             }
     }
 
-    override fun join(timeoutMs: Long?): ActivatedBashProcess = start().join()
+    override fun join(timeoutMs: Long?): BashProcess = start().join()
 
-    override fun onComplete(action: (Process) -> Unit) = synchronized(this) {
+    override fun onComplete(action: () -> Unit) = synchronized(this) {
         val p = activatedBashProcess
         if (p != null) {
             p.onComplete(action)

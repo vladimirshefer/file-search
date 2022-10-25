@@ -5,6 +5,10 @@ import dev.shefer.searchengine.bash.process.BashProcess.Companion.ProcessStatus
 class BashProcessChain(
     private val chain: List<BashProcess>
 ) : BashProcess {
+
+    @Volatile
+    private var currentProcessIndex = -1;
+
     override val errorOutput: String
         get() = StringBuilder()
             .also { sb ->
@@ -24,22 +28,20 @@ class BashProcessChain(
             .toString()
 
     override val status: ProcessStatus
-        get() {
-            chain
-                .find { it.status in listOf(ProcessStatus.ERROR, ProcessStatus.CANCELED) }
-                ?.also { return it.status }
-
-            chain.find { it.status == ProcessStatus.IN_PROGRESS }
-                ?.also { return it.status }
-
-            chain.find { it.status == ProcessStatus.PENDING }
-                ?.also { return it.status }
-
-            return ProcessStatus.IN_PROGRESS
-        }
+        get() = if (currentProcessIndex == -1) ProcessStatus.PENDING else chain[currentProcessIndex].status
 
     override fun start(): BashProcess {
-        TODO("Not yet implemented")
+        synchronized(this) {
+            if (currentProcessIndex == -1) {
+                start(0)
+            }
+        }
+        return this
+    }
+
+    private fun start(index: Int) {
+        if (index !in chain.indices) return
+        chain[index].start().onComplete { start(index + 1) }
     }
 
     override fun cancel() {
@@ -50,8 +52,8 @@ class BashProcessChain(
         chain.forEach(BashProcess::join)
     }
 
-    override fun onComplete(action: (Process) -> Unit) {
-        TODO("Not yet implemented")
+    override fun onComplete(action: () -> Unit) {
+        chain.last().onComplete(action)
     }
 
     override fun update() {

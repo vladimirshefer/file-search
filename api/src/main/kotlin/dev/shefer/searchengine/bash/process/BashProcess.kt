@@ -2,6 +2,9 @@ package dev.shefer.searchengine.bash.process
 
 import dev.shefer.searchengine.bash.process.BashProcess.Companion.ProcessStatus
 
+/**
+ * Wrapper around java Process and ProcessBuilder, which allows to combine and organize multiple Processes
+ */
 interface BashProcess {
     val errorOutput: String
     val output: String
@@ -14,7 +17,7 @@ interface BashProcess {
      * If process is not started, then starts the process.
      */
     fun join(timeoutMs: Long? = null): BashProcess
-    fun onComplete(action: (Process) -> Unit)
+    fun onComplete(action: () -> Unit)
 
     /**
      * Synchronizes the status and checks for processUpdates.

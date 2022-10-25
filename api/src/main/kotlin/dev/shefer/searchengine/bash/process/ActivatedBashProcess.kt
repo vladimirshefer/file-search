@@ -52,8 +52,8 @@ class ActivatedBashProcess(
         update()
     }
 
-    override fun onComplete(action: (Process) -> Unit) {
-        processFuture.thenAccept(action)
+    override fun onComplete(action: () -> Unit) {
+        processFuture.thenAccept { action() }
     }
 
     init {
