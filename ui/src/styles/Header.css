@@ -18,9 +18,17 @@
 }
 
 .header_nav-item {
+    min-width: 5em;
+    @apply text-center;
     text-decoration: inherit;
     color: black;
     padding: 5px;
     margin: 0 5px;
-    @apply bg-default-100;
+    /*@apply hover:bg-default-100;*/
+}
+
+.header_nav-item:hover {
+    /*text-decoration: underline;*/
+    @apply rounded-md;
+    border: 1px solid #ddd;
 }
