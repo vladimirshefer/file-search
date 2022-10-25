@@ -54,6 +54,10 @@ export default function MediaCard(
                                   e.preventDefault();
                                   setOptionsOpened(!isOptionsOpened)
                               }}
+                              onTouchEnd={(e) => {
+                                  e.preventDefault()
+                                  setOptionsOpened(!isOptionsOpened)
+                              }}
                               onDoubleClick={(e) => {
                                   e.preventDefault()
                               }}
@@ -69,9 +73,24 @@ export default function MediaCard(
                      }}
                 >
                     <ul>
-                        <li onClick={actionOpen}>Open</li>
-                        <li onClick={actionDeleteSource}>Delete source</li>
-                        <li onClick={actionDeleteOptimized}>Delete optimized</li>
+                        <li
+                            onClick={actionOpen}
+                            onTouchEnd={actionOpen}
+                        >
+                            Open
+                        </li>
+                        <li
+                            onClick={actionDeleteSource}
+                            onTouchEnd={actionDeleteSource}
+                        >
+                            Delete source
+                        </li>
+                        <li
+                            onClick={actionDeleteOptimized}
+                            onTouchEnd={actionDeleteOptimized}
+                        >
+                            Delete optimized
+                        </li>
                     </ul>
                 </div>
             </li>
