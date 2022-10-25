@@ -1,6 +1,9 @@
 .media-card {
     position: relative;
-    grid-column: span 4;
+    @apply col-span-6;
+    @apply sm:col-span-4;
+    @apply md:col-span-3;
+    @apply lg:col-span-2;
     display: flex;
     flex-direction: column;
     aspect-ratio: 1/1;
