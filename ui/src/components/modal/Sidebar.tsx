@@ -15,12 +15,13 @@ export default function Sidebar(
 
     if (!isVisible) return null;
 
-    return <>
+    return <div className={"sidebar"}>
         <div className={"sidebar_background"}
              onClick={actionClose}
         />
-        <div className={"sidebar sidebar__right " + (isVisible ? "" : "hidden")}>
+        <div className={"sidebar_body sidebar_body__right " + (isVisible ? "" : "hidden")}>
+            <button type={"button"} onClick={actionClose}>Close</button>
             {children}
         </div>
-    </>
+    </div>
 }

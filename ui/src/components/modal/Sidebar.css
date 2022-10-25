@@ -1,10 +1,15 @@
 .sidebar {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.sidebar_body {
     position: fixed;
     @apply bg-white;
     z-index: 50;
 }
 
-.sidebar__right {
+.sidebar_body__right {
     height: 100vh;
     right: 0;
     top: 0;
