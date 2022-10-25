@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useMemo, useState} from "react";
 import "./index.css"
 import {MediaStatus} from "lib/Api";
 import {IoCheckmarkDoneOutline} from "react-icons/io5";
@@ -25,6 +25,11 @@ export default function MediaCard(
 
     let [isOptionsOpened, setOptionsOpened] = useState<boolean>(false)
 
+    let previewBackgroundUrl = useMemo(() => {
+        let thumbnailUrl = `/api/files/show/?rootName=thumbnails,optimized,source&path=${path}/${name}`;
+        return `url('${thumbnailUrl}')`;
+    }, []);
+
     return (<>
             <li className={`media-card ${isSelected ? "media-card__selected" : ""}`}
                 title={name}
@@ -34,7 +39,7 @@ export default function MediaCard(
             >
                 <div className={"media-card_content"}>
                     <div className={"media-card_image"}
-                         style={{backgroundImage: "url('/api/files/show/?path=" + path + "/" + name + "')"}}
+                         style={{backgroundImage: previewBackgroundUrl}}
                     />
                     <div className={`media-card_info drag-selectable`}
                          data-selection-id={name} // used for drag-select.

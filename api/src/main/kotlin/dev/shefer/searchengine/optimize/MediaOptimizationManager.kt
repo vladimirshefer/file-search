@@ -21,13 +21,15 @@ import kotlin.io.path.isDirectory
 class MediaOptimizationManager(
     val mediaOptimizer: MediaOptimizer,
     sourceMediaRoot: Path,
-    optimizedMediaRoot: Path
+    optimizedMediaRoot: Path,
+    thumbnailsMediaRoot: Path,
 ) {
 
     val LOG = LoggerFactory.getLogger(this.javaClass)
 
     private val sourceMediaSubtree = FileSystemSubtree(sourceMediaRoot)
     private val optimizedMediaSubtree = FileSystemSubtree(optimizedMediaRoot)
+    private val thumbnailsMediaSubtree = FileSystemSubtree(thumbnailsMediaRoot)
 
     fun getMediaInfo(file: Path): MediaInfo {
         val sourceFileInfo = sourceMediaSubtree.getFileInfo(file)

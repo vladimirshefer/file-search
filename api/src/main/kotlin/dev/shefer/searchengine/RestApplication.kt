@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
 import java.nio.file.Path
+import kotlin.io.path.createDirectories
 
 @SpringBootApplication
 class RestApplication {
@@ -16,12 +17,24 @@ class RestApplication {
         sourceMediaRootPath: String,
         @Value("\${app.optimizedMediaRootPath}")
         optimizedMediaRootPath: String,
+        @Value("\${app.internalDataRootPath}")
+        internalDataRootPath: String,
         mediaOptimizer: MediaOptimizer
     ): MediaOptimizationManager {
+        val sourceMediaRoot = Path.of(sourceMediaRootPath)
+            .also { it.createDirectories() }
+        val optimizedMediaRoot = Path.of(optimizedMediaRootPath)
+            .also { it.createDirectories() }
+        val internalDataRoot = Path.of(internalDataRootPath)
+            .also { it.createDirectories() }
+        val thumbnailsMediaRoot = internalDataRoot.resolve("thumbnails")
+            .also { it.createDirectories() }
+
         return MediaOptimizationManager(
             mediaOptimizer,
-            Path.of(sourceMediaRootPath),
-            Path.of(optimizedMediaRootPath)
+            sourceMediaRoot,
+            optimizedMediaRoot,
+            thumbnailsMediaRoot,
         )
     }
 }

@@ -2,3 +2,4 @@ app:
   rootDirectory: "/app/media/source"
   sourceMediaRootPath: "/app/media/source"
   optimizedMediaRootPath: "/app/media/optimized"
+  internalDataRootPath: "/app/media/data"
