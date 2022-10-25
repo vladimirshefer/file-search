@@ -1,5 +1,5 @@
 import {MediaDirectoryInfo} from "lib/Api";
-import DirectoryCard from "components/FilesPage/DirectoryCard";
+import DirectoryCard from "components/FilesPage/directories/DirectoryCard";
 import React from "react";
 import "./DirectoryCardGrid.css"
 

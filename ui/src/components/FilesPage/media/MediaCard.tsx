@@ -1,5 +1,5 @@
 import React, {useMemo, useState} from "react";
-import "./index.css"
+import "./MediaCard.css"
 import {MediaStatus} from "lib/Api";
 import {IoCheckmarkDoneOutline} from "react-icons/io5";
 import {AiOutlineCheck, AiOutlineClose} from "react-icons/ai";

@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import axios from "axios";
 import {Link} from "react-router-dom";
 import ConversionUtils from "utils/ConversionUtils";
-import "./index.css"
+import "./DirectoryCard.css"
 
 export default function DirectoryCard(
     {

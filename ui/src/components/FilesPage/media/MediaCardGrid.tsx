@@ -1,7 +1,7 @@
 import {MediaInfo} from "lib/Api";
-import MediaCard from "components/FilesPage/MediaCard";
+import MediaCard from "components/FilesPage/media/MediaCard";
 import React from "react";
-import "./index.css"
+import "./MediaCardGrid.css"
 
 export default function MediaCardGrid(
     {
