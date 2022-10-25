@@ -12,42 +12,42 @@ import kotlin.io.path.exists
 class BashExecutor {
     companion object {
 
-        private val LOG = LoggerFactory.getLogger(BashExecutor::class.java);
+        private val LOG = LoggerFactory.getLogger(BashExecutor::class.java)
 
         val FULLHD_PIXELS = 2073600
 
         /**
          * @param image absolute path to image
          */
-        fun toJpg(image: Path): String {
-            return executeForFile(image, listOf("mogrify", "-monitor", "-format", "jpg"))
+        fun toJpg(image: Path): BashProcess {
+            return prepareProcessForFile(image, listOf("mogrify", "-monitor", "-format", "jpg"))
         }
 
         /**
          * @param image absolute path to image
          */
-        fun optimizeJpeg(image: Path): String {
-            return executeForFile(image, listOf("jpegoptim"))
+        fun optimizeJpeg(image: Path): BashProcess {
+            return prepareProcessForFile(image, listOf("jpegoptim"))
         }
 
         /**
          * @param image absolute path to image
          */
-        fun resizeDown(image: Path, pixelsLimit: Int): String {
-            return executeForFile(image, listOf("mogrify", "-monitor", "-resize", "$pixelsLimit@>"))
+        fun resizeDown(image: Path, pixelsLimit: Int): BashProcess {
+            return prepareProcessForFile(image, listOf("mogrify", "-monitor", "-resize", "$pixelsLimit@>"))
         }
 
         /**
          * @param image absolute path to image
          * @param maxSizeKb maximum size of output file.
          */
-        fun optimizeJpegToMaxSize(image: Path, maxSizeKb: Int): String {
-            return executeForFile(image, listOf("jpegoptim", "--size=${maxSizeKb}K"))
+        fun optimizeJpegToMaxSize(image: Path, maxSizeKb: Int): BashProcess {
+            return prepareProcessForFile(image, listOf("jpegoptim", "--size=${maxSizeKb}K"))
         }
 
-        fun toMp4WithQuality28(source: Path, target: Path): String {
+        fun toMp4WithQuality28(source: Path, target: Path): BashProcess {
             assertFileExists(source)
-            val bashProcess = prepareProcess(
+            return prepareProcess(
                 source.parent,
                 arrayOf(
                     "ffmpeg",
@@ -63,14 +63,10 @@ class BashExecutor {
                     target.toString()
                 )
             )
-            return bashProcess
-                .join()
-                .assertSuccess()
-                .output
         }
 
         fun videoResolution(video: Path): Resolution {
-            val output: String = executeForFile(
+            val bashProcess = prepareProcessForFile(
                 video, listOf(
                     "ffprobe",
                     "-v", "error",
@@ -79,6 +75,9 @@ class BashExecutor {
                     "-of", "csv=s=x:p=0"
                 )
             )
+            val output: String = bashProcess.start().join()
+                .assertSuccess()
+                .output
 
             return Resolution(
                 output.substringBefore('x').toInt(),
@@ -86,15 +85,12 @@ class BashExecutor {
             )
         }
 
-        private fun executeForFile(image: Path, command: List<String>): String {
+        private fun prepareProcessForFile(
+            image: Path,
+            command: List<String>
+        ): BashProcess {
             assertFileExists(image)
-            val bashProcess = prepareProcess(image.parent, arrayOf(*command.toTypedArray(), image.fileName.toString()))
-            return bashProcess.start().join()
-                .also { LOG.info(it.output) }
-                .also { LOG.error(it.errorOutput) }
-                .assertSuccess()
-
-                .output
+            return prepareProcess(image.parent, arrayOf(*command.toTypedArray(), image.fileName.toString()))
         }
 
         private fun assertFileExists(image: Path) {

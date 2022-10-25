@@ -1,6 +1,7 @@
 package dev.shefer.searchengine.optimize
 
 import dev.shefer.searchengine.bash.BashExecutor
+import dev.shefer.searchengine.bash.process.assertSuccess
 import org.springframework.stereotype.Component
 import org.springframework.util.FileSystemUtils
 import java.awt.Desktop
@@ -17,13 +18,13 @@ class MediaOptimizer {
             val workingFile = workDir.resolve(source.fileName)
             Files.copy(source, workingFile)
             var output = ""
-            output += BashExecutor.toJpg(workingFile)
+            output += BashExecutor.toJpg(workingFile).join().assertSuccess().output
 
             val result = findResult(workDir, workingFile)
 
             val MAX_200X200 = 40000
-            output += BashExecutor.resizeDown(result, MAX_200X200)
-            output += BashExecutor.optimizeJpegToMaxSize(result, 100)
+            output += BashExecutor.resizeDown(result, MAX_200X200).join().assertSuccess().output
+            output += BashExecutor.optimizeJpegToMaxSize(result, 100).join().assertSuccess().output
             Files.copy(result, target)
 
             output
@@ -35,14 +36,14 @@ class MediaOptimizer {
             val workingFile = workDir.resolve(source.fileName)
             Files.copy(source, workingFile)
             var output = ""
-            output += BashExecutor.toJpg(workingFile)
+            output += BashExecutor.toJpg(workingFile).join().assertSuccess().output
 
             val result = findResult(workDir, workingFile)
 
-            output += BashExecutor.optimizeJpeg(result)
+            output += BashExecutor.optimizeJpeg(result).start().join().assertSuccess().output
             output += "\n"
-            output += BashExecutor.resizeDown(result, BashExecutor.FULLHD_PIXELS)
-            output += BashExecutor.optimizeJpegToMaxSize(result, 500)
+            output += BashExecutor.resizeDown(result, BashExecutor.FULLHD_PIXELS).join().assertSuccess().output
+            output += BashExecutor.optimizeJpegToMaxSize(result, 500).join().assertSuccess().output
             Files.copy(result, target)
 
             output
@@ -63,7 +64,7 @@ class MediaOptimizer {
             workDir.resolve("source").createDirectories()
             workDir.resolve("result").createDirectories()
             Files.copy(source, workingFile)
-            val output = BashExecutor.toMp4WithQuality28(workingFile, resultFile)
+            val output = BashExecutor.toMp4WithQuality28(workingFile, resultFile).join().assertSuccess().output
 
             Files.copy(resultFile, target)
 
