@@ -19,13 +19,14 @@ import kotlin.io.path.isDirectory
  * Files migrate only from source to optimized root and never backwards.
  */
 class MediaOptimizationManager(
-    val mediaOptimizer: MediaOptimizer,
+    private val mediaOptimizer: MediaOptimizer,
     sourceMediaRoot: Path,
     optimizedMediaRoot: Path,
     thumbnailsMediaRoot: Path,
 ) {
 
-    val LOG = LoggerFactory.getLogger(this.javaClass)
+    private val LOG = LoggerFactory.getLogger(this.javaClass)
+
 
     private val sourceMediaSubtree = FileSystemSubtree(sourceMediaRoot)
     private val optimizedMediaSubtree = FileSystemSubtree(optimizedMediaRoot)
