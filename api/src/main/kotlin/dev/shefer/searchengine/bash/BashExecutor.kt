@@ -1,6 +1,9 @@
 package dev.shefer.searchengine.bash
 
 import dev.shefer.searchengine.bash.dto.Resolution
+import dev.shefer.searchengine.bash.process.BashProcess
+import dev.shefer.searchengine.bash.process.PreparedBashProcess
+import dev.shefer.searchengine.bash.process.assertSuccess
 import org.slf4j.LoggerFactory
 import java.io.FileNotFoundException
 import java.nio.file.Path
@@ -18,7 +21,6 @@ class BashExecutor {
          */
         fun toJpg(image: Path): String {
             return executeForFile(image, listOf("mogrify", "-monitor", "-format", "jpg"))
-                .also { LOG.info(it) }
         }
 
         /**
@@ -26,7 +28,6 @@ class BashExecutor {
          */
         fun optimizeJpeg(image: Path): String {
             return executeForFile(image, listOf("jpegoptim"))
-                .also { LOG.info(it) }
         }
 
         /**
@@ -34,7 +35,6 @@ class BashExecutor {
          */
         fun resizeDown(image: Path, pixelsLimit: Int): String {
             return executeForFile(image, listOf("mogrify", "-monitor", "-resize", "$pixelsLimit@>"))
-                .also { LOG.info(it) }
         }
 
         /**
@@ -43,31 +43,35 @@ class BashExecutor {
          */
         fun optimizeJpegToMaxSize(image: Path, maxSizeKb: Int): String {
             return executeForFile(image, listOf("jpegoptim", "--size=${maxSizeKb}K"))
-                .also { LOG.info(it) }
         }
 
         fun toMp4WithQuality28(source: Path, target: Path): String {
             assertFileExists(source)
-            return execute(
+            val bashProcess = prepareProcess(
                 source.parent,
-                "ffmpeg",
-                "-n",
-                "-i",
-                source.toString(),
-                "-c:v",
-                "libx265",
-                "-crf",
-                "28",
-                "-c:a",
-                "copy",
-                target.toString()
+                arrayOf(
+                    "ffmpeg",
+                    "-n",
+                    "-i",
+                    source.toString(),
+                    "-c:v",
+                    "libx265",
+                    "-crf",
+                    "28",
+                    "-c:a",
+                    "copy",
+                    target.toString()
+                )
             )
+            return bashProcess
+                .join()
+                .assertSuccess()
+                .output
         }
 
         fun videoResolution(video: Path): Resolution {
             val output: String = executeForFile(
-                video,
-                listOf(
+                video, listOf(
                     "ffprobe",
                     "-v", "error",
                     "-select_streams", "v:0",
@@ -75,12 +79,22 @@ class BashExecutor {
                     "-of", "csv=s=x:p=0"
                 )
             )
-                .also { LOG.info(it) }
 
             return Resolution(
                 output.substringBefore('x').toInt(),
                 output.substringAfter('x').substringBefore('\n').toInt()
             )
+        }
+
+        private fun executeForFile(image: Path, command: List<String>): String {
+            assertFileExists(image)
+            val bashProcess = prepareProcess(image.parent, arrayOf(*command.toTypedArray(), image.fileName.toString()))
+            return bashProcess.start().join()
+                .also { LOG.info(it.output) }
+                .also { LOG.error(it.errorOutput) }
+                .assertSuccess()
+
+                .output
         }
 
         private fun assertFileExists(image: Path) {
@@ -89,30 +103,19 @@ class BashExecutor {
             }
         }
 
-        private fun executeForFile(path: Path, command: List<String>): String {
-            assertFileExists(path)
-
-            return execute(path.parent, *command.toTypedArray(), path.fileName.toString())
-        }
-
-        private fun execute(workingDirectory: Path, vararg command: String): String {
+        private fun prepareProcess(
+            workingDirectory: Path,
+            command: Array<String>
+        ): BashProcess {
             if (!workingDirectory.exists()) {
                 throw FileNotFoundException("No such directory $workingDirectory")
             }
 
-            val process = ProcessBuilder()
+            val processBuilder = ProcessBuilder()
                 .directory(workingDirectory.toFile())
                 .command(*command)
-                .start()
 
-            val statusCode = process.waitFor()
-            val output = process.inputReader().readText()
-            val error = process.errorReader().readText()
-            if (statusCode != 0) {
-                throw RuntimeException("Could not execute bash command. Status: $statusCode. Error: $error")
-            }
-
-            return output
+            return PreparedBashProcess(processBuilder)
         }
 
     }
