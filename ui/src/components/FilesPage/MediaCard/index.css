@@ -4,8 +4,7 @@
     display: flex;
     flex-direction: column;
     aspect-ratio: 1/1;
-    border: 1px solid #ddd;
-    @apply rounded-md
+    @apply rounded-md;
 }
 
 .media-card_content {
@@ -14,6 +13,8 @@
     height: 100%;
     aspect-ratio: 1/1;
     overflow: hidden;
+    border: 1px solid #ddd;
+    @apply rounded-md;
 }
 
 .media-card__selected {
