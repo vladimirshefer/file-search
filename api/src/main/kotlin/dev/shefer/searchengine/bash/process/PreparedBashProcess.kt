@@ -22,14 +22,12 @@ class PreparedBashProcess(
     }
 
     override fun start() = synchronized(this) {
-        val activatedBashProcess1 = activatedBashProcess
-            ?: ActivatedBashProcess(processBuilder.start())
-                .also {
-                    onCompleteList.forEach(it::onComplete)
-                }
+        activatedBashProcess?.also { return it }
 
-        activatedBashProcess = activatedBashProcess1
-        activatedBashProcess1
+        ActivatedBashProcess(processBuilder.start())
+            .also {
+                onCompleteList.forEach(it::onComplete)
+            }
     }
 
     override fun join(timeoutMs: Long?): ActivatedBashProcess = start().join()
