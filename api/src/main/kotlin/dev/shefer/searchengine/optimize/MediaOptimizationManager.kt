@@ -173,24 +173,71 @@ class MediaOptimizationManager(
     }
 
     /**
+     * @param rootName comma separated list of root names such as "source", "optimized", "thumbnails"
      * @param path relative unsafe path.
-     * @return absolute path
+     * @return absolute path to file in one of specified roots
      */
     fun find(rootName: String, path: Path): Path {
-        if (rootName != "optimized") {
-            return sourceMediaSubtree.resolve(path)
+        if (rootName.contains(',')) {
+            rootName.split(',').forEach {
+                val find = find(it, path)
+
+                if (find.exists()) {
+                    return find
+                }
+            }
         }
 
-        val exactMatch = optimizedMediaSubtree.resolve(path)
-        if (exactMatch.exists()) {
-            return exactMatch
+        when (rootName) {
+            "thumbnails" -> {
+                val thumbnailPath = thumbnailsMediaSubtree.resolve(path)
+                if (!thumbnailPath.exists()) {
+                    runCatching { createThumbnail(path) }
+                        .onFailure { it.printStackTrace() }
+                }
+                return thumbnailPath
+            }
+
+            "optimized" -> {
+                val exactMatch = optimizedMediaSubtree.resolve(path)
+
+                if (exactMatch.exists()) {
+                    return exactMatch
+                }
+
+                return Files
+                    .list(exactMatch.parent)
+                    .filter { it.fileName.startsWith(path.fileName) }
+                    .findAny()
+                    .orElse(null)
+                    ?: exactMatch;
+            }
+
+            else -> {
+                return sourceMediaSubtree.resolve(path)
+            }
+        }
+    }
+
+    private fun createThumbnail(path: Path) {
+        val thumbnailPath = thumbnailsMediaSubtree.resolve(path)
+
+        if (thumbnailPath.exists()) {
+            return
         }
 
-        return Files
-            .list(exactMatch.parent)
-            .filter { it.fileName.startsWith(path.fileName) }
-            .findAny()
-            .orElseThrow { FileNotFoundException("No optimized file for path $path") }
+        if (path.extension.lowercase() !in listOf("jpg", "jpeg", "png")) {
+            return
+        }
+
+        val sourceImage = find("source,optimized", path)
+            .also {
+                if (!it.exists()) {
+                    throw FileNotFoundException("No source or optimized image for file $path")
+                }
+            }
+        thumbnailPath.parent.createDirectories()
+        mediaOptimizer.createThumbnail(sourceImage, thumbnailPath)
     }
 
 }
