@@ -29,6 +29,7 @@ export default function FilesList(
                     let size = `${sourceSize}/${optimizedSize}`;
                     let editLink = "/edit/" + root + "/" + file.displayName;
                     let openLink = "/api/files/show/?path=" + root + "/" + file.displayName;
+                    let openOptimizedLink = "/api/files/show/?rootName=optimized&path=" + root + "/" + file.displayName;
                     return <FileInfo
                         key={file.displayName}
                         displayName={file.displayName}
@@ -36,6 +37,7 @@ export default function FilesList(
                         size={size}
                         editLink={editLink}
                         openLink={openLink}
+                        openOptimizedLink={openOptimizedLink}
                         isSelected={filesSelected.includes(file.displayName)}
                         actionOpen={() => actionOpen(file.displayName)}
                     />;
@@ -53,6 +55,7 @@ function FileInfo(
         size,
         editLink,
         openLink,
+        openOptimizedLink,
         isSelected,
         actionOpen = () => undefined,
     }: {
@@ -61,6 +64,7 @@ function FileInfo(
         size: string,
         editLink: string,
         openLink: string,
+        openOptimizedLink: string,
         isSelected: boolean,
         actionOpen: () => void,
     }
@@ -96,6 +100,13 @@ function FileInfo(
             className={"file-info_button"}
         >
             <button type={"button"}>Open source</button>
+        </a>
+        <a
+            href={openOptimizedLink}
+            target={"_blank"}
+            className={"file-info_button"}
+        >
+            <button type={"button"}>Optimized</button>
         </a>
         <button type={"button"}
                 onClick={actionOpen}
