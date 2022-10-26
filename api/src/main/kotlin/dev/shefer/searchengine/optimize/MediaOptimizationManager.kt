@@ -1,5 +1,9 @@
 package dev.shefer.searchengine.optimize
 
+import dev.shefer.searchengine.bash.process.BashProcess
+import dev.shefer.searchengine.bash.process.BashProcess.Companion.ProcessStatus
+import dev.shefer.searchengine.bash.process.BashProcessChain
+import dev.shefer.searchengine.bash.process.MockBashProcess
 import dev.shefer.searchengine.optimize.dto.DirectorySyncStatus
 import dev.shefer.searchengine.optimize.dto.FileInfo
 import dev.shefer.searchengine.optimize.dto.MediaDirectoryInfo
@@ -27,10 +31,11 @@ class MediaOptimizationManager(
 
     private val LOG = LoggerFactory.getLogger(this.javaClass)
 
-
     private val sourceMediaSubtree = FileSystemSubtree(sourceMediaRoot)
     private val optimizedMediaSubtree = FileSystemSubtree(optimizedMediaRoot)
     private val thumbnailsMediaSubtree = FileSystemSubtree(thumbnailsMediaRoot)
+
+    val currentProcesses = ArrayList<BashProcess>()
 
     fun getMediaInfo(file: Path): MediaInfo {
         val sourceFileInfo = sourceMediaSubtree.getFileInfo(file)
@@ -45,7 +50,8 @@ class MediaOptimizationManager(
         return MediaDirectoryInfo(
             path.fileName.toString(),
             path.toString(),
-            withTimer("dirstatus") { directorySyncStatus(path) } ?: DirectorySyncStatus.EMPTY,
+            DirectorySyncStatus.NONE,
+//            withTimer("dirstatus") { directorySyncStatus(path) } ?: DirectorySyncStatus.EMPTY,
             withTimer("listmedia") { listMedia(path) }.toList(),
             withTimer("listdirectories") { listDirectories(path) },
         )
@@ -144,32 +150,35 @@ class MediaOptimizationManager(
     }
 
     fun optimize(optimizePaths: List<Path>) {
-        optimizePaths.map { optimize(it) }
+        currentProcesses += BashProcessChain.of(optimizePaths.map { optimize(it) }).start()
     }
 
-    private fun optimize(relPath: Path) {
+    private fun optimize(relPath: Path): BashProcess {
         val path = normalizePath(relPath)
         val sourceFile = sourceMediaSubtree.resolve(path)
         val optimizedMedia = optimizedMediaSubtree.resolve(path)
         LOG.info("Start optimizing $path")
         if (sourceFile.isDirectory()) {
-            sourceMediaSubtree.listFilesOrEmpty(path).forEach { optimize(it) }
-            return
+            return BashProcessChain.of(
+                sourceMediaSubtree.listFilesOrEmpty(path).map { optimize(it) } +
+                        sourceMediaSubtree.listDirectoriesOrEmpty(path).map { optimize(it) }
+            )
         }
         optimizedMedia.parent.createDirectories()
         if (path.extension.lowercase() in listOf("jpg", "jpeg", "png")) {
-            mediaOptimizer.optimizeImage(
+            return mediaOptimizer.optimizeImage(
                 sourceFile,
                 optimizedMedia
             )
         }
         if (path.extension.lowercase() in listOf("mp4", "avi", "flv")) {
-            mediaOptimizer.optimizeVideo(
+            return mediaOptimizer.optimizeVideo(
                 sourceFile,
                 optimizedMedia
             )
         }
         LOG.info("End optimizing $path")
+        return MockBashProcess(ProcessStatus.SUCCESS)
     }
 
     /**
@@ -205,12 +214,14 @@ class MediaOptimizationManager(
                     return exactMatch
                 }
 
+                if (!exactMatch.parent.exists()) return exactMatch
+
                 return Files
                     .list(exactMatch.parent)
                     .filter { it.fileName.startsWith(path.fileName) }
                     .findAny()
                     .orElse(null)
-                    ?: exactMatch;
+                    ?: exactMatch
             }
 
             else -> {
