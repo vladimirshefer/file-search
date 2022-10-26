@@ -31,6 +31,7 @@ class FileSystemService(
     }
 
     fun getTextFileContent(path: String): String {
+        val path = if (path.startsWith("/")) path.substring(1) else path
         return Files.readString(resolve(path))
     }
 
