@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -44,12 +45,18 @@ class FileSystemController(
 
     @GetMapping("/show")
     fun showFileContent(
+        @RequestHeader(value = "Range", required = false)
+        videoRange: String?,
+        @RequestParam(required = false)
+        chunkSize: Long?,
         @RequestParam(required = false, defaultValue = "")
         path: String,
         @RequestParam(required = false, defaultValue = "source")
         rootName: String
     ): ResponseEntity<ByteArray> {
-        return fileSystemService.showFileContent(path, rootName)
+        val range = parseRange(videoRange, chunkSize) ?: chunkSize?.let { LongRange(0, it - 1) }
+
+        return fileSystemService.getFileContentBytes(path, rootName, range)
     }
 
     @GetMapping("/stats")
@@ -83,5 +90,28 @@ class FileSystemController(
         optimizeRequest: OptimizeRequest
     ) {
         fileSystemService.optimize(optimizeRequest)
+    }
+
+    private fun parseRange(videoRange: String?, chunkSize: Long?): LongRange? {
+        videoRange ?: return null
+
+        val rangeValues = videoRange.split('-', '=')
+            .mapNotNull { runCatching { it.toLong() }.getOrNull() }
+
+        val range = when (rangeValues.size) {
+            1 -> {
+                if (chunkSize == null) LongRange(rangeValues[0], Long.MAX_VALUE)
+                else LongRange(rangeValues[0], rangeValues[0] + chunkSize - 1)
+            }
+
+            2 -> {
+                LongRange(rangeValues[0], rangeValues[1])
+            }
+
+            else -> {
+                null
+            }
+        }
+        return range
     }
 }

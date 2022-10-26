@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.util.MimeType
 import java.io.IOException
+import java.io.RandomAccessFile
 import java.nio.file.FileVisitResult
 import java.nio.file.Files
 import java.nio.file.Path
@@ -17,6 +18,7 @@ import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
 import kotlin.io.path.exists
 import kotlin.io.path.extension
+import kotlin.io.path.fileSize
 
 @Service
 class FileSystemService(
@@ -31,25 +33,47 @@ class FileSystemService(
     }
 
     fun getTextFileContent(path: String): String {
-        val path = if (path.startsWith("/")) path.substring(1) else path
-        return Files.readString(resolve(path))
+        return Files.readString(resolve(preparePath(path)))
     }
 
-    fun showFileContent(path: String, rootName: String): ResponseEntity<ByteArray> {
-        val path = if (path.startsWith("/")) path.substring(1) else path
-        val absolutePath = mediaOptimizationManager.find(rootName, Path.of(path))
-        val content = Files.readAllBytes(absolutePath)
-        val contentType = Files.probeContentType(absolutePath) ?: "text/plain"
-        val mimeType = MimeType.valueOf(contentType)
-        val mediaType = MediaType.asMediaType(mimeType)
-        return ResponseEntity.ok()
+    fun getFileContentBytes(
+        path: String,
+        rootName: String,
+        range: LongRange?,
+    ): ResponseEntity<ByteArray> {
+        val absolutePath = mediaOptimizationManager.find(rootName, preparePath(path))
+        return serveFile(absolutePath, range)
+    }
+
+    private fun serveFile(
+        absolutePath: Path,
+        range: LongRange?
+    ): ResponseEntity<ByteArray> {
+        val fileSize = absolutePath.fileSize()
+        if (range != null && range.first == 0L && range.last == fileSize - 1) return serveFile(absolutePath, null)
+
+        val content = absolutePath.readBytesRanged(range)
+        val mediaType = absolutePath.mediaType
+
+        val responseEntity = if (range == null) ResponseEntity.ok() else ResponseEntity.status(206)
+//        val responseEntity = ResponseEntity.ok()
+        return responseEntity
             .contentType(mediaType)
+            .also {
+                if (range != null) {
+                    it.header("Cache-Control", "no-cache, no-store, must-revalidate")
+                    it.header("Pragma", "no-cache")
+                    it.header("Expires", "0")
+                    it.header("Accept-Ranges", "bytes")
+                    val lastByteIndex = range.first + content.size - 1
+                    it.header("Content-Range", "bytes ${range.first}-$lastByteIndex/$fileSize")
+                }
+            }
             .body(content)
     }
 
     fun stats(path: String): Map<String, Any?> {
-        val path = resolve(path)
-
+        val path = resolve(preparePath(path))
         var forbiddenDirectoriess = 0
         var totalSize = 0L
         val extension2count = HashMap<String, Int>()
@@ -89,7 +113,7 @@ class FileSystemService(
     }
 
     fun getReadme(path: String): Map<String, Any?> {
-        val dir = resolve(path).toFile()
+        val dir = resolve(preparePath(path)).toFile()
 
         if (!dir.isDirectory) {
             throw IllegalArgumentException("Not a directory: $path")
@@ -102,8 +126,7 @@ class FileSystemService(
         return mapOf("content" to indexContent)
     }
 
-    private fun resolve(path: String): Path {
-        val path = if (path.startsWith("/")) path.substring(1) else path
+    private fun resolve(path: Path): Path {
         val file = Path.of(root).resolve(path).normalize()
 
         if (!file.exists()) {
@@ -113,8 +136,13 @@ class FileSystemService(
         return file
     }
 
+    private fun preparePath(path: String): Path {
+        val relativePath = if (path.startsWith("/")) path.substring(1) else path
+        return Path.of(relativePath).normalize()
+    }
+
     fun size(path: String): Long {
-        val file = resolve(path)
+        val file = resolve(preparePath(path))
         if (Files.isRegularFile(file)) {
             return Files.size(file)
         }
@@ -136,5 +164,39 @@ class FileSystemService(
     fun optimize(optimizeRequest: OptimizeRequest) {
         val optimizePaths = optimizeRequest.paths.map { Path.of(optimizeRequest.basePath, it) }
         mediaOptimizationManager.optimize(optimizePaths)
+    }
+
+    companion object {
+        private val Path.mediaType: MediaType get() = MediaType.asMediaType(mimeType)
+
+        private val Path.mimeType: MimeType get() = MimeType.valueOf(contentType)
+
+        private val Path.contentType: String
+            get() {
+                return Files.probeContentType(this)
+                    ?: when (extension.lowercase()) {
+                        "flv" -> "video/x-flv"
+                        "mp4" -> "video/mp4"
+                        else -> "text/plain"
+                    }
+            }
+
+        private fun Path.readBytesRanged(range: LongRange?): ByteArray {
+            if (range == null) {
+                return Files.readAllBytes(this)
+            }
+
+            val size = Files.size(this)
+            val from = range.first
+            val to = minOf(range.last, size - 1)
+            val len = to - from + 1
+            val buffer = ByteArray(len.toInt())
+
+            RandomAccessFile(toFile(), "r")
+                .also { it.seek(from) }
+                .use { it.read(buffer, 0, buffer.size) }
+
+            return buffer
+        }
     }
 }
