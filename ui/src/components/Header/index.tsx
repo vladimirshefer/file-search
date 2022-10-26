@@ -10,6 +10,7 @@ function Header() {
             </div>
             <NavItem to={"/"} text={"Home"}/>
             <NavItem to={"/files"} text={"Files"}/>
+            <NavItem to={"/processes"} text={"Processes"}/>
         </nav>
     </>
 }
