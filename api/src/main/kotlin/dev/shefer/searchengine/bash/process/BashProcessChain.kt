@@ -5,7 +5,7 @@ import dev.shefer.searchengine.bash.process.BashProcess.Companion.ProcessStatus
 import kotlin.math.max
 
 class BashProcessChain private constructor(
-    val chain: List<BashProcess>
+    private val chain: List<BashProcess>
 ) : BashProcess {
 
     @Volatile
@@ -28,6 +28,8 @@ class BashProcessChain private constructor(
                 }
             }
             .toString()
+
+    override val children: List<BashProcess> = chain
 
     @get:JsonInclude
     override val status: ProcessStatus

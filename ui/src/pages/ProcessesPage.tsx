@@ -1,13 +1,22 @@
 import axios from "axios";
 import {useEffect, useState} from "react";
+import {useSearchParams} from "react-router-dom";
 
 export default function ProcessesPage() {
 
     let [data, setData] = useState<any>(null)
+    let [queryParams] = useSearchParams()
 
     useEffect(() => {
         let id = setInterval(async () => {
-            setData((await axios.get("/api/processes")).data)
+            let ids = queryParams.getAll("ids")
+            console.log(ids)
+            setData((await axios.get("/api/processes",
+                {
+                    params: {ids: ids},
+                    paramsSerializer: {indexes: null}
+                }
+            )).data)
         }, 500);
 
         return () => clearInterval(id);
@@ -23,33 +32,22 @@ export default function ProcessesPage() {
                 {node.map((child: any) => renderList(child))}
             </ul>
         }
-        if (!!node.first || !!node.second) {
-            return <li className={"border-2"}>
-                <p>{node.first}</p>
-                <ul className={"border-2"}>{renderList(node.second)}</ul>
-            </li>
-        }
-        if (!!node.chain) {
-            return <ul className={"border-2"}>
-                <p>Chain ({node.chain.length})</p>
-                {
-                    node.chain.map((child: any) => renderList(child))
-                }
-            </ul>
-        }
         if (!!node.status) {
-            if (node.status == "SUCCESS") return <p>SUCCESS</p>
+            // if (node.status == "SUCCESS") return <p>SUCCESS</p>
             return <div className={"border-2"}>
+                <h4>{node.id}</h4>
                 <h4>{node.status || "NO STATUS"}</h4>
-                <pre className={"whitespace-pre-wrap"}>
-                    {node.output || "NO OUTPUT"}
-                </pre>
-                <pre className={"whitespace-pre-wrap"}>
-                    {node.errorOutput || "NO OUTPUT"}
-                </pre>
+                {(!!node.children && node.children.length > 0)
+                    ? (renderList(node.children))
+                    : (
+                        <>
+                            <pre className={"whitespace-pre-wrap"}>{node.output || "NO OUTPUT"}</pre>
+                            <pre className={"whitespace-pre-wrap"}>{node.errorOutput || "NO OUTPUT"}</pre>
+                        </>
+                    )
+                }
             </div>
-        }
-        else return <pre className={"border-2"}>{JSON.stringify(node, null, 2)}</pre>
+        } else return <pre className={"border-2"}>{JSON.stringify(node, null, 2)}</pre>
 
     }
 

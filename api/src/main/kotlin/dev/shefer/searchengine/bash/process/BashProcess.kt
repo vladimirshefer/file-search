@@ -1,16 +1,24 @@
 package dev.shefer.searchengine.bash.process
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import dev.shefer.searchengine.bash.process.BashProcess.Companion.ProcessStatus
 
 /**
  * Wrapper around java Process and ProcessBuilder, which allows to combine and organize multiple Processes
  */
 interface BashProcess {
+    val id: String
+        @JsonInclude
+        get() = this.javaClass.simpleName + "$" + this.hashCode().toString()
+
     val errorOutput: String
     val output: String
     val status: ProcessStatus
     fun start(): BashProcess
     fun cancel()
+    val children: List<BashProcess>
+        @JsonInclude
+        get() = emptyList()
 
     /**
      * Blocks current thread until process exit.
