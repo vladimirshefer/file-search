@@ -29,6 +29,8 @@ function FilesPage() {
     async function init() {
         setIsLoading(true);
         setPathSegments(filePath.split("/").filter(it => !!it))
+        setSelectedFiles([])
+        setContent(null)
         try {
             await loadContent(filePath)
             await loadStats(filePath)
@@ -49,6 +51,8 @@ function FilesPage() {
     useEffect(() => {
         init();
     }, [filePath])
+
+    if (isLoading) return <span>LOADING...</span>
 
     let openedMedia: string | null = null;
     let openedMediaCandidate = searchParams.get("open");
@@ -105,8 +109,6 @@ function FilesPage() {
         return null;
         // return fileApiService.delete();
     }
-
-    if (isLoading) return <span>LOADING...</span>
 
     return <div>
         {(!!openedMedia) ? (
