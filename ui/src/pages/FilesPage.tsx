@@ -117,8 +117,9 @@ function FilesPage() {
                 actionClose={() => closeMedia()}
             >
                 <ImageView
-                    image1Url={"/api/files/show/?path=" + filePath + "/" + openedMedia}
-                    image2Url={"/api/files/show/?rootName=optimized&path=" + filePath + "/" + openedMedia}
+                    // TODO use only files from corresponding root. here is the temp fix to ui not fail
+                    image1Url={"/api/files/show/?rootName=source,optimized&path=" + filePath + "/" + openedMedia}
+                    image2Url={"/api/files/show/?rootName=optimized,source&path=" + filePath + "/" + openedMedia}
                 />
             </Sidebar>
         ) : null
