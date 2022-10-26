@@ -1,13 +1,15 @@
 package dev.shefer.searchengine.bash.process
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import dev.shefer.searchengine.bash.process.BashProcess.Companion.ProcessStatus
+import kotlin.math.max
 
-class BashProcessChain(
-    private val chain: List<BashProcess>
+class BashProcessChain private constructor(
+    val chain: List<BashProcess>
 ) : BashProcess {
 
     @Volatile
-    private var currentProcessIndex = -1;
+    private var currentProcessIndex = -1
 
     override val errorOutput: String
         get() = StringBuilder()
@@ -27,20 +29,22 @@ class BashProcessChain(
             }
             .toString()
 
+    @get:JsonInclude
     override val status: ProcessStatus
         get() = if (currentProcessIndex == -1) ProcessStatus.PENDING else chain[currentProcessIndex].status
 
+    @Synchronized
     override fun start(): BashProcess {
-        synchronized(this) {
-            if (currentProcessIndex == -1) {
-                start(0)
-            }
+        if (currentProcessIndex == -1) {
+            start(0)
         }
         return this
     }
 
+    @Synchronized
     private fun start(index: Int) {
         if (index !in chain.indices) return
+        currentProcessIndex = max(currentProcessIndex, index)
         chain[index].start().onComplete { start(index + 1) }
     }
 
@@ -50,13 +54,27 @@ class BashProcessChain(
 
     override fun join(timeoutMs: Long?): BashProcess = apply {
         chain.forEach(BashProcess::join)
+        currentProcessIndex = chain.size - 1
     }
 
     override fun onComplete(action: () -> Unit) {
-        chain.last().onComplete(action)
+        if (this.chain.isEmpty()) {
+            action()
+        } else {
+            chain.last().onComplete(action)
+        }
     }
 
     override fun update() {
         chain.forEach(BashProcess::update)
+    }
+
+    companion object {
+        fun of(chain: List<BashProcess>) =
+            if (chain.isEmpty()) {
+                MockBashProcess(ProcessStatus.SUCCESS)
+            } else {
+                BashProcessChain(chain)
+            }
     }
 }

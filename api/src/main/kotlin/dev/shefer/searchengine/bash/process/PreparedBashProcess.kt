@@ -20,7 +20,6 @@ class PreparedBashProcess(
 
     override val output: String = activatedBashProcess?.output ?: ""
 
-
     override var status: ProcessStatus =
         activatedBashProcess?.status ?: if (isCanceledBeforeStart) ProcessStatus.CANCELED else ProcessStatus.PENDING
 
@@ -38,9 +37,11 @@ class PreparedBashProcess(
             return this
         }
 
-        ActivatedBashProcess(processBuilder().start())
+        val process = processBuilder()
+        ActivatedBashProcess(process.start())
             .also {
                 onCompleteList.forEach(it::onComplete)
+                it.onComplete { this.status = it.status }
                 activatedBashProcess = it
             }
     }

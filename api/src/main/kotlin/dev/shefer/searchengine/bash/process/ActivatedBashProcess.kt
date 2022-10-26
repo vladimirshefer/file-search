@@ -16,7 +16,8 @@ class ActivatedBashProcess(
 
     private var statusCode: Int? = null
 
-    private val processFuture: CompletableFuture<Process>
+    @Volatile
+    private var processFuture: CompletableFuture<Process>
 
     private val error: StringBuilder = StringBuilder()
 
@@ -52,12 +53,13 @@ class ActivatedBashProcess(
         update()
     }
 
+    @Synchronized
     override fun onComplete(action: () -> Unit) {
-        processFuture.thenAccept { action() }
+        processFuture = processFuture.whenComplete { _, _ -> action() }
     }
 
     init {
-        processFuture = process.onExit().thenApply { it.also { update() } }
+        processFuture = process.onExit().whenComplete { _, _ -> update() }
         update()
     }
 
