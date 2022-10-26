@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { RiDeleteBin5Line } from "react-icons/ri";
+import { RiDeleteBin6Line } from "react-icons/ri";
 import { GrOptimize } from "react-icons/gr";
 
 import "styles/FilesPage.css"
@@ -137,7 +137,7 @@ function FilesPage() {
                     className={"toolbar-icon"}
                     onClick={initOptimizationForSelected}
                     title={"Optimize"} />
-                <RiDeleteBin5Line
+                <RiDeleteBin6Line
                     className={"toolbar-icon"}
                     title={"Delete"}
                     onClick={deleteSelected} />

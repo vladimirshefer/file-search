@@ -1,0 +1,17 @@
+.file-actions-bar {
+    display: flex;
+}
+
+.file-actions-bar .toolbar-icon {
+    height: 100%;
+    margin-left: 1em;
+    color: black;
+}
+
+.file-actions-bar .toolbar-icon:last-child {
+    margin-right: 1em;
+}
+
+.file-actions-bar .toolbar-icon:hover {
+    cursor: pointer;
+}
