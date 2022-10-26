@@ -1,13 +1,16 @@
-import React, {useEffect, useState} from 'react'
-import {useNavigate, useParams, useSearchParams} from "react-router-dom";
+import React, { useEffect, useState } from 'react'
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { RiDeleteBin5Line } from "react-icons/ri";
+import { GrOptimize } from "react-icons/gr";
+
 import "styles/FilesPage.css"
 import "components/toolbox/Toolbox.css"
 import ConversionUtils from "utils/ConversionUtils";
-import {MediaDirectoryInfo, MediaInfo} from "lib/Api";
+import { MediaDirectoryInfo, MediaInfo } from "lib/Api";
 import MediaCardGrid from "components/FilesPage/media/MediaCardGrid";
 import Breadcrumbs from "components/files/BreadCrumbs";
 import DirectoryCardGrid from "components/FilesPage/directories/DirectoryCardGrid";
-import {Readme} from "components/files/Readme";
+import { Readme } from "components/files/Readme";
 import FilesList from "components/FilesPage/FilesList/FilesList";
 import FileApiService from "lib/service/FileApiService";
 import DragArea from "components/drag/DragArea";
@@ -18,7 +21,7 @@ function FilesPage() {
     let [content, setContent] = useState<MediaDirectoryInfo | null>(null);
     let [stats, setStats] = useState<{ [key: string]: any }>({});
     let [readme, setReadme] = useState<string>("");
-    let {"*": filePath = ""} = useParams<string>()
+    let { "*": filePath = "" } = useParams<string>()
     let [pathSegments, setPathSegments] = useState<string[]>([])
     let navigate = useNavigate();
     let [selectedFiles, setSelectedFiles] = useState<string[]>([])
@@ -87,11 +90,11 @@ function FilesPage() {
     }
 
     function openMedia(fileName: string) {
-        setSearchParams({...searchParams, open: fileName})
+        setSearchParams({ ...searchParams, open: fileName })
     }
 
     function closeMedia() {
-        let newParams = {...searchParams} as any;
+        let newParams = { ...searchParams } as any;
         delete newParams.open
         setSearchParams(newParams)
     }
@@ -130,23 +133,17 @@ function FilesPage() {
                 selectFn={i => goToPathSegment(i)}
             />
             <div className={"file-actions-bar"}>
-                <button
-                    className={"toolbox_item"}
+                <GrOptimize
+                    className={"toolbar-icon"}
                     onClick={initOptimizationForSelected}
-                    title={"Optimize"}
-                >
-                    Optimize
-                </button>
-                <button
-                    className={"toolbox_item"}
+                    title={"Optimize"} />
+                <RiDeleteBin5Line
+                    className={"toolbar-icon"}
                     title={"Delete"}
-                    onClick={deleteSelected}
-                >
-                    Delete
-                </button>
+                    onClick={deleteSelected} />
             </div>
         </div>
-        <Readme readme={readme}/>
+        <Readme readme={readme} />
         <DragArea
             setSelectedItems={setSelectedFiles}
         >

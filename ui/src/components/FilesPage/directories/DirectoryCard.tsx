@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import axios from "axios";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import ConversionUtils from "utils/ConversionUtils";
 import "./DirectoryCard.css"
 
@@ -18,6 +18,8 @@ export default function DirectoryCard(
     }) {
 
     let [size, setSize] = useState<number | null>(null)
+
+    const navigate = useNavigate();
 
     async function requestSize() {
         let result = await axios.get("/api/files/size", {
@@ -38,6 +40,9 @@ export default function DirectoryCard(
             to={"./" + name}
             relative={"path"}
             title={name}
+            onTouchEnd={() => {
+                navigate("./" + name)
+            }}
         >
             <div className="directory-card_main-line">
 

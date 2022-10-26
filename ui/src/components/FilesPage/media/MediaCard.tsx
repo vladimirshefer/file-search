@@ -46,9 +46,9 @@ export default function MediaCard(
                     >
                         <span className={"media-card_icon"}>
                             {
-                                status == "OPTIMIZED_ONLY" ? <IoCheckmarkDoneOutline/> :
-                                    status == "OPTIMIZED" ? <AiOutlineCheck/> :
-                                        status == "SOURCE_ONLY" ? <AiOutlineClose/> : null
+                                status === "OPTIMIZED_ONLY" ? <IoCheckmarkDoneOutline/> :
+                                    status === "OPTIMIZED" ? <AiOutlineCheck/> :
+                                        status === "SOURCE_ONLY" ? <AiOutlineClose/> : null
                             }
                         </span>
                         <span className={"media-card_name"}>
