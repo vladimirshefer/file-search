@@ -44,7 +44,7 @@ class FileSystemController(
     }
 
     @GetMapping("/show")
-    fun showFileContent(
+    fun serveFile(
         @RequestHeader(value = "Range", required = false)
         videoRange: String?,
         @RequestParam(required = false)
@@ -56,7 +56,7 @@ class FileSystemController(
     ): ResponseEntity<ByteArray> {
         val range = parseRange(videoRange, chunkSize) ?: chunkSize?.let { LongRange(0, it - 1) }
 
-        return fileSystemService.getFileContentBytes(path, rootName, range)
+        return fileSystemService.serveFile(path, rootName, range)
     }
 
     @GetMapping("/stats")

@@ -36,7 +36,7 @@ class FileSystemService(
         return Files.readString(resolve(preparePath(path)))
     }
 
-    fun getFileContentBytes(
+    fun serveFile(
         path: String,
         rootName: String,
         range: LongRange?,
@@ -47,8 +47,19 @@ class FileSystemService(
 
     private fun serveFile(
         absolutePath: Path,
-        range: LongRange?
+        range: LongRange?,
     ): ResponseEntity<ByteArray> {
+        if (absolutePath.isVideo) {
+            if (range == null) {
+                // Serve only 2KB of video file, until explicitly asked more.
+                return serveFile(absolutePath, LongRange(0, 2000))
+            }
+            if (range.last == Long.MAX_VALUE) {
+                // Force serving video by chunks if range end is not specified
+                return serveFile(absolutePath, LongRange(range.first, range.first + ONE_MEGABYTE))
+            }
+        }
+
         val fileSize = absolutePath.fileSize()
         if (range != null && range.first == 0L && range.last == fileSize - 1) return serveFile(absolutePath, null)
 
@@ -167,9 +178,13 @@ class FileSystemService(
     }
 
     companion object {
+        private val ONE_MEGABYTE = 1000000
+
         private val Path.mediaType: MediaType get() = MediaType.asMediaType(mimeType)
 
         private val Path.mimeType: MimeType get() = MimeType.valueOf(contentType)
+
+        private val Path.isVideo: Boolean get() = mimeType.type.lowercase() == "video"
 
         private val Path.contentType: String
             get() {
