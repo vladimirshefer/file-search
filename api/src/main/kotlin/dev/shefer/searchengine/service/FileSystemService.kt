@@ -45,6 +45,12 @@ class FileSystemService(
         return serveFile(absolutePath, range)
     }
 
+    /**
+     * Will serve file with correct Content-Type.
+     * Supports HTTP Range requests.
+     * If the file is of video type, then ranges (chunks) are set
+     * in response even if there is no or unbounded (0-) range requested.
+     */
     private fun serveFile(
         absolutePath: Path,
         range: LongRange?,
