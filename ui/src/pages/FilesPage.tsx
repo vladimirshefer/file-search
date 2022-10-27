@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { GrOptimize } from "react-icons/gr";
+import { BsGrid3X3 } from "react-icons/bs";
+import { MdList } from "react-icons/md";
 
 import "styles/FilesPage.css"
 import "components/toolbox/Toolbox.css"
@@ -16,6 +18,7 @@ import FileApiService from "lib/service/FileApiService";
 import DragArea from "components/drag/DragArea";
 import Sidebar from "components/modal/Sidebar";
 import ImageView from "components/FilesPage/ImageView/ImageView";
+import { ViewType } from 'enums/view';
 
 function FilesPage() {
     let [content, setContent] = useState<MediaDirectoryInfo | null>(null);
@@ -27,7 +30,8 @@ function FilesPage() {
     let [selectedFiles, setSelectedFiles] = useState<string[]>([])
     let fileApiService = new FileApiService()
     let [isLoading, setIsLoading] = useState<boolean>(true);
-    let [searchParams, setSearchParams] = useSearchParams()
+    let [searchParams, setSearchParams] = useSearchParams();
+    let [stateView, switchedView] = useState<ViewType>(ViewType.Grid);
 
     async function init() {
         setIsLoading(true);
@@ -133,14 +137,25 @@ function FilesPage() {
                 selectFn={i => goToPathSegment(i)}
             />
             <div className={"file-actions-bar"}>
-                <GrOptimize
-                    className={"toolbar-icon"}
-                    onClick={initOptimizationForSelected}
-                    title={"Optimize"} />
-                <RiDeleteBin6Line
-                    className={"toolbar-icon"}
-                    title={"Delete"}
-                    onClick={deleteSelected} />
+                <div className={"toolbar-item"}>
+                    {stateView === ViewType.Grid ?
+                        <BsGrid3X3 className={"toolbar-icon"}
+                            onClick={() => switchedView(ViewType.List)} title={"Grid"} />
+                        : <MdList className={"toolbar-icon"}
+                            onClick={() => { switchedView(ViewType.Grid) }} title={"List"} />}
+                </div>
+                <div className={"toolbar-item"}>
+                    <GrOptimize
+                        className={"toolbar-icon"}
+                        onClick={initOptimizationForSelected}
+                        title={"Optimize"} />
+                </div>
+                <div className={"toolbar-item"}>
+                    <RiDeleteBin6Line
+                        className={"toolbar-icon"}
+                        title={"Delete"}
+                        onClick={deleteSelected} />
+                </div>
             </div>
         </div>
         <Readme readme={readme} />
