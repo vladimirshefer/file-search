@@ -11,22 +11,55 @@
     border: 1px solid #ddd;
     padding: 5px;
     user-select: none;
+    @apply grid-cols-12;
 }
 
 .file-info__selected {
     @apply bg-primary-200;
 }
 
+.file-info_names {
+    /* Small screen (default) */
+    @apply col-span-12;
+    @apply grid grid-cols-12;
+
+    /** Medium screen **/
+    @apply md:col-span-6
+}
+
 .file-info_name {
-    margin: 0 15px 0 5px;
+    margin: 0 15px 5px 5px;
 }
 
 .file-info_size {
+
+    /* Small screen (default) */
     font-size: 0.7rem;
     @apply bg-secondary-200;
     border-radius: 4px;
     padding: 5px;
     margin: 0 5px;
+    @apply col-span-4;
+    @apply flex justify-center items-center content-center;
+
+    /** Medium screen **/
+    @apply md:col-span-3;
+
+    /** Large screen **/
+    @apply lg:col-span-2;
+}
+
+.file-info_buttons {
+    /* Small screen (default) */
+    @apply col-span-8;
+    @apply flex;
+    @apply justify-around;
+
+    /** Medium screen **/
+    @apply md:col-span-3;
+
+    /** Large screen **/
+    @apply lg:col-span-4;
 }
 
 .file-info_button {

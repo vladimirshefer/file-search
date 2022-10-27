@@ -71,47 +71,53 @@ function FileInfo(
 ) {
     return <li
         key={displayName}
-        className={`file-info drag-selectable ${isSelected ? "file-info__selected" : ""}`}
+        className={`file-info grid grid-cols-12 drag-selectable ${isSelected ? "file-info__selected" : ""}`}
         data-selection-id={displayName}
     >
-            <span className={"file-info_name"}>
+        <div className={"file-info_names"}>
+            <span className={"file-info_name col-span-12 m-3"}>
                 {displayName}
             </span>
-        {
-            (!secondaryName) ?
-                <span className={"file-info_name-optimized"}>
+            {
+                (!secondaryName) ?
+                    <span className={"file-info_name-optimized col-span-12"}>
                         {secondaryName}
                     </span>
-                : null
-        }
+                    : null
+            }
+        </div>
         <span className={"file-info_size"}>
             {size}
         </span>
-        <Link
-            to={editLink}
-            relative={"route"}
-            className={"file-info_button"}
-        >
-            <button type={"button"}>Edit text</button>
-        </Link>
-        <a
-            href={openLink}
-            target={"_blank"}
-            className={"file-info_button"}
-        >
-            <button type={"button"}>Open source</button>
-        </a>
-        <a
-            href={openOptimizedLink}
-            target={"_blank"}
-            className={"file-info_button"}
-        >
-            <button type={"button"}>Optimized</button>
-        </a>
-        <button type={"button"}
-                onClick={actionOpen}
-        >
-            Open
-        </button>
+        <div className={"file-info_buttons"}>
+            <Link
+                to={editLink}
+                relative={"route"}
+                className={"file-info_button"}
+            >
+                <button type={"button"}>Edit text</button>
+            </Link>
+            <a
+                href={openLink}
+                target={"_blank"}
+                className={"file-info_button"}
+            >
+                <button type={"button"}>Open source</button>
+            </a>
+            <a
+                href={openOptimizedLink}
+                target={"_blank"}
+                className={"file-info_button"}
+            >
+                <button type={"button"}>Optimized</button>
+            </a>
+            <a>
+                <button type={"button"}
+                        onClick={actionOpen}
+                >
+                    Open
+                </button>
+            </a>
+        </div>
     </li>;
 }
