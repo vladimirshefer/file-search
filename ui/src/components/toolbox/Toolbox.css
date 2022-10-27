@@ -1,16 +1,13 @@
 .toolbox {
-    border-bottom: 1px solid #dde;
-    border-top: 1px solid #dde;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     font-size: 18px;
-    font-weight: 500;
     position: sticky;
     top: 0;
-    background-color: white;
     z-index: 1;
     min-height: 2.5rem;
+    @apply border-y border-default-300;
+    @apply bg-white;
+    @apply flex justify-between items-center;
+    @apply shadow-md;
 }
 
 .toolbox_item {
@@ -22,7 +19,6 @@
     @apply rounded-md;
     @apply mx-1 py-1 px-3;
     @apply bg-white;
-    @apply hover:bg-default-200;
 }
 
 .toolbox_delimiter {

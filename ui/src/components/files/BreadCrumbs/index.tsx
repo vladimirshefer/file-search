@@ -10,10 +10,10 @@ export default function Breadcrumbs(
         selectFn?: ((n: number) => any)
     }) {
 
-    return <ul className={"breadcrumbs"}>
+    return <ul className={"flex ml-3"}>
         {names.map((name, index) => <>
                 <li
-                    className="breadcrumb toolbox_item"
+                    className="breadcrumb"
                     onClick={e => {
                         e.preventDefault();
                         selectFn(index)
@@ -23,9 +23,9 @@ export default function Breadcrumbs(
                 >
                     {name}
                 </li>
-                <li className={"breadcrumbs_delimiter toolbox_delimiter"}
+                <li className={"last:hidden mx-1"}
                     key={name + "_delimiter"}>
-                    {">"}
+                    {"/"}
                 </li>
             </>
         )}

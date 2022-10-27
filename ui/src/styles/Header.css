@@ -1,7 +1,6 @@
 .header {
     padding: 8px;
     display: flex;
-    font-weight: 500;
     align-items: center;
     font-size: 18px;
 }
@@ -20,15 +19,10 @@
 .header_nav-item {
     min-width: 5em;
     @apply text-center;
-    text-decoration: inherit;
     color: black;
     padding: 5px;
     margin: 0 5px;
-    /*@apply hover:bg-default-100;*/
-}
-
-.header_nav-item:hover {
-    /*text-decoration: underline;*/
+    @apply text-inherit;
     @apply rounded-md;
-    border: 1px solid #ddd;
+    @apply hover:shadow hover:shadow-default-500;
 }

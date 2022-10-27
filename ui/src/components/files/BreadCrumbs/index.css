@@ -1,7 +1,7 @@
-.breadcrumbs {
-    display: flex;
+.breadcrumb {
+    @apply hover:underline underline-offset-4;
+    @apply decoration-default-300;
+    @apply cursor-pointer;
+    @apply truncate;
 }
 
-.breadcrumbs_delimiter:last-child {
-    display: none;
-}

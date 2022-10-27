@@ -9,6 +9,7 @@
     flex-direction: column;
     @apply rounded-md;
     @apply font-medium;
+    @apply shadow;
 }
 
 .directory-card__selected {
@@ -48,10 +49,6 @@
 
 .directory-card_size {
     @apply bg-primary-300;
-}
-
-.directory-card_select {
-    display: none;
 }
 
 .directory-card_status-item * {
