@@ -1,12 +1,10 @@
 import axios from "axios";
-import {useState} from "react";
 import {useSearchParams} from "react-router-dom";
 import "styles/ProcessesPage.css"
 import {useQuery} from "@tanstack/react-query";
 
 export default function ProcessesPage() {
 
-    let [data, setData] = useState<any>(null)
     let [queryParams] = useSearchParams()
 
     let {
