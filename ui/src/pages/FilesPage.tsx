@@ -1,13 +1,9 @@
 import React, {useEffect, useState} from 'react'
 import {useNavigate, useParams, useSearchParams} from "react-router-dom";
-import {AiOutlineDelete} from "react-icons/ai";
-import {BsPlay} from "react-icons/bs";
-import { useEffect, useState } from 'react'
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { RiDeleteBin6Line } from "react-icons/ri";
-import { GrOptimize } from "react-icons/gr";
-import { BsGrid3X3 } from "react-icons/bs";
-import { MdList } from "react-icons/md";
+import {BsGrid3X3} from "react-icons/bs";
+import {RiDeleteBin6Line} from "react-icons/ri";
+import {GrOptimize} from "react-icons/gr";
+import {MdList} from "react-icons/md";
 
 import "styles/FilesPage.css"
 import "components/toolbox/Toolbox.css"
@@ -22,7 +18,7 @@ import FileApiService from "lib/service/FileApiService";
 import DragArea from "components/drag/DragArea";
 import Sidebar from "components/modal/Sidebar";
 import ImageView from "components/FilesPage/ImageView/ImageView";
-import { ViewType } from 'enums/view';
+import {ViewType} from 'enums/view';
 import {useQuery} from "@tanstack/react-query";
 
 function FilesPage() {
