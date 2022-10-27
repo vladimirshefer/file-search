@@ -66,13 +66,13 @@ class ActivatedBashProcess(
     override fun update() {
         synchronized(process) {
             status = process.processStatus()
-            if (!process.isAlive) {
-                statusCode = process.exitValue()
-            }
+            statusCode = process.exitCode
             error.append(process.errorReader().readText())
             stdout.append(process.inputReader().readText())
         }
     }
+
+    private val Process.exitCode get() = (if (!isAlive) exitValue() else null)
 
     companion object {
 
