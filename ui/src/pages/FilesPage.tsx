@@ -35,7 +35,7 @@ function FilesPage() {
         data: content,
         isLoading: contentLoading,
         error: contentLoadingError,
-    } = useQuery(["content"], async () => {
+    } = useQuery(["content", filePath], async () => {
         return await fileApiService.loadContent(filePath)
     })
 
@@ -43,7 +43,7 @@ function FilesPage() {
         data: readme2,
         isLoading: readmeIsLoading,
         isLoadingError: readmeIsError,
-    } = useQuery(["readme"], async () => {
+    } = useQuery(["readme", filePath], async () => {
         return await fileApiService.loadReadme(filePath)
     })
 
