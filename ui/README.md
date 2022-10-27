@@ -1,6 +1,26 @@
-# Getting Started with Create React App
+# MOAFS UI
+Media optimization and file search user interface (web).
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+### Features
+  - Access files from browser
+  - Play media
+  - Media optimization: Visually seamless media conversion + compression
+  - TODO: Files analytics
+  - TODO: Files search
+  - Minor:
+    - README files support (`.txt` is done, `.md` is TODO)
+
+### Tech stack 
+  - React 13
+  - React Router 6
+  - React Icons
+  - React Query 4
+  - Tailwind. 
+
+### Core project patterns / approaches
+  - Use functional react components only
+  - Use [BEM](https://en.bem.info/methodology/naming-convention/#naming-rules) naming for css.
+
 
 ## Available Scripts
 
@@ -39,8 +59,4 @@ Instead, it will copy all the configuration files and the transitive dependencie
 
 You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
 
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
