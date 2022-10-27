@@ -1,3 +1,7 @@
+import React, {useEffect, useState} from 'react'
+import {useNavigate, useParams, useSearchParams} from "react-router-dom";
+import {AiOutlineDelete} from "react-icons/ai";
+import {BsPlay} from "react-icons/bs";
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { RiDeleteBin6Line } from "react-icons/ri";
@@ -8,48 +12,50 @@ import { MdList } from "react-icons/md";
 import "styles/FilesPage.css"
 import "components/toolbox/Toolbox.css"
 import ConversionUtils from "utils/ConversionUtils";
-import { MediaDirectoryInfo, MediaInfo } from "lib/Api";
+import {MediaDirectoryInfo, MediaInfo} from "lib/Api";
 import MediaCardGrid from "components/FilesPage/media/MediaCardGrid";
 import Breadcrumbs from "components/files/BreadCrumbs";
 import DirectoryCardGrid from "components/FilesPage/directories/DirectoryCardGrid";
-import { Readme } from "components/files/Readme";
+import {Readme} from "components/files/Readme";
 import FilesList from "components/FilesPage/FilesList/FilesList";
 import FileApiService from "lib/service/FileApiService";
 import DragArea from "components/drag/DragArea";
 import Sidebar from "components/modal/Sidebar";
 import ImageView from "components/FilesPage/ImageView/ImageView";
 import { ViewType } from 'enums/view';
+import {useQuery} from "@tanstack/react-query";
 
 function FilesPage() {
-    let [content, setContent] = useState<MediaDirectoryInfo | null>(null);
     let [stats, setStats] = useState<{ [key: string]: any }>({});
     let [readme, setReadme] = useState<string>("");
-    let { "*": filePath = "" } = useParams<string>()
+    let {"*": filePath = ""} = useParams<string>()
     let [pathSegments, setPathSegments] = useState<string[]>([])
     let navigate = useNavigate();
     let [selectedFiles, setSelectedFiles] = useState<string[]>([])
     let fileApiService = new FileApiService()
-    let [isLoading, setIsLoading] = useState<boolean>(true);
     let [searchParams, setSearchParams] = useSearchParams();
     let [stateView, switchedView] = useState<ViewType>(ViewType.Grid);
 
+    let {
+        isLoading: contentLoading,
+        error: contentLoadingError,
+        data: content,
+    } = useQuery(["content"], async () => {
+        return await fileApiService.loadContent(filePath) as (MediaDirectoryInfo | null)
+    })
+
     async function init() {
-        setIsLoading(true);
         setPathSegments(filePath.split("/").filter(it => !!it))
         setSelectedFiles([])
-        setContent(null)
         try {
-            await loadContent(filePath)
             await loadStats(filePath)
             await loadReadme(filePath)
         } catch (e) {
             console.log(e);
         }
-        setIsLoading(false);
 
         return function cleanup() {
             setSelectedFiles([]);
-            setContent(null);
             setStats({})
             setReadme("")
         }
@@ -59,15 +65,11 @@ function FilesPage() {
         init();
     }, [filePath])
 
-    if (isLoading) return <span>LOADING...</span>
+    if (contentLoading) return <span>LOADING...</span>
 
     let openedMedia: string | null = null;
     let openedMediaCandidate = searchParams.get("open");
     if (!!openedMediaCandidate) openedMedia = openedMediaCandidate
-
-    async function loadContent(filePath: string) {
-        setContent(await fileApiService.loadContent(filePath))
-    }
 
     async function loadStats(filePath: string) {
         setStats(await fileApiService.loadStats(filePath) || {})
@@ -94,11 +96,11 @@ function FilesPage() {
     }
 
     function openMedia(fileName: string) {
-        setSearchParams({ ...searchParams, open: fileName })
+        setSearchParams({...searchParams, open: fileName})
     }
 
     function closeMedia() {
-        let newParams = { ...searchParams } as any;
+        let newParams = {...searchParams} as any;
         delete newParams.open
         setSearchParams(newParams)
     }
@@ -128,6 +130,7 @@ function FilesPage() {
                     image1Url={"/api/files/show/?rootName=source,optimized&path=" + filePath + "/" + openedMedia}
                     image2Url={"/api/files/show/?rootName=optimized,source&path=" + filePath + "/" + openedMedia}
                 />
+
             </Sidebar>
         ) : null
         }
@@ -158,29 +161,35 @@ function FilesPage() {
                 </div>
             </div>
         </div>
-        <Readme readme={readme} />
-        <DragArea
-            setSelectedItems={setSelectedFiles}
-        >
-            <DirectoryCardGrid
-                directories={content?.directories || []}
-                path={filePath}
-                selectedDirectories={selectedFiles}
-                actionOpen={(dirname) => null}
-            />
-            <MediaCardGrid
-                imageMedias={imageFiles || []}
-                path={filePath}
-                selectedItems={selectedFiles}
-                actionOpen={(fileName) => openMedia(fileName)}
-            />
-            <FilesList
-                files={content?.files || []}
-                root={filePath}
-                filesSelected={selectedFiles}
-                actionOpen={(filename) => openMedia(filename)}
-            />
-        </DragArea>
+        <Readme readme={readme}/>
+        {contentLoading
+            ? (<span>LOADING...</span>)
+            : contentLoadingError
+                ? (<span>LOADING ERROR</span>)
+                : (
+                    <DragArea
+                        setSelectedItems={setSelectedFiles}
+                    >
+                        <DirectoryCardGrid
+                            directories={content?.directories || []}
+                            path={filePath}
+                            selectedDirectories={selectedFiles}
+                            actionOpen={(dirname) => null}
+                        />
+                        <MediaCardGrid
+                            imageMedias={imageFiles || []}
+                            path={filePath}
+                            selectedItems={selectedFiles}
+                            actionOpen={(fileName) => openMedia(fileName)}
+                        />
+                        <FilesList
+                            files={content?.files || []}
+                            root={filePath}
+                            filesSelected={selectedFiles}
+                            actionOpen={(filename) => openMedia(filename)}
+                        />
+                    </DragArea>
+                )}
     </div>
 }
 
