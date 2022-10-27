@@ -5,7 +5,8 @@ export default function Sidebar(
     {
         isVisible,
         children,
-        actionClose = () => {},
+        actionClose = () => {
+        },
     }: {
         isVisible?: boolean
         children?: ReactNode,
@@ -20,7 +21,13 @@ export default function Sidebar(
              onClick={actionClose}
         />
         <div className={"sidebar_body sidebar_body__right " + (isVisible ? "" : "hidden")}>
-            <button type={"button"} onClick={actionClose}>Close</button>
+            <button
+                type={"button"}
+                onClick={actionClose}
+                tabIndex={0}
+            >
+                Close
+            </button>
             {children}
         </div>
     </div>
