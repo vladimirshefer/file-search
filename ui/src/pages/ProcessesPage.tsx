@@ -1,26 +1,27 @@
 import axios from "axios";
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import {useSearchParams} from "react-router-dom";
+import "styles/ProcessesPage.css"
+import {useQuery} from "@tanstack/react-query";
 
 export default function ProcessesPage() {
 
     let [data, setData] = useState<any>(null)
     let [queryParams] = useSearchParams()
 
-    useEffect(() => {
-        let id = setInterval(async () => {
-            let ids = queryParams.getAll("ids")
-            console.log(ids)
-            setData((await axios.get("/api/processes",
-                {
-                    params: {ids: ids},
-                    paramsSerializer: {indexes: null}
-                }
-            )).data)
-        }, 500);
+    let {
+        data: processes,
+        isLoading: dataLoading,
+        isError: dataLoadingError,
+    } = useProcesses(queryParams.getAll("ids"))
 
-        return () => clearInterval(id);
-    }, [])
+    if (dataLoading) {
+        return <span>"Processes are loading..."</span>
+    }
+
+    if (dataLoadingError) {
+        return <span>"Processes are loading..."</span>
+    }
 
     function renderList(node: any) {
         if (!node) {
@@ -33,7 +34,6 @@ export default function ProcessesPage() {
             </ul>
         }
         if (!!node.status) {
-            // if (node.status == "SUCCESS") return <p>SUCCESS</p>
             return <div className={"border-2"}>
                 <h4>{node.id}</h4>
                 <h4>{node.status || "NO STATUS"}</h4>
@@ -51,6 +51,41 @@ export default function ProcessesPage() {
 
     }
 
-    return renderList(data)
+    function BackgroundWrapper(
+        {
+            backgroundClass,
+            children,
+        }: {
+            backgroundClass: string,
+            children: any
+        }
+    ) {
+        return <div className="background-wrapper">
+            <div className={`background-wrapper_background ${backgroundClass}`}></div>
+            {children}
+        </div>
+    }
 
+    return <>
+        <BackgroundWrapper backgroundClass={"process-loading-background"}>
+            <p>Loading</p>
+        </BackgroundWrapper>
+
+        {renderList(processes)}
+    </>
+
+}
+
+function useProcesses(ids: string[]) {
+    return useQuery(["processes"], async () => {
+        let axiosResponse = await axios.get("/api/processes",
+            {
+                params: {ids: ids},
+                paramsSerializer: {indexes: null}
+            }
+        );
+        return axiosResponse.data
+    }, {
+        refetchInterval: 3000
+    });
 }
