@@ -8,7 +8,7 @@ import { MdList } from "react-icons/md";
 import "styles/FilesPage.css"
 import "components/toolbox/Toolbox.css"
 import ConversionUtils from "utils/ConversionUtils";
-import { MediaDirectoryInfo, MediaInfo } from "lib/Api";
+import { MediaInfo} from "lib/Api";
 import MediaCardGrid from "components/FilesPage/media/MediaCardGrid";
 import Breadcrumbs from "components/files/BreadCrumbs";
 import DirectoryCardGrid from "components/FilesPage/directories/DirectoryCardGrid";
@@ -23,7 +23,6 @@ import { useQuery } from "@tanstack/react-query";
 
 function FilesPage() {
     let [stats, setStats] = useState<{ [key: string]: any }>({});
-    let [readme, setReadme] = useState<string>("");
     let { "*": filePath = "" } = useParams<string>()
     let [pathSegments, setPathSegments] = useState<string[]>([])
     let navigate = useNavigate();
@@ -33,11 +32,19 @@ function FilesPage() {
     let [stateView, switchView] = useState<ViewType>(ViewType.Grid);
 
     let {
+        data: content,
         isLoading: contentLoading,
         error: contentLoadingError,
-        data: content,
     } = useQuery(["content"], async () => {
-        return await fileApiService.loadContent(filePath) as (MediaDirectoryInfo | null)
+        return await fileApiService.loadContent(filePath)
+    })
+
+    let {
+        data: readme2,
+        isLoading: readmeIsLoading,
+        isLoadingError: readmeIsError,
+    } = useQuery(["readme"], async () => {
+        return await fileApiService.loadReadme(filePath)
     })
 
     async function init() {
@@ -45,7 +52,6 @@ function FilesPage() {
         setSelectedFiles([])
         try {
             await loadStats(filePath)
-            await loadReadme(filePath)
         } catch (e) {
             console.log(e);
         }
@@ -53,7 +59,6 @@ function FilesPage() {
         return function cleanup() {
             setSelectedFiles([]);
             setStats({})
-            setReadme("")
         }
     }
 
@@ -61,18 +66,12 @@ function FilesPage() {
         init();
     }, [filePath])
 
-    if (contentLoading) return <span>LOADING...</span>
-
     let openedMedia: string | null = null;
     let openedMediaCandidate = searchParams.get("open");
     if (!!openedMediaCandidate) openedMedia = openedMediaCandidate
 
     async function loadStats(filePath: string) {
         setStats(await fileApiService.loadStats(filePath) || {})
-    }
-
-    async function loadReadme(filePath: string) {
-        setReadme(await fileApiService.loadReadme(filePath) || "")
     }
 
     function renderStats(stats: { [p: string]: any }) {
@@ -132,10 +131,10 @@ function FilesPage() {
         }
         <div className="toolbox flex">
             <Breadcrumbs
-                names={["/", ...pathSegments]}
+                names={["Home", ...pathSegments]}
                 selectFn={i => goToPathSegment(i)}
             />
-            <div className={"file-actions-bar"}>
+            <div className={"file-actions-bar"} key={"file-actions-bar"}>
                 <div className={"toolbar-item"}>
                     {stateView === ViewType.Grid ?
                         <button onClick={() => switchView(ViewType.List)}>
@@ -161,10 +160,10 @@ function FilesPage() {
                 </div>
             </div>
         </div>
-        <Readme readme={readme} />
+        <Readme readme={readme2} />
         {contentLoading
             ? (<span>LOADING...</span>)
-            : contentLoadingError
+            : !!contentLoadingError
                 ? (<span>LOADING ERROR</span>)
                 : (
                     <DragArea

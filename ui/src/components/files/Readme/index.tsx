@@ -4,10 +4,12 @@ export function Readme(
     {
         readme
     }: {
-        readme: string
+        readme?: string | null | undefined
     }
 ) {
-    return <div className={`readme ${readme ? "" : "hidden "}`}>
+    console.log(readme)
+
+    return <div className={`readme ${readme ? "" : "hidden"}`}>
         <h3>README</h3>
         <pre className={"readme_text"}>
                 {readme}
