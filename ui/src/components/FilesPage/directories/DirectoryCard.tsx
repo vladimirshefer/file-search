@@ -9,7 +9,7 @@ export default function DirectoryCard(
         name,
         parent,
         isSelected = false,
-        actionOpen = () => {},
+        actionOpen = () => undefined,
     }: {
         name: string,
         parent: string,
@@ -33,7 +33,7 @@ export default function DirectoryCard(
 
     return <li
         key={name}
-        className={`directory-card drag-selectable ${isSelected?"directory-card__selected":""}`}
+        className={`directory-card drag-selectable ${isSelected ? "directory-card__selected" : ""}`}
         data-selection-id={name}
     >
         <Link
@@ -71,11 +71,6 @@ export default function DirectoryCard(
                     }}
                 >
                     {ConversionUtils.getReadableSize(size)}
-                </span>
-            <span
-                className={"directory-card_status-item directory-card_select"}
-            >
-                    <input type={"checkbox"}/>
                 </span>
         </div>
     </li>;
