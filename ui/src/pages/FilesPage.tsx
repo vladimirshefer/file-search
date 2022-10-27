@@ -1,36 +1,36 @@
-import React, {useEffect, useState} from 'react'
-import {useNavigate, useParams, useSearchParams} from "react-router-dom";
-import {BsGrid3X3} from "react-icons/bs";
-import {RiDeleteBin6Line} from "react-icons/ri";
-import {GrOptimize} from "react-icons/gr";
-import {MdList} from "react-icons/md";
+import React, { useEffect, useState } from 'react'
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { BsGrid3X3 } from "react-icons/bs";
+import { RiDeleteBin6Line } from "react-icons/ri";
+import { GrOptimize } from "react-icons/gr";
+import { MdList } from "react-icons/md";
 
 import "styles/FilesPage.css"
 import "components/toolbox/Toolbox.css"
 import ConversionUtils from "utils/ConversionUtils";
-import {MediaDirectoryInfo, MediaInfo} from "lib/Api";
+import { MediaDirectoryInfo, MediaInfo } from "lib/Api";
 import MediaCardGrid from "components/FilesPage/media/MediaCardGrid";
 import Breadcrumbs from "components/files/BreadCrumbs";
 import DirectoryCardGrid from "components/FilesPage/directories/DirectoryCardGrid";
-import {Readme} from "components/files/Readme";
+import { Readme } from "components/files/Readme";
 import FilesList from "components/FilesPage/FilesList/FilesList";
 import FileApiService from "lib/service/FileApiService";
 import DragArea from "components/drag/DragArea";
 import Sidebar from "components/modal/Sidebar";
 import ImageView from "components/FilesPage/ImageView/ImageView";
-import {ViewType} from 'enums/view';
-import {useQuery} from "@tanstack/react-query";
+import { ViewType } from 'enums/view';
+import { useQuery } from "@tanstack/react-query";
 
 function FilesPage() {
     let [stats, setStats] = useState<{ [key: string]: any }>({});
     let [readme, setReadme] = useState<string>("");
-    let {"*": filePath = ""} = useParams<string>()
+    let { "*": filePath = "" } = useParams<string>()
     let [pathSegments, setPathSegments] = useState<string[]>([])
     let navigate = useNavigate();
     let [selectedFiles, setSelectedFiles] = useState<string[]>([])
     let fileApiService = new FileApiService()
     let [searchParams, setSearchParams] = useSearchParams();
-    let [stateView, switchedView] = useState<ViewType>(ViewType.Grid);
+    let [stateView, switchView] = useState<ViewType>(ViewType.Grid);
 
     let {
         isLoading: contentLoading,
@@ -92,11 +92,11 @@ function FilesPage() {
     }
 
     function openMedia(fileName: string) {
-        setSearchParams({...searchParams, open: fileName})
+        setSearchParams({ ...searchParams, open: fileName })
     }
 
     function closeMedia() {
-        let newParams = {...searchParams} as any;
+        let newParams = { ...searchParams } as any;
         delete newParams.open
         setSearchParams(newParams)
     }
@@ -138,26 +138,30 @@ function FilesPage() {
             <div className={"file-actions-bar"}>
                 <div className={"toolbar-item"}>
                     {stateView === ViewType.Grid ?
-                        <BsGrid3X3 className={"toolbar-icon"}
-                            onClick={() => switchedView(ViewType.List)} title={"Grid"} />
-                        : <MdList className={"toolbar-icon"}
-                            onClick={() => { switchedView(ViewType.Grid) }} title={"List"} />}
+                        <button onClick={() => switchView(ViewType.List)}>
+                            <BsGrid3X3 className={"toolbar-icon"} title={"Grid"} />
+                        </button>
+                        : <button onClick={() => switchView(ViewType.Grid)}>
+                            <MdList className={"toolbar-icon"} title={"List"} />
+                        </button>}
                 </div>
                 <div className={"toolbar-item"}>
-                    <GrOptimize
-                        className={"toolbar-icon"}
-                        onClick={initOptimizationForSelected}
-                        title={"Optimize"} />
+                    <button onClick={initOptimizationForSelected}>
+                        <GrOptimize
+                            className={"toolbar-icon"}
+                            title={"Optimize"} />
+                    </button>
                 </div>
                 <div className={"toolbar-item"}>
-                    <RiDeleteBin6Line
-                        className={"toolbar-icon"}
-                        title={"Delete"}
-                        onClick={deleteSelected} />
+                    <button onClick={deleteSelected}>
+                        <RiDeleteBin6Line
+                            className={"toolbar-icon"}
+                            title={"Delete"} />
+                    </button>
                 </div>
             </div>
         </div>
-        <Readme readme={readme}/>
+        <Readme readme={readme} />
         {contentLoading
             ? (<span>LOADING...</span>)
             : contentLoadingError
