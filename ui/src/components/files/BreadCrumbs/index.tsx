@@ -21,7 +21,9 @@ export default function Breadcrumbs(
                     title={name}
                     key={name}
                 >
-                    {name}
+                    <a>
+                        {name}
+                    </a>
                 </li>
                 <li className={"last:hidden mx-1"}
                     key={name + "_delimiter"}>
