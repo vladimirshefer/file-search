@@ -30,7 +30,8 @@ class PreparedBashProcess(
         }
     }
 
-    override fun start(): BashProcess = synchronized(this) {
+    @Synchronized
+    override fun start(): BashProcess {
         activatedBashProcess?.also { return it }
 
         if (isCanceledBeforeStart) {
@@ -38,7 +39,8 @@ class PreparedBashProcess(
         }
 
         val process = processBuilder()
-        ActivatedBashProcess(process.start())
+
+        return ActivatedBashProcess(process.start())
             .also {
                 onCompleteList.forEach(it::onComplete)
                 it.onComplete { this.status = it.status }
