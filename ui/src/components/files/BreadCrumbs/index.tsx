@@ -19,6 +19,7 @@ export default function Breadcrumbs(
                         selectFn(index)
                     }}
                     title={name}
+                    tabIndex={0}
                     key={name}
                 >
                     <a>
