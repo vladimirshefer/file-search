@@ -1,56 +1,29 @@
-.directory-card {
-    border: 1px solid #ddd;
-    @apply col-span-6;
-    @apply sm:col-span-4;
-    @apply md:col-span-3;
-    @apply lg:col-span-2;
-    overflow: hidden;
+.directory-card-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+}
+
+.directory-card-grid_header {
+    grid-column: span 12;
     display: flex;
-    flex-direction: column;
-    @apply rounded-md;
-    @apply font-medium;
-    @apply shadow;
+    font-weight: 500;
+    padding: 0.7em;
+    margin-bottom: 10px;
 }
 
-.directory-card__selected {
-    @apply bg-primary-200;
+.directory-card-list {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
 }
 
-.directory-card a {
-    text-decoration: inherit;
+.directory-card-list:last-child {
+    padding-bottom: 40px;
 }
 
-.directory-card_main-line {
-    padding: 15px;
+.directory-card-list .directory-card-list_header {
+    grid-column: span 2;
     display: flex;
-    border-bottom: 1px solid #eee;
-}
-
-.directory-card_status-line {
-    display: flex;
-    justify-content: end;
-    overflow: hidden;
-    margin: 0;
-    user-select: none;
-}
-
-.directory-card_name {
-    @apply truncate;
-    margin: 0 10px;
-}
-
-.directory-card_status-item {
-    padding: 0 10px;
-    margin: 0;
-    cursor: pointer;
-    height: 100%;
-    text-align: center;
-}
-
-.directory-card_size {
-    @apply bg-primary-300;
-}
-
-.directory-card_status-item * {
-    align-self: center;
+    font-weight: 500;
+    padding: 0.7em;
+    margin-bottom: 10px;
 }

@@ -11,7 +11,7 @@ import ConversionUtils from "utils/ConversionUtils";
 import { MediaInfo} from "lib/Api";
 import MediaCardGrid from "components/FilesPage/media/MediaCardGrid";
 import Breadcrumbs from "components/files/BreadCrumbs";
-import DirectoryCardGrid from "components/FilesPage/directories/DirectoryCardGrid";
+import DirectoryCard from "components/FilesPage/directories/DirectoryCard";
 import { Readme } from "components/files/Readme";
 import FilesList from "components/FilesPage/FilesList/FilesList";
 import FileApiService from "lib/service/FileApiService";
@@ -169,11 +169,12 @@ function FilesPage() {
                     <DragArea
                         setSelectedItems={setSelectedFiles}
                     >
-                        <DirectoryCardGrid
+                        <DirectoryCard
                             directories={content?.directories || []}
                             path={filePath}
                             selectedDirectories={selectedFiles}
-                            actionOpen={(dirname) => null}
+                            actionOpen={() => null}
+                            isView={stateView}
                         />
                         <MediaCardGrid
                             imageMedias={imageFiles || []}
