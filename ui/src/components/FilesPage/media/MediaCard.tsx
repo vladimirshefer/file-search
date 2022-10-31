@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from "react";
+import React, {KeyboardEventHandler, useMemo, useState} from "react";
 import "./MediaCard.css"
 import {MediaStatus} from "lib/Api";
 import {IoCheckmarkDoneOutline} from "react-icons/io5";
@@ -24,6 +24,7 @@ export default function MediaCard(
     }) {
 
     let [isOptionsOpened, setOptionsOpened] = useState<boolean>(false)
+    let toggleOptionsOpened = () => setOptionsOpened(!isOptionsOpened);
 
     let previewBackgroundUrl = useMemo(() => {
         let thumbnailUrl = `/api/files/show/?rootName=thumbnails,optimized,source&path=${path}/${name}`;
@@ -51,24 +52,22 @@ export default function MediaCard(
                                         status === "SOURCE_ONLY" ? <AiOutlineClose/> : null
                             }
                         </span>
-                        <span className={"media-card_name"}>
+                        <span className={"media-card_name"}
+                           tabIndex={0}
+                           onKeyUp={(e) => {
+                               if (e.key === "Enter") actionOpen()
+                           }}
+                        >
                             {name}
                         </span>
-                        <span className={"media-card_options-button"}
-                              onClick={(e) => {
-                                  e.preventDefault();
-                                  setOptionsOpened(!isOptionsOpened)
-                              }}
-                              onTouchEnd={(e) => {
-                                  e.preventDefault()
-                                  setOptionsOpened(!isOptionsOpened)
-                              }}
-                              onDoubleClick={(e) => {
-                                  e.preventDefault()
-                              }}
+                        <button className={"media-card_options-button"}
+                           onClick={prevent(toggleOptionsOpened)}
+                           onKeyUp={ifEnter(toggleOptionsOpened)}
+                           onTouchEnd={prevent(toggleOptionsOpened)}
+                           onDoubleClick={prevent(null)}
                         >
                             ...
-                        </span>
+                        </button>
                     </div>
                 </div>
                 <div className={`media-card_options ${isOptionsOpened ? "" : "hidden"}`}
@@ -78,27 +77,52 @@ export default function MediaCard(
                      }}
                 >
                     <ul>
-                        <li
-                            onClick={actionOpen}
-                            onTouchEnd={actionOpen}
-                        >
-                            Open
+                        <li>
+                            <button
+                                onClick={actionOpen}
+                                onTouchEnd={actionOpen}
+                                onKeyUp={ifEnter(actionOpen)}
+                            >
+                                Open
+                            </button>
                         </li>
-                        <li
-                            onClick={actionDeleteSource}
-                            onTouchEnd={actionDeleteSource}
-                        >
-                            Delete source
+                        <li>
+                            <button
+                                onClick={actionDeleteSource}
+                                onTouchEnd={actionDeleteSource}
+                                onKeyUp={ifEnter(actionOpen)}
+                            >
+                                Delete source
+                            </button>
                         </li>
-                        <li
-                            onClick={actionDeleteOptimized}
-                            onTouchEnd={actionDeleteOptimized}
-                        >
-                            Delete optimized
+                        <li>
+                            <button
+                                onClick={actionDeleteOptimized}
+                                onTouchEnd={actionDeleteOptimized}
+                                onKeyUp={ifEnter(actionOpen)}
+                            >
+                                Delete optimized
+                            </button>
                         </li>
                     </ul>
                 </div>
             </li>
         </>
     )
+}
+
+function ifEnter<T>(action: () => any): KeyboardEventHandler<T> {
+    return prevent((e: KeyboardEvent) => {
+            if (e.key === "Enter" || e.key === "Space") action()
+            return undefined
+        }
+    )
+}
+
+function prevent<E extends Event, EH>(action: ((e: E) => any) | null): EH {
+    return ((e: E) => {
+        e.preventDefault()
+        e.stopPropagation()
+        return action && action(e)
+    }) as EH
 }

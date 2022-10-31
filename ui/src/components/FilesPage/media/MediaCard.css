@@ -8,6 +8,17 @@
     flex-direction: column;
     aspect-ratio: 1/1;
     @apply rounded-md;
+    animation: fadein 0.3s;
+    @apply shadow;
+}
+
+@keyframes fadein {
+    from {
+        opacity: 0
+    }
+    to {
+        opacity: 1
+    }
 }
 
 .media-card_content {
@@ -27,8 +38,8 @@
 .media-card_image {
     max-width: 100%;
     aspect-ratio: 1/1;
-    background-size:cover;
-    background-position:center;
+    background-size: cover;
+    background-position: center;
 }
 
 .media-card_info {
