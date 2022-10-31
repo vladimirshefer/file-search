@@ -100,24 +100,24 @@ function FileInfo(
             <a
                 href={openLink}
                 target={"_blank"}
+                rel={"noreferrer"}
                 className={"file-info_button"}
             >
-                <button type={"button"}>Open source</button>
+                Open source
             </a>
             <a
                 href={openOptimizedLink}
                 target={"_blank"}
+                rel={"noreferrer"}
                 className={"file-info_button"}
             >
-                <button type={"button"}>Optimized</button>
+                Optimized
             </a>
-            <a>
-                <button type={"button"}
-                        onClick={actionOpen}
-                >
-                    Open
-                </button>
-            </a>
+            <button type={"button"}
+                    onClick={actionOpen}
+            >
+                Open
+            </button>
         </div>
     </li>;
 }
