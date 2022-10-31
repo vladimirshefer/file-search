@@ -1,0 +1,8 @@
+.readme {
+    padding: 1em;
+}
+
+.readme_text {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}

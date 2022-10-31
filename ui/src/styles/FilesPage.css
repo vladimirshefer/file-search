@@ -1,0 +1,31 @@
+.file-actions-bar {
+    display: flex;
+    min-height: inherit;
+    align-items: center;
+}
+
+.file-actions-bar .toolbar-item {
+    height: 100%;
+    margin-left: 1.5em;
+    color: black;
+}
+
+.file-actions-bar .toolbar-item:last-child {
+    margin-right: 1em;
+}
+
+.file-actions-bar .toolbar-item {
+    width: 2em;
+    min-height: 2em;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.file-actions-bar .toolbar-item:hover {
+    cursor: pointer;
+    --tw-bg-opacity: 1;
+    background-color: rgb(231 229 228 / var(--tw-bg-opacity));
+    text-decoration: none;
+}

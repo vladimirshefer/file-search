@@ -1,0 +1,29 @@
+.directory-card-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+}
+
+.directory-card-grid_header {
+    grid-column: span 12;
+    display: flex;
+    font-weight: 500;
+    padding: 0.7em;
+    margin-bottom: 10px;
+}
+
+.directory-card-list {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+}
+
+.directory-card-list:last-child {
+    padding-bottom: 40px;
+}
+
+.directory-card-list .directory-card-list_header {
+    grid-column: span 2;
+    display: flex;
+    font-weight: 500;
+    padding: 0.7em;
+    margin-bottom: 10px;
+}

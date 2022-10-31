@@ -1,0 +1,85 @@
+.media-card {
+    position: relative;
+    @apply col-span-6;
+    @apply sm:col-span-4;
+    @apply md:col-span-3;
+    @apply lg:col-span-2;
+    display: flex;
+    flex-direction: column;
+    aspect-ratio: 1/1;
+    @apply rounded-md;
+    animation: fadein 0.3s;
+    @apply shadow;
+}
+
+@keyframes fadein {
+    from {
+        opacity: 0
+    }
+    to {
+        opacity: 1
+    }
+}
+
+.media-card_content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    aspect-ratio: 1/1;
+    overflow: hidden;
+    border: 1px solid #ddd;
+    @apply rounded-md;
+}
+
+.media-card__selected {
+    @apply bg-primary-200;
+}
+
+.media-card_image {
+    max-width: 100%;
+    aspect-ratio: 1/1;
+    background-size: cover;
+    background-position: center;
+}
+
+.media-card_info {
+    display: flex;
+    justify-content: space-between;
+    align-content: center;
+}
+
+.media-card_icon svg {
+    margin: 5px 10px;
+    height: 18px;
+    width: 18px;
+}
+
+.media-card_name {
+    margin: 5px 10px;
+    @apply truncate;
+    user-select: none;
+}
+
+.media-card_options-button {
+    padding: 0 1em;
+    display: flex;
+    align-content: center;
+    cursor: pointer;
+}
+
+.media-card_options {
+    background-color: white;
+    @apply rounded-md;
+    padding: 0.7em 0;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 1;
+}
+
+.media-card_options li {
+    @apply hover:bg-default-100;
+    cursor: pointer;
+    padding: 0.3em 1em;
+    /*z-index: 150;*/
+}
