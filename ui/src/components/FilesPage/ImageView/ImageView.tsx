@@ -31,13 +31,13 @@ export default function ImageView(
         return () => {
             imageZoomer.unmount();
         }
-    }, [])
+    }, [sourceIdR, optimizedIdR, zoomSourceIdR, zoomOptimizedIdR])
 
     function renderImage(id: string, src: string) {
         return <img id={id}
                     draggable={false}
                     className={"img-zoom-img"}
-                    alt={"Source image"}
+                    alt={"Source"}
                     src={src}
         />;
     }
@@ -45,6 +45,8 @@ export default function ImageView(
     return <>
         <div className={"image-view"}
              onWheel={(e) => {
+                 e.preventDefault()
+                 e.stopPropagation()
                  let zoomIn = e.deltaY < 0;
                  let zoomStep = zoomIn ? 1.2 : 1 / 1.2;
                  imageZoomer?.setZoomRate(imageZoomer?.getZoomRate() * zoomStep)
