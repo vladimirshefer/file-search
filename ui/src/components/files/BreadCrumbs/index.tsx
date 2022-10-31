@@ -12,19 +12,17 @@ export default function Breadcrumbs(
 
     return <ul className={"flex ml-3"}>
         {names.map((name, index) => <>
-                <li
-                    className="breadcrumb"
-                    onClick={e => {
-                        e.preventDefault();
-                        selectFn(index)
-                    }}
-                    title={name}
-                    tabIndex={0}
-                    key={name}
-                >
-                    <a>
+                <li key={name}>
+                    <button
+                        className="breadcrumb"
+                        onClick={e => {
+                            e.preventDefault();
+                            selectFn(index)
+                        }}
+                        title={name}
+                    >
                         {name}
-                    </a>
+                    </button>
                 </li>
                 <li className={"last:hidden mx-1"}
                     key={name + "_delimiter"}>
