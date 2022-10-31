@@ -83,8 +83,8 @@ export class SingleImageZoomer {
         viewId: string,
         positionListener: (x: number, y: number) => void
     ) {
-        if (!imageId) throw "Zoomer: imageId is not set"
-        if (!viewId) throw `Zoomer: viewId is not set for image ${imageId}`
+        if (!imageId) throw new Error("Zoomer: imageId is not set")
+        if (!viewId) throw new Error(`Zoomer: viewId is not set for image ${imageId}`)
         this.imageId = imageId;
         this.viewId = viewId;
         this.positionListener = positionListener
