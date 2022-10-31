@@ -1,7 +1,9 @@
 package dev.shefer.searchengine
 
+import dev.shefer.searchengine.optimize.FileSystemSubtree
 import dev.shefer.searchengine.optimize.MediaOptimizationManager
 import dev.shefer.searchengine.optimize.MediaOptimizer
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -37,6 +39,14 @@ class RestApplication {
             thumbnailsMediaRoot,
         )
     }
+
+    @Qualifier("sourceSubtree")
+    @Bean
+    fun sourceMediaSubtree(
+        @Value("\${app.sourceMediaRootPath}")
+        sourceMediaRootPath: String,
+    ) = FileSystemSubtree.of(sourceMediaRootPath)
+
 }
 
 fun main() {

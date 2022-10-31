@@ -35,6 +35,14 @@ class FileSystemController(
         return mapOf("content" to content)
     }
 
+    @GetMapping("/info")
+    fun getInfo(
+        @RequestParam(required = false, defaultValue = "")
+        path: String
+    ): Any? {
+        return fileSystemService.getInfo(path)
+    }
+
     @GetMapping("/readme")
     fun readme(
         @RequestParam(required = false, defaultValue = "")

@@ -1,9 +1,11 @@
 package dev.shefer.searchengine.service
 
 import dev.shefer.searchengine.dto.OptimizeRequest
+import dev.shefer.searchengine.optimize.FileSystemSubtree
 import dev.shefer.searchengine.optimize.MediaOptimizationManager
 import dev.shefer.searchengine.optimize.dto.MediaDirectoryInfo
 import dev.shefer.searchengine.util.FileUtil.forEachAccessibleFile
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -19,10 +21,16 @@ import java.nio.file.attribute.BasicFileAttributes
 import kotlin.io.path.exists
 import kotlin.io.path.extension
 import kotlin.io.path.fileSize
+import kotlin.io.path.getLastModifiedTime
+import kotlin.io.path.isDirectory
+import kotlin.io.path.isRegularFile
+import kotlin.io.path.name
 
 @Service
 class FileSystemService(
-    private val mediaOptimizationManager: MediaOptimizationManager
+    private val mediaOptimizationManager: MediaOptimizationManager,
+    @Qualifier("sourceSubtree")
+    private val sourceSubtree: FileSystemSubtree
 ) {
 
     @Value("\${app.rootDirectory}")
@@ -181,6 +189,35 @@ class FileSystemService(
     fun optimize(optimizeRequest: OptimizeRequest) {
         val optimizePaths = optimizeRequest.paths.map { Path.of(optimizeRequest.basePath, it) }
         mediaOptimizationManager.optimize(optimizePaths)
+    }
+
+    fun getInfo(path: String): Map<String, Any> {
+        val file = sourceSubtree.resolve(Path.of(path))
+
+        if (file.isRegularFile()) return mapOf(
+            "isFile" to true,
+            "isDirectory" to false,
+            "fileSize" to file.fileSize(),
+            "fileName" to file.name,
+            "displayName" to file.name,
+            "fileExtension" to file.extension,
+            "mimeType" to file.mimeType.toString(),
+            "mediaType" to file.mediaType.toString(),
+            "contentType" to file.contentType,
+            "isVideo" to file.isVideo,
+            "lastModified" to file.getLastModifiedTime().toInstant().epochSecond.toString(),
+        )
+
+        if (file.isDirectory()) return mapOf(
+            "isFile" to false,
+            "isDirectory" to true,
+            "directoryName" to file.name,
+            "displayName" to file.name,
+            "filesInside" to Files.list(file).filter { it.isRegularFile() }.count(),
+            "directoriesInside" to Files.list(file).filter { it.isDirectory() }.count(),
+        )
+
+        return emptyMap()
     }
 
     companion object {

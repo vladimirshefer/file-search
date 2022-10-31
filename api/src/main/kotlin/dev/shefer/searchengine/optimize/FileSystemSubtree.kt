@@ -87,4 +87,21 @@ class FileSystemSubtree(
         return resolve(filePath).fileSize()
     }
 
+    companion object {
+        fun of(pathString: String): FileSystemSubtree {
+            val path = Path.of(pathString)
+            return of(path)
+        }
+
+        private fun of(path: Path): FileSystemSubtree {
+            if (!path.exists()) {
+                throw IllegalArgumentException("No such directory $path")
+            }
+            if (!path.isDirectory()) {
+                throw IllegalArgumentException("Not a directory $path")
+            }
+            return FileSystemSubtree(path)
+        }
+    }
+
 }
