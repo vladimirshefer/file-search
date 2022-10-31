@@ -50,6 +50,6 @@ export default function useDragSelect(
 
     useEffect(() => {
         return enableSelection()
-    }, [])
+    }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
 }
