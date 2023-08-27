@@ -38,6 +38,7 @@
 .directory-card_name {
     @apply truncate;
     margin: 0 10px;
+    cursor: default;
 }
 
 .directory-card_status-item {
