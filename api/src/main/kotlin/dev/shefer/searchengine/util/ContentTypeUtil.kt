@@ -1,7 +1,10 @@
 package dev.shefer.searchengine.util
 
-import java.nio.file.Files
+import org.apache.tika.mime.MimeType
+import org.apache.tika.mime.MimeTypes
+import java.net.URLConnection
 import java.nio.file.Path
+
 
 object ContentTypeUtil {
     /**
@@ -9,13 +12,11 @@ object ContentTypeUtil {
      * @return null if unknown content type.
      */
     fun guessCorrectFileExtension(path: Path): String? {
-        val contentType = Files.probeContentType(path) ?: return null
-        if (contentType == "image/png") {
-            return "png"
-        }
-        if (contentType == "image/jpeg") {
-            return "jpg"
-        }
-        return null
+        val file = path.toFile()
+        val connection: URLConnection = file.toURI().toURL().openConnection()
+        val contentType: String = connection.contentType ?: return null
+        val allTypes = MimeTypes.getDefaultMimeTypes()
+        val jpeg: MimeType = allTypes.forName(contentType) ?: return null
+        return jpeg.extension.takeIf { it.isNotBlank() }?.substring(1)
     }
 }
