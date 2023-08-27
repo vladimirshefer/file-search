@@ -1,25 +1,25 @@
-import React, { useEffect, useState } from 'react'
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { BsGrid3X3 } from "react-icons/bs";
-import { RiDeleteBin6Line } from "react-icons/ri";
-import { GrOptimize } from "react-icons/gr";
-import { MdList } from "react-icons/md";
+import React, {useEffect, useState} from 'react'
+import {useNavigate, useParams, useSearchParams} from "react-router-dom";
+import {BsGrid3X3} from "react-icons/bs";
+import {RiDeleteBin6Line} from "react-icons/ri";
+import {GrOptimize} from "react-icons/gr";
+import {MdList} from "react-icons/md";
 
 import "styles/FilesPage.css"
 import "components/toolbox/Toolbox.css"
 import ConversionUtils from "utils/ConversionUtils";
-import { MediaInfo} from "lib/Api";
+import {MediaInfo} from "lib/Api";
 import MediaCardGrid from "components/FilesPage/media/MediaCardGrid";
 import Breadcrumbs from "components/files/BreadCrumbs";
 import DirectoryCard from "components/FilesPage/directories/DirectoryCard";
-import { Readme } from "components/files/Readme";
+import {Readme} from "components/files/Readme";
 import FilesList from "components/FilesPage/FilesList/FilesList";
 import FileApiService from "lib/service/FileApiService";
 import DragArea from "components/drag/DragArea";
 import Sidebar from "components/modal/Sidebar";
 import ImageView from "components/FilesPage/ImageView/ImageView";
-import { ViewType } from 'enums/view';
-import { useQuery } from "@tanstack/react-query";
+import {ViewType} from 'enums/view';
+import {useQuery} from "@tanstack/react-query";
 
 function FilesPage() {
     let [stats, setStats] = useState<{ [key: string]: any }>({});
@@ -120,12 +120,20 @@ function FilesPage() {
                 isVisible={!!openedMedia}
                 actionClose={() => closeMedia()}
             >
-                <ImageView
-                    // TODO use only files from corresponding root. here is the temp fix to ui not fail
-                    image1Url={"/api/files/show/?rootName=source,optimized&path=" + filePath + "/" + openedMedia}
-                    image2Url={"/api/files/show/?rootName=optimized,source&path=" + filePath + "/" + openedMedia}
-                />
-
+                {
+                    openedMedia.includes(".mp4")
+                        ? <video
+                            src={`/api/files/show/?rootName=source,optimized&path=${filePath}/${openedMedia}`}
+                            controls={true}
+                            autoPlay={true}
+                            loop={true}
+                        />
+                        : <ImageView
+                            // TODO use only files from corresponding root. here is the temp fix to ui not fail
+                            image1Url={`/api/files/show/?rootName=source,optimized&path=${filePath}/${openedMedia}`}
+                            image2Url={`/api/files/show/?rootName=optimized,source&path=${filePath}/${openedMedia}`}
+                        />
+                }
             </Sidebar>
         ) : null
         }
