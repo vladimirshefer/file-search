@@ -22,9 +22,79 @@ import {ViewType} from 'enums/view';
 import {useQuery} from "@tanstack/react-query";
 import mime from "mime";
 
+function Inspection(
+    {
+        inspection
+    }: {
+        inspection: any
+    }
+) {
+    let fileApiService = new FileApiService()
+
+    function fixInspection(inspection: any) {
+        return fileApiService.fixInspection(inspection)
+    }
+
+    return <tr>
+        <td>
+            <button
+                onClick={() => fixInspection(inspection).then(it => alert(JSON.stringify(it)))}
+            >
+                Fix
+            </button>
+        </td>
+        <td>{inspection.type}</td>
+        <td>{inspection.description}</td>
+        <td>{inspection.path}</td>
+    </tr>;
+}
+
+function Inspections(
+    {
+        filePath
+    }: {
+        filePath: string
+    }
+) {
+
+    let fileApiService = new FileApiService()
+
+    let [inspectionsRequested, setInspectionsRequested] = useState(false)
+
+    let {
+        data: inspections,
+        isLoading: inspectionsLoading,
+        error: inspectionsLoadingError,
+    } = useQuery(["inspections", inspectionsRequested, filePath], async () => {
+        return inspectionsRequested ? await fileApiService.loadInspections(filePath) as any[] : []
+    })
+
+    return <>
+        Inspections...
+        <button onClick={() =>
+            setInspectionsRequested(true)
+        }>
+            Load
+        </button>
+        <div>
+            {!!inspections
+                ? <>
+                    <table>
+                        <tbody>
+                        {inspections.map(inspection => {
+                            return <Inspection key={inspection.path} inspection={inspection}/>
+                        })}
+                        </tbody>
+                    </table>
+                </>
+                : <span> All fine </span>}
+        </div>
+    </>
+}
+
 function FilesPage() {
     let [stats, setStats] = useState<{ [key: string]: any }>({});
-    let { "*": filePath = "" } = useParams<string>()
+    let {"*": filePath = ""} = useParams<string>()
     let [pathSegments, setPathSegments] = useState<string[]>([])
     let navigate = useNavigate();
     let [selectedFiles, setSelectedFiles] = useState<string[]>([])
@@ -96,11 +166,11 @@ function FilesPage() {
     }
 
     function openMedia(fileName: string) {
-        setSearchParams({ ...searchParams, open: fileName })
+        setSearchParams({...searchParams, open: fileName})
     }
 
     function closeMedia() {
-        let newParams = { ...searchParams } as any;
+        let newParams = {...searchParams} as any;
         delete newParams.open
         setSearchParams(newParams)
     }
@@ -155,59 +225,63 @@ function FilesPage() {
                 <div className={"toolbar-item"}>
                     {stateView === ViewType.Grid ?
                         <button onClick={() => switchView(ViewType.List)}>
-                            <BsGrid3X3 className={"toolbar-icon"} title={"Grid"} />
+                            <BsGrid3X3 className={"toolbar-icon"} title={"Grid"}/>
                         </button>
                         : <button onClick={() => switchView(ViewType.Grid)}>
-                            <MdList className={"toolbar-icon"} title={"List"} />
+                            <MdList className={"toolbar-icon"} title={"List"}/>
                         </button>}
                 </div>
                 <div className={"toolbar-item"}>
                     <button onClick={initOptimizationForSelected}>
                         <GrOptimize
                             className={"toolbar-icon"}
-                            title={"Optimize"} />
+                            title={"Optimize"}/>
                     </button>
                 </div>
                 <div className={"toolbar-item"}>
                     <button onClick={deleteSelected}>
                         <RiDeleteBin6Line
                             className={"toolbar-icon"}
-                            title={"Delete"} />
+                            title={"Delete"}/>
                     </button>
                 </div>
             </div>
         </div>
-        <Readme readme={readme2} />
+        <Readme readme={readme2}/>
         {contentLoading
             ? (<span>LOADING...</span>)
             : !!contentLoadingError
                 ? (<span>LOADING ERROR</span>)
                 : (
-                    <DragArea
-                        setSelectedItems={setSelectedFiles}
-                    >
-                        <DirectoryCard
-                            directories={content?.directories || []}
-                            path={filePath}
-                            selectedDirectories={selectedFiles}
-                            actionOpen={(directoryName) => openSubdirectory(directoryName)}
-                            isView={stateView}
-                        />
-                        <MediaCardGrid
-                            imageMedias={imageFiles || []}
-                            path={filePath}
-                            selectedItems={selectedFiles}
-                            actionOpen={(fileName) => openMedia(fileName)}
-                        />
-                        <FilesList
-                            files={content?.files || []}
-                            root={filePath}
-                            filesSelected={selectedFiles}
-                            actionOpen={(filename) => openMedia(filename)}
-                        />
-                    </DragArea>
+                    <>
+                        <Inspections filePath={filePath}/>
+                        <DragArea
+                            setSelectedItems={setSelectedFiles}
+                        >
+                            <DirectoryCard
+                                directories={content?.directories || []}
+                                path={filePath}
+                                selectedDirectories={selectedFiles}
+                                actionOpen={(directoryName) => openSubdirectory(directoryName)}
+                                isView={stateView}
+                            />
+                            <MediaCardGrid
+                                imageMedias={imageFiles || []}
+                                path={filePath}
+                                selectedItems={selectedFiles}
+                                actionOpen={(fileName) => openMedia(fileName)}
+                            />
+                            <FilesList
+                                files={content?.files || []}
+                                root={filePath}
+                                filesSelected={selectedFiles}
+                                actionOpen={(filename) => openMedia(filename)}
+                            />
+                        </DragArea>
+                    </>
                 )}
     </div>
 }
+
 
 export default FilesPage

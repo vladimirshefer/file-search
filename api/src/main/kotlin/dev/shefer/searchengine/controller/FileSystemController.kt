@@ -125,7 +125,7 @@ class FileSystemController(
         return range
     }
 
-    @GetMapping("/inspect")
+    @GetMapping("/inspections")
     fun inspect(
         @RequestParam(required = false, defaultValue = "")
         path: String
@@ -135,6 +135,15 @@ class FileSystemController(
         val inspectionResults = ArrayList<InspectionReport>()
         inspectPathRecursively(subtree, Path.of(path), inspectionResults)
         return inspectionResults
+    }
+
+    @PostMapping("/inspections/fix")
+    fun inspect(
+        @RequestBody
+        inspectionReport: InspectionReport
+    ): Any {
+        val subtree = fileSystemService.sourceSubtree
+        return fileInspectionService.fixInspection(inspectionReport, subtree.resolve(Path.of(inspectionReport.path)))
     }
 
     private fun inspectPathRecursively(
@@ -147,7 +156,7 @@ class FileSystemController(
             inspectionResults.addAll(fileInspectionService.runInspections(absolutePath).map {
                 InspectionReport(
                     it.second.name,
-                    it.first.name,
+                    it.first.simpleName,
                     relativePath.toString()
                 )
             })
@@ -166,7 +175,7 @@ class FileSystemController(
     companion object {
         val LOG: Logger = LoggerFactory.getLogger(this::class.java)
 
-        class InspectionReport(
+        data class InspectionReport(
             val description: String,
             val type: String,
             val path: String,

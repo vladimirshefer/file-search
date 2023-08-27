@@ -13,6 +13,22 @@ export default class FileApiService {
         return response.data
     }
 
+    async loadInspections(filePath: string): Promise<any[]> {
+        let response = await axios.get("/api/files/inspections", {
+            params: {
+                path: filePath
+            }
+        });
+
+        return response.data
+    }
+
+    async fixInspection(inspection: any): Promise<any[]> {
+        let response = await axios.post("/api/files/inspections/fix", inspection);
+
+        return response.data
+    }
+
     async loadStats(filePath: string) {
         let response = await axios.get("/api/files/stats", {
             params: {
