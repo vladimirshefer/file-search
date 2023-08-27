@@ -14,8 +14,8 @@ class FileSystemSubtree(
 ) {
 
     /**
-     *
-     * @param path relative path.
+     * @param path relative path to the directory.
+     * @return list of relative sub-paths.
      */
     fun listFilesOrEmpty(path: Path): Set<Path> {
         val absolutePath = resolve(path)
@@ -50,6 +50,7 @@ class FileSystemSubtree(
     /**
      * ```
      * root: /home/user; .resolve("dir") -> "/home/user/dir"
+     * root: /home/user; .resolve("dir/foo") -> "/home/user/dir/foo"
      * root: /home/user; .resolve("../root") -> IllegalFileAccessException
      * root: /home/user; .resolve("/var/log") -> IllegalFileAccessException
      * ```
