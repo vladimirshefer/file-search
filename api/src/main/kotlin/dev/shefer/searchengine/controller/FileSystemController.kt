@@ -1,21 +1,24 @@
 package dev.shefer.searchengine.controller
 
 import dev.shefer.searchengine.dto.OptimizeRequest
+import dev.shefer.searchengine.optimize.FileSystemSubtree
 import dev.shefer.searchengine.optimize.dto.MediaDirectoryInfo
+import dev.shefer.searchengine.plugin.file_inspections.InspectionResult
+import dev.shefer.searchengine.service.FileInspectionService
 import dev.shefer.searchengine.service.FileSystemService
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestHeader
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
+import java.nio.file.Path
+import kotlin.io.path.isDirectory
+import kotlin.io.path.isRegularFile
 
 @RestController
 @RequestMapping("/api/files")
 class FileSystemController(
-    private val fileSystemService: FileSystemService
+    private val fileSystemService: FileSystemService,
+    private val fileInspectionService: FileInspectionService,
 ) {
 
     @GetMapping("/list")
@@ -121,5 +124,41 @@ class FileSystemController(
             }
         }
         return range
+    }
+
+    @GetMapping("/inspect")
+    fun inspect(
+        @RequestParam(required = false, defaultValue = "")
+        path: String
+    ): Any {
+        val subtree = fileSystemService.sourceSubtree
+        listOf(Path.of(path))
+        val inspectionResults = ArrayList<Pair<Path, InspectionResult>>()
+        inspectPathRecursively(subtree, Path.of(path), inspectionResults)
+        return inspectionResults.map { "${it.first}: ${it.second.name}" }
+    }
+
+    private fun inspectPathRecursively(
+        subtree: FileSystemSubtree,
+        relativePath: Path,
+        inspectionResults: ArrayList<Pair<Path, InspectionResult>>
+    ) {
+        val absolutePath = subtree.resolve(relativePath)
+        if (absolutePath.isRegularFile()) {
+            inspectionResults.addAll(fileInspectionService.runInspections(absolutePath).map { relativePath to it })
+        } else if (absolutePath.isDirectory()) {
+            subtree.listFilesOrEmpty(relativePath).forEach {
+                inspectPathRecursively(subtree, it, inspectionResults)
+            }
+            subtree.listDirectoriesOrEmpty(relativePath).forEach {
+                inspectPathRecursively(subtree, it, inspectionResults)
+            }
+        } else {
+            LOG.warn("Neither file nor directory $relativePath")
+        }
+    }
+
+    companion object {
+        val LOG: Logger = LoggerFactory.getLogger(this::class.java)
     }
 }

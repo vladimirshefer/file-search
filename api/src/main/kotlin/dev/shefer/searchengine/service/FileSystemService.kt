@@ -18,19 +18,13 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
-import kotlin.io.path.exists
-import kotlin.io.path.extension
-import kotlin.io.path.fileSize
-import kotlin.io.path.getLastModifiedTime
-import kotlin.io.path.isDirectory
-import kotlin.io.path.isRegularFile
-import kotlin.io.path.name
+import kotlin.io.path.*
 
 @Service
 class FileSystemService(
     private val mediaOptimizationManager: MediaOptimizationManager,
     @Qualifier("sourceSubtree")
-    private val sourceSubtree: FileSystemSubtree
+    val sourceSubtree: FileSystemSubtree
 ) {
 
     @Value("\${app.rootDirectory}")
