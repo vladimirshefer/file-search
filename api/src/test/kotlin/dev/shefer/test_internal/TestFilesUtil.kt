@@ -24,16 +24,26 @@ object TestFilesUtil {
         return resource("./src/test/resources/test_files/$name").normalize()
     }
 
-    fun placeTestFile(dir: Path, testFileName: String, targetFileName: String = testFileName) {
-        if (!dir.exists()) {
-            dir.createDirectories()
+    /**
+     * @param targetDir usually, the test temporary directory.
+     * @param testFileName file name of the test resources file
+     * @param targetFileName `testFileName` will be renamed to this name in `targetDir`
+     * @return the absolute path of created (placed) test file.
+     */
+    fun placeTestFile(targetDir: Path, testFileName: String, targetFileName: String = testFileName): Path {
+        if (!targetDir.exists()) {
+            targetDir.createDirectories()
         }
         val testFile = testFile(testFileName)
-        val targetFile = dir.resolve(targetFileName)
+        val targetFile = targetDir.resolve(targetFileName)
         targetFile.parent.createDirectories()
         Files.copy(testFile, targetFile)
+        return targetFile
     }
 
+    /**
+     * @param action (absolute path of created temp directory -> expected action with this directory)
+     */
     fun withTempDirectory(action: (dir: Path) -> Unit) {
         val OPEN_DIRECTORY_ON_START = false
 
