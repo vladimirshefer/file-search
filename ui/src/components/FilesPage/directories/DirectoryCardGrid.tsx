@@ -36,7 +36,7 @@ export default function DirectoryCardGrid(
         className={`directory-card drag-selectable ${isSelected ? "directory-card__selected" : ""}`}
         data-selection-id={name}
         onDoubleClick={() =>
-            navigate(`./${name}`)
+            actionOpen()
         }
         title={name}
     >
@@ -71,11 +71,11 @@ export default function DirectoryCardGrid(
                 </span>
 
             <Link
-                to={"./" + name}
+                to={`./${name}`}
                 relative={"path"}
                 title={name}
                 onTouchEnd={() => {
-                    navigate(`./${name}`)
+                    actionOpen()
                 }}
             >
                 <span

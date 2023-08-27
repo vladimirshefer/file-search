@@ -90,6 +90,10 @@ function FilesPage() {
         navigate("/files/" + pathSegments.slice(0, n).join("/"))
     }
 
+    function openSubdirectory(name: string) {
+        navigate("/files/" + pathSegments.join("/") + "/" + name)
+    }
+
     function openMedia(fileName: string) {
         setSearchParams({ ...searchParams, open: fileName })
     }
@@ -181,7 +185,7 @@ function FilesPage() {
                             directories={content?.directories || []}
                             path={filePath}
                             selectedDirectories={selectedFiles}
-                            actionOpen={() => null}
+                            actionOpen={(directoryName) => openSubdirectory(directoryName)}
                             isView={stateView}
                         />
                         <MediaCardGrid
