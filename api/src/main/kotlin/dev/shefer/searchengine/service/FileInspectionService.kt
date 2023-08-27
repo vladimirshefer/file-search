@@ -10,8 +10,9 @@ class FileInspectionService(
     private val inspections: List<FileInspection>
 ) {
 
-    fun runInspections(path: Path): List<InspectionResult> {
-        return inspections.mapNotNull { it.run(path) }
+    fun runInspections(path: Path): List<Pair<Class<*>, InspectionResult>> {
+        return inspections.map { it::class.java as Class<*> to runCatching { it.run(path) } .getOrElse { null } }
+            .filter { it.second != null } as List<Pair<Class<*>, InspectionResult>>
     }
 
 }

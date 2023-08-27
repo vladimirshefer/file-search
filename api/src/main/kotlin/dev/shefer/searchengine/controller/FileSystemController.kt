@@ -3,7 +3,6 @@ package dev.shefer.searchengine.controller
 import dev.shefer.searchengine.dto.OptimizeRequest
 import dev.shefer.searchengine.optimize.FileSystemSubtree
 import dev.shefer.searchengine.optimize.dto.MediaDirectoryInfo
-import dev.shefer.searchengine.plugin.file_inspections.InspectionResult
 import dev.shefer.searchengine.service.FileInspectionService
 import dev.shefer.searchengine.service.FileSystemService
 import org.slf4j.Logger
@@ -133,19 +132,25 @@ class FileSystemController(
     ): Any {
         val subtree = fileSystemService.sourceSubtree
         listOf(Path.of(path))
-        val inspectionResults = ArrayList<Pair<Path, InspectionResult>>()
+        val inspectionResults = ArrayList<InspectionReport>()
         inspectPathRecursively(subtree, Path.of(path), inspectionResults)
-        return inspectionResults.map { "${it.first}: ${it.second.name}" }
+        return inspectionResults
     }
 
     private fun inspectPathRecursively(
         subtree: FileSystemSubtree,
         relativePath: Path,
-        inspectionResults: ArrayList<Pair<Path, InspectionResult>>
+        inspectionResults: ArrayList<InspectionReport>
     ) {
         val absolutePath = subtree.resolve(relativePath)
         if (absolutePath.isRegularFile()) {
-            inspectionResults.addAll(fileInspectionService.runInspections(absolutePath).map { relativePath to it })
+            inspectionResults.addAll(fileInspectionService.runInspections(absolutePath).map {
+                InspectionReport(
+                    it.second.name,
+                    it.first.name,
+                    relativePath.toString()
+                )
+            })
         } else if (absolutePath.isDirectory()) {
             subtree.listFilesOrEmpty(relativePath).forEach {
                 inspectPathRecursively(subtree, it, inspectionResults)
@@ -160,5 +165,11 @@ class FileSystemController(
 
     companion object {
         val LOG: Logger = LoggerFactory.getLogger(this::class.java)
+
+        class InspectionReport(
+            val description: String,
+            val type: String,
+            val path: String,
+        )
     }
 }
