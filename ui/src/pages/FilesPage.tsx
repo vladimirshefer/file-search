@@ -91,7 +91,7 @@ function FilesPage() {
     }
 
     function openSubdirectory(name: string) {
-        navigate("/files/" + pathSegments.join("/") + "/" + name)
+        navigate("/files/" + pathSegments.join("/") + "/" + name + "/")
     }
 
     function openMedia(fileName: string) {
