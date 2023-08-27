@@ -20,6 +20,7 @@ import Sidebar from "components/modal/Sidebar";
 import ImageView from "components/FilesPage/ImageView/ImageView";
 import {ViewType} from 'enums/view';
 import {useQuery} from "@tanstack/react-query";
+import mime from "mime";
 
 function FilesPage() {
     let [stats, setStats] = useState<{ [key: string]: any }>({});
@@ -118,6 +119,8 @@ function FilesPage() {
         // return fileApiService.delete();
     }
 
+    let openedMediaType = !!openedMedia ? mime.getType(openedMedia) : null;
+
     return <div>
         {(!!openedMedia) ? (
             <Sidebar
@@ -125,18 +128,20 @@ function FilesPage() {
                 actionClose={() => closeMedia()}
             >
                 {
-                    openedMedia.includes(".mp4")
+                    openedMediaType?.includes("video/")
                         ? <video
                             src={`/api/files/show/?rootName=source,optimized&path=${filePath}/${openedMedia}`}
                             controls={true}
                             autoPlay={true}
                             loop={true}
                         />
-                        : <ImageView
-                            // TODO use only files from corresponding root. here is the temp fix to ui not fail
-                            image1Url={`/api/files/show/?rootName=source,optimized&path=${filePath}/${openedMedia}`}
-                            image2Url={`/api/files/show/?rootName=optimized,source&path=${filePath}/${openedMedia}`}
-                        />
+                        : openedMediaType?.includes("image/")
+                            ? <ImageView
+                                // TODO use only files from corresponding root. here is the temp fix to ui not fail
+                                image1Url={`/api/files/show/?rootName=source,optimized&path=${filePath}/${openedMedia}`}
+                                image2Url={`/api/files/show/?rootName=optimized,source&path=${filePath}/${openedMedia}`}
+                            />
+                            : null
                 }
             </Sidebar>
         ) : null
