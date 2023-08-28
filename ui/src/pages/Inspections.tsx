@@ -1,5 +1,5 @@
 import fileApiService from "../lib/service/FileApiService";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 
@@ -53,6 +53,8 @@ function Inspections(
         enabled: inspectionsRequested,
     })
 
+    let inspectionsList = useMemo<any[]>(() => inspectionsRequested ? inspections || [] : [], [inspections, inspectionsRequested])
+
     return <>
         Inspections...
         <button onClick={() =>
@@ -66,9 +68,9 @@ function Inspections(
             Close
         </button>
         <div>
-            {!!inspections && inspections.length > 0
+            {inspectionsList.length > 0
                 ? <ul>
-                    {inspections.map(inspection => {
+                    {inspectionsList.map(inspection => {
                         return <Inspection key={inspection.path} inspection={inspection}/>
                     })}
                 </ul>
