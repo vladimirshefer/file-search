@@ -15,9 +15,13 @@ import kotlin.io.path.nameWithoutExtension
 @Component
 class WrongFileExtensionFileInspection : FileInspection {
     override fun run(path: Path): InspectionResult? {
-        val correctExtension = ContentTypeUtil.guessCorrectFileExtension(path) ?: return null
+        val correctExtension = path.guessCorrectFileExtension() ?: return null
         val actualExtension = path.extension
 
+        val target = path.parent.resolve("${path.nameWithoutExtension}.$correctExtension")
+        if (target.exists()) {
+            return null
+        }
         if (actualExtension != correctExtension) {
             return InspectionResult("Wrong extension. Expected $correctExtension, Actual: $actualExtension")
         }
