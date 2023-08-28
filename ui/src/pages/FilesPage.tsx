@@ -30,7 +30,6 @@ function FilesPage() {
     let [pathSegments, setPathSegments] = useState<string[]>([])
     let navigate = useNavigate();
     let [selectedFiles, setSelectedFiles] = useState<string[]>([])
-    let fileApiService = new FileApiService()
     let [searchParams, setSearchParams] = useSearchParams();
     let [stateView, switchView] = useState<ViewType>(ViewType.Grid);
 
