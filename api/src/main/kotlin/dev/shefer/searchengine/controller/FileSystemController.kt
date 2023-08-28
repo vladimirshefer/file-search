@@ -128,12 +128,14 @@ class FileSystemController(
     @GetMapping("/inspections")
     fun inspect(
         @RequestParam(required = false, defaultValue = "")
-        path: String
+        path: String,
+        @RequestParam(required = false, defaultValue = "20")
+        limit: Int
     ): Any {
         val subtree = fileSystemService.sourceSubtree
         listOf(Path.of(path))
         val inspectionResults = ArrayList<InspectionReport>()
-        inspectPathRecursively(subtree, Path.of(path), inspectionResults)
+        inspectPathRecursively(subtree, Path.of(path), inspectionResults, limit)
         return inspectionResults
     }
 
@@ -149,8 +151,11 @@ class FileSystemController(
     private fun inspectPathRecursively(
         subtree: FileSystemSubtree,
         relativePath: Path,
-        inspectionResults: ArrayList<InspectionReport>
+        inspectionResults: ArrayList<InspectionReport>,
+        limit: Int
     ) {
+        if (inspectionResults.size >= limit) return
+
         val absolutePath = subtree.resolve(relativePath)
         if (absolutePath.isRegularFile()) {
             inspectionResults.addAll(fileInspectionService.runInspections(absolutePath).map {
@@ -162,10 +167,10 @@ class FileSystemController(
             })
         } else if (absolutePath.isDirectory()) {
             subtree.listFilesOrEmpty(relativePath).forEach {
-                inspectPathRecursively(subtree, it, inspectionResults)
+                inspectPathRecursively(subtree, it, inspectionResults, limit)
             }
             subtree.listDirectoriesOrEmpty(relativePath).forEach {
-                inspectPathRecursively(subtree, it, inspectionResults)
+                inspectPathRecursively(subtree, it, inspectionResults, limit)
             }
         } else {
             LOG.warn("Neither file nor directory $relativePath")
