@@ -20,7 +20,7 @@ class BashExecutor {
          * @param image absolute path to image
          */
         fun toJpg(image: Path): BashProcess {
-            return prepareProcessForFile(image, listOf("mogrify", "-monitor", "-format", "jpg"))
+            return prepareProcessForFile(image, listOf("mogrify", "-verbose"))
         }
 
         /**
@@ -34,7 +34,7 @@ class BashExecutor {
          * @param image absolute path to image
          */
         fun resizeDown(image: Path, pixelsLimit: Int): BashProcess {
-            return prepareProcessForFile(image, listOf("mogrify", "-monitor", "-resize", "$pixelsLimit@>"))
+            return prepareProcessForFile(image, listOf("mogrify", "-verbose", "-resize", "$pixelsLimit@>"))
         }
 
         /**
