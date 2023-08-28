@@ -1,96 +1,28 @@
-import React, {useEffect, useState} from 'react'
-import {useNavigate, useParams, useSearchParams} from "react-router-dom";
-import {BsGrid3X3} from "react-icons/bs";
-import {RiDeleteBin6Line} from "react-icons/ri";
-import {GrOptimize} from "react-icons/gr";
-import {MdList} from "react-icons/md";
+import React, { useEffect, useState } from 'react'
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { BsGrid3X3 } from "react-icons/bs";
+import { RiDeleteBin6Line } from "react-icons/ri";
+import { GrOptimize } from "react-icons/gr";
+import { MdList } from "react-icons/md";
 
 import "styles/FilesPage.css"
 import "components/toolbox/Toolbox.css"
 import ConversionUtils from "utils/ConversionUtils";
-import {MediaInfo} from "lib/Api";
+import { MediaInfo } from "lib/Api";
 import MediaCardGrid from "components/FilesPage/media/MediaCardGrid";
 import Breadcrumbs from "components/files/BreadCrumbs";
 import DirectoryCard from "components/FilesPage/directories/DirectoryCard";
-import {Readme} from "components/files/Readme";
+import { Readme } from "components/files/Readme";
 import FilesList from "components/FilesPage/FilesList/FilesList";
-import FileApiService from "lib/service/FileApiService";
+import fileApiService from "lib/service/FileApiService";
 import DragArea from "components/drag/DragArea";
 import Sidebar from "components/modal/Sidebar";
 import ImageView from "components/FilesPage/ImageView/ImageView";
-import {ViewType} from 'enums/view';
-import {useQuery} from "@tanstack/react-query";
+import { ViewType } from 'enums/view';
+import { useQuery } from "@tanstack/react-query";
 import mime from "mime";
+import Inspections from "./Inspections";
 
-function Inspection(
-    {
-        inspection
-    }: {
-        inspection: any
-    }
-) {
-    let fileApiService = new FileApiService()
-
-    function fixInspection(inspection: any) {
-        return fileApiService.fixInspection(inspection)
-    }
-
-    return <tr>
-        <td>
-            <button
-                onClick={() => fixInspection(inspection).then(it => alert(JSON.stringify(it)))}
-            >
-                Fix
-            </button>
-        </td>
-        <td>{inspection.type}</td>
-        <td>{inspection.description}</td>
-        <td>{inspection.path}</td>
-    </tr>;
-}
-
-function Inspections(
-    {
-        filePath
-    }: {
-        filePath: string
-    }
-) {
-
-    let fileApiService = new FileApiService()
-
-    let [inspectionsRequested, setInspectionsRequested] = useState(false)
-
-    let {
-        data: inspections,
-        isLoading: inspectionsLoading,
-        error: inspectionsLoadingError,
-    } = useQuery(["inspections", inspectionsRequested, filePath], async () => {
-        return inspectionsRequested ? await fileApiService.loadInspections(filePath) as any[] : []
-    })
-
-    return <>
-        Inspections...
-        <button onClick={() =>
-            setInspectionsRequested(true)
-        }>
-            Load
-        </button>
-        <div>
-            {!!inspections
-                ? <>
-                    <table>
-                        <tbody>
-                        {inspections.map(inspection => {
-                            return <Inspection key={inspection.path} inspection={inspection}/>
-                        })}
-                        </tbody>
-                    </table>
-                </>
-                : <span> All fine </span>}
-        </div>
-    </>
-}
 
 function FilesPage() {
     let [stats, setStats] = useState<{ [key: string]: any }>({});
