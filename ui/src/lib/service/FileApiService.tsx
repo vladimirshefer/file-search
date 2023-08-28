@@ -1,7 +1,7 @@
 import axios from "axios";
-import {MediaDirectoryInfo} from "lib/Api";
+import { MediaDirectoryInfo } from "lib/Api";
 
-export default class FileApiService {
+class FileApiService {
 
     async loadContent(filePath: string): Promise<MediaDirectoryInfo> {
         let response = await axios.get("/api/files/list", {
@@ -60,3 +60,7 @@ export default class FileApiService {
         }
     }
 }
+
+let fileApiService = new FileApiService()
+
+export default fileApiService

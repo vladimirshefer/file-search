@@ -119,22 +119,21 @@ function FilesPage() {
     })
 
     async function init() {
-        setPathSegments(filePath.split("/").filter(it => !!it))
-        setSelectedFiles([])
         try {
             await loadStats(filePath)
         } catch (e) {
             console.log(e);
         }
+    }
 
+    useEffect(() => {
+        setPathSegments(filePath.split("/").filter(it => !!it))
+        setSelectedFiles([])
+        init();
         return function cleanup() {
             setSelectedFiles([]);
             setStats({})
         }
-    }
-
-    useEffect(() => {
-        init();
     }, [filePath])
 
     let openedMedia: string | null = null;
