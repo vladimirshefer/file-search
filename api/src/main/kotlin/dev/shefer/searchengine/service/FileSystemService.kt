@@ -4,13 +4,14 @@ import dev.shefer.searchengine.dto.OptimizeRequest
 import dev.shefer.searchengine.optimize.FileSystemSubtree
 import dev.shefer.searchengine.optimize.MediaOptimizationManager
 import dev.shefer.searchengine.optimize.dto.MediaDirectoryInfo
+import dev.shefer.searchengine.plugin.file_metadata.AttributeResolver
+import dev.shefer.searchengine.util.ContentTypeUtil.isVideo
+import dev.shefer.searchengine.util.ContentTypeUtil.mediaType
 import dev.shefer.searchengine.util.FileUtil.forEachAccessibleFile
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
-import org.springframework.util.MimeType
 import java.io.IOException
 import java.io.RandomAccessFile
 import java.nio.file.FileVisitResult
@@ -18,13 +19,16 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
-import kotlin.io.path.*
+import kotlin.io.path.exists
+import kotlin.io.path.extension
+import kotlin.io.path.fileSize
 
 @Service
 class FileSystemService(
     private val mediaOptimizationManager: MediaOptimizationManager,
     @Qualifier("sourceSubtree")
-    val sourceSubtree: FileSystemSubtree
+    val sourceSubtree: FileSystemSubtree,
+    val attributeResolvers: List<AttributeResolver>,
 ) {
 
     @Value("\${app.rootDirectory}")
@@ -185,53 +189,20 @@ class FileSystemService(
         mediaOptimizationManager.optimize(optimizePaths)
     }
 
+    /**
+     * @param path relative path
+     */
     fun getInfo(path: String): Map<String, Any> {
-        val file = sourceSubtree.resolve(Path.of(path))
+        val absolutePath = sourceSubtree.resolve(Path.of(path))
 
-        if (file.isRegularFile()) return mapOf(
-            "isFile" to true,
-            "isDirectory" to false,
-            "fileSize" to file.fileSize(),
-            "fileName" to file.name,
-            "displayName" to file.name,
-            "fileExtension" to file.extension,
-            "mimeType" to file.mimeType.toString(),
-            "mediaType" to file.mediaType.toString(),
-            "contentType" to file.contentType,
-            "isVideo" to file.isVideo,
-            "lastModified" to file.getLastModifiedTime().toInstant().epochSecond.toString(),
-        )
-
-        if (file.isDirectory()) return mapOf(
-            "isFile" to false,
-            "isDirectory" to true,
-            "directoryName" to file.name,
-            "displayName" to file.name,
-            "filesInside" to Files.list(file).filter { it.isRegularFile() }.count(),
-            "directoriesInside" to Files.list(file).filter { it.isDirectory() }.count(),
-        )
-
-        return emptyMap()
+        val attributes = HashMap<String, Any>()
+        attributeResolvers.map { attributeResolver -> attributeResolver.get(absolutePath) }
+            .forEach { attributes.putAll(it) }
+        return attributes
     }
 
     companion object {
         private val ONE_MEGABYTE = 1000000
-
-        private val Path.mediaType: MediaType get() = MediaType.asMediaType(mimeType)
-
-        private val Path.mimeType: MimeType get() = MimeType.valueOf(contentType)
-
-        private val Path.isVideo: Boolean get() = mimeType.type.lowercase() == "video"
-
-        private val Path.contentType: String
-            get() {
-                return Files.probeContentType(this)
-                    ?: when (extension.lowercase()) {
-                        "flv" -> "video/x-flv"
-                        "mp4" -> "video/mp4"
-                        else -> "text/plain"
-                    }
-            }
 
         private fun Path.readBytesRanged(range: LongRange?): ByteArray {
             if (range == null) {

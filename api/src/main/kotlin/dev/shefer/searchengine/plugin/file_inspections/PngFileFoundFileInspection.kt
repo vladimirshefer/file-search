@@ -1,7 +1,7 @@
 package dev.shefer.searchengine.plugin.file_inspections
 
 import dev.shefer.searchengine.bash.BashExecutor
-import dev.shefer.searchengine.util.ContentTypeUtil
+import dev.shefer.searchengine.util.ContentTypeUtil.guessCorrectFileExtension
 import org.springframework.stereotype.Component
 import java.nio.file.Path
 import kotlin.io.path.exists
@@ -14,7 +14,7 @@ import kotlin.io.path.nameWithoutExtension
 @Component
 class PngFileFoundFileInspection : FileInspection {
     override fun run(path: Path): InspectionResult? {
-        if (ContentTypeUtil.guessCorrectFileExtension(path) == "png") {
+        if (path.guessCorrectFileExtension() == "png") {
             return InspectionResult("PNG found")
         }
         return null

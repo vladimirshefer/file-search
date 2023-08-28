@@ -1,7 +1,7 @@
 package dev.shefer.searchengine.plugin.file_inspections
 
 import dev.shefer.searchengine.plugin.file_inspections.InspectionFixResult.InspectionFixStatus.*
-import dev.shefer.searchengine.util.ContentTypeUtil
+import dev.shefer.searchengine.util.ContentTypeUtil.guessCorrectFileExtension
 import org.springframework.stereotype.Component
 import java.nio.file.Path
 import kotlin.io.path.exists
@@ -29,7 +29,7 @@ class WrongFileExtensionFileInspection : FileInspection {
         run(path)
             ?: return InspectionFixResult(NOT_REQUIRED, "There is no such problem")
 
-        val correctExtension = ContentTypeUtil.guessCorrectFileExtension(path)
+        val correctExtension = path.guessCorrectFileExtension()
             ?: return InspectionFixResult(FAILED, "Could not find correct extension for this file")
 
         val target = path.parent.resolve("${path.nameWithoutExtension}.$correctExtension")
