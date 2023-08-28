@@ -2,6 +2,7 @@ package dev.shefer.searchengine.plugin.file_inspections
 
 import dev.shefer.searchengine.bash.BashExecutor
 import dev.shefer.searchengine.util.ContentTypeUtil.guessCorrectFileExtension
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.nio.file.Path
 import kotlin.io.path.exists
@@ -28,7 +29,11 @@ class PngFileFoundFileInspection : FileInspection {
             return InspectionFixResult(InspectionFixResult.InspectionFixStatus.FAILED, "Target file already exists")
         }
         path.moveTo(target)
-        BashExecutor.toJpg(target).join()
+        BashExecutor.toJpg(target).join().also { LOG.info("Convert to JPG ${it.output}\n${it.errorOutput}")}
         return InspectionFixResult(InspectionFixResult.InspectionFixStatus.FIXED, "Converted to JPG")
+    }
+
+    companion object {
+        val LOG = LoggerFactory.getLogger(this::class.java.declaringClass)
     }
 }
