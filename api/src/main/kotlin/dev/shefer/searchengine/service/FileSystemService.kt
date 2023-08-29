@@ -6,6 +6,8 @@ import dev.shefer.searchengine.optimize.MediaOptimizationManager
 import dev.shefer.searchengine.optimize.dto.MediaDirectoryInfo
 import dev.shefer.searchengine.plugin.file_metadata.AttributeResolver
 import dev.shefer.searchengine.util.FileUtil.forEachAccessibleFile
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseEntity
@@ -149,8 +151,17 @@ class FileSystemService(
         val absolutePath = sourceSubtree.resolve(Path.of(path))
 
         val attributes = HashMap<String, Any>()
-        attributeResolvers.map { attributeResolver -> attributeResolver.get(absolutePath) }
+        attributeResolvers
+            .map { attributeResolver ->
+                runCatching { attributeResolver.get(absolutePath) }
+                    .onFailure { e -> LOG.error("Attribute resolver failed: ${attributeResolver::class.java.name}", e) }
+                    .getOrElse { emptyMap() }
+            }
             .forEach { attributes.putAll(it) }
         return attributes
+    }
+
+    companion object {
+        val LOG: Logger = LoggerFactory.getLogger(this::class.java.declaringClass)
     }
 }
