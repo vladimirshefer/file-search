@@ -5,6 +5,7 @@ import dev.shefer.searchengine.bash.process.BashProcess.Companion.ProcessStatus
 import dev.shefer.searchengine.bash.process.BashProcessChain
 import dev.shefer.searchengine.bash.process.MockBashProcess
 import dev.shefer.searchengine.optimize.dto.*
+import dev.shefer.searchengine.plugin.thumbnails.ThumbnailsGenerator
 import dev.shefer.searchengine.util.FileUtil
 import org.slf4j.LoggerFactory
 import java.io.FileNotFoundException
@@ -24,6 +25,7 @@ class MediaOptimizationManager(
     sourceMediaRoot: Path,
     optimizedMediaRoot: Path,
     thumbnailsMediaRoot: Path,
+    private val thumbnailsGenerators: List<ThumbnailsGenerator>
 ) {
 
     private val LOG = LoggerFactory.getLogger(this.javaClass)
@@ -205,9 +207,17 @@ class MediaOptimizationManager(
                     .resolve(DATA_DIR_NAME)
                     .resolve("thumbnails")
                     .resolve(path.name)
+
                 if (!thumbnailPath.exists()) {
-                    runCatching { createThumbnail(sourceMediaSubtree.resolve(path), thumbnailPath) }
-                        .onFailure { LOG.error("Could not create thumbnail", it) }
+                    val sourceAbsolutePath = sourceMediaSubtree.resolve(path)
+                    val thumbnailsGenerator = thumbnailsGenerators.find { thumbnailsGenerator ->
+                        runCatching {
+                            thumbnailsGenerator.canRun(sourceAbsolutePath)
+                        }.getOrElse { false }
+                    }
+                        ?: return NOT_EXISTING_PATH
+
+                    thumbnailsGenerator.run(sourceAbsolutePath, thumbnailPath)
                 }
                 return thumbnailPath
             }

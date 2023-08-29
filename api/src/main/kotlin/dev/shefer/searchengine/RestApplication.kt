@@ -3,6 +3,7 @@ package dev.shefer.searchengine
 import dev.shefer.searchengine.optimize.FileSystemSubtree
 import dev.shefer.searchengine.optimize.MediaOptimizationManager
 import dev.shefer.searchengine.optimize.MediaOptimizer
+import dev.shefer.searchengine.plugin.thumbnails.ThumbnailsGenerator
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -21,7 +22,8 @@ class RestApplication {
         optimizedMediaRootPath: String,
         @Value("\${app.internalDataRootPath}")
         internalDataRootPath: String,
-        mediaOptimizer: MediaOptimizer
+        mediaOptimizer: MediaOptimizer,
+        thumbnailsGenerators: List<ThumbnailsGenerator>
     ): MediaOptimizationManager {
         val sourceMediaRoot = Path.of(sourceMediaRootPath)
             .also { it.createDirectories() }
@@ -37,6 +39,7 @@ class RestApplication {
             sourceMediaRoot,
             optimizedMediaRoot,
             thumbnailsMediaRoot,
+            thumbnailsGenerators
         )
     }
 
