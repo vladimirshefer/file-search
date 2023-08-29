@@ -140,4 +140,18 @@ class BashExecutorTest {
         }
     }
 
+    @Test
+    fun testVideoFrame() {
+        withTempDirectory { testDir ->
+            /* GIVEN */
+            val sourcePath = placeTestFile(testDir, "FULLHD_60FPS.mp4")
+            val targetPath = testDir.resolve("thumbnail.jpg")
+
+            /* WHEN */
+            BashExecutor.videoFrame(sourcePath, targetPath).join().assertSuccess()
+
+            /* THEN */
+            assertFilesEquals(targetPath, targetPath)
+        }
+    }
 }

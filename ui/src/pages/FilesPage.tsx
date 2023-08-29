@@ -83,8 +83,8 @@ function FilesPage() {
     }
 
     let imageFiles: MediaInfo[] = content?.files?.filter(it => {
-        let type: string = (it.source || it.optimized)!!.type;
-        return ["jpg", "png", "jpeg"].includes(type)
+        let name: string = (it.source || it.optimized)!!.name;
+        return mime.getType(name)?.includes("image/") || name.includes(".mp4")
     }) || []
 
     function goToPathSegment(n: number) {

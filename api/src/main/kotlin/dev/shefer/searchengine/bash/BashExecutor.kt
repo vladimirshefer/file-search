@@ -85,6 +85,19 @@ class BashExecutor {
             )
         }
 
+        fun videoFrame(videoAbsolutePath: Path, frameTargetPath: Path): BashProcess {
+            val bashProcess = prepareProcess(
+                videoAbsolutePath.parent,
+                arrayOf("ffmpeg",
+                    "-ss", "00:00:00.02",
+                    "-i", videoAbsolutePath.toString(),
+                    "-frames:v", "1",
+                    frameTargetPath.toString()
+                )
+            )
+            return bashProcess
+        }
+
         private fun prepareProcessForFile(
             image: Path,
             command: List<String>
