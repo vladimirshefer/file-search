@@ -4,6 +4,8 @@ import dev.shefer.searchengine.bash.BashExecutor
 import dev.shefer.searchengine.bash.process.BashProcess
 import dev.shefer.searchengine.bash.process.BashProcessChain
 import dev.shefer.searchengine.bash.process.LazyBashProcess
+import dev.shefer.searchengine.bash.process.assertSuccess
+import dev.shefer.searchengine.util.ImageFileUtil.isImage
 import org.springframework.stereotype.Component
 import org.springframework.util.FileSystemUtils
 import java.awt.Desktop
@@ -11,40 +13,38 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import kotlin.io.path.createDirectories
+import kotlin.io.path.nameWithoutExtension
 import kotlin.math.absoluteValue
 import kotlin.random.Random
+
+private fun BashProcess.logTo(logger: (String) -> Unit): BashProcess = apply {
+    logger(output + errorOutput)
+}
 
 @Component
 class MediaOptimizer {
 
-    fun createThumbnail(source: Path, target: Path): BashProcess {
-        val workDir = createTempDirectory()
-        val workingFile = workDir.resolve(source.fileName)
-        Files.copy(source, workingFile)
+    fun createThumbnail(source: Path, target: Path) {
+        if (!source.isImage) throw IllegalArgumentException("The file is not an image $source")
+        withTempDirectory { workDir ->
+            val workingFile = workDir.resolve("${source.nameWithoutExtension}.jpg")
+            Files.copy(source, workingFile)
+            target.parent.createDirectories()
 
-        val toJpgProcess = BashExecutor.toJpg(workingFile)
-
-        val resizeDownProcess = LazyBashProcess {
-            val result = findResult(workDir, workingFile)
             val MAX_200X200 = 40000
-            BashExecutor.resizeDown(result, MAX_200X200)
+            BashExecutor.resizeDown(workingFile, MAX_200X200)
+                .join()
+                .assertSuccess()
+                .logTo(::println)
+
+            BashExecutor.optimizeJpegToMaxSize(workingFile, 20)
+                .join()
+                .assertSuccess()
+                .logTo(::println)
+
+            Files.move(workingFile, target)
+                .also { println(it) }
         }
-
-        val compressProcess = LazyBashProcess {
-            val result = findResult(workDir, workingFile)
-            BashExecutor.optimizeJpegToMaxSize(result, 100)
-                .also { it.onComplete { Files.copy(result, target) } }
-        }
-
-        return BashProcessChain.of(
-            listOf(
-                toJpgProcess,
-                resizeDownProcess,
-                compressProcess,
-            )
-        )
-            .also { it.onComplete { workDir.toFile().deleteRecursively() } }
-
     }
 
     fun optimizeImage(source: Path, target: Path): BashProcess {
