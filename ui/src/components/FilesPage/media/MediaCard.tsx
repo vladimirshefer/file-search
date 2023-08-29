@@ -27,8 +27,8 @@ export default function MediaCard(
     let toggleOptionsOpened = () => setOptionsOpened(!isOptionsOpened);
 
     let previewBackgroundUrl = useMemo(() => {
-        let thumbnailUrl = `/api/files/show/?rootName=thumbnails,optimized,source&path=${path}/${name}`;
-        return `url('${thumbnailUrl}')`;
+        let thumbnailUrl = `/api/files/show/?rootName=thumbnails&path=${path}/${name}`;
+        return `url('${thumbnailUrl}'), url('/no-thumbnail.png')`;
     }, []);
 
     return (<>
