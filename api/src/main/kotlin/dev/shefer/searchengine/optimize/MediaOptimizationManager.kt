@@ -4,20 +4,17 @@ import dev.shefer.searchengine.bash.process.BashProcess
 import dev.shefer.searchengine.bash.process.BashProcess.Companion.ProcessStatus
 import dev.shefer.searchengine.bash.process.BashProcessChain
 import dev.shefer.searchengine.bash.process.MockBashProcess
-import dev.shefer.searchengine.optimize.dto.DirectorySyncStatus
-import dev.shefer.searchengine.optimize.dto.FileInfo
-import dev.shefer.searchengine.optimize.dto.MediaDirectoryInfo
-import dev.shefer.searchengine.optimize.dto.MediaInfo
-import dev.shefer.searchengine.optimize.dto.MediaStatus
+import dev.shefer.searchengine.optimize.dto.*
 import dev.shefer.searchengine.util.FileUtil
 import org.slf4j.LoggerFactory
 import java.io.FileNotFoundException
 import java.nio.file.Files
+import java.nio.file.NoSuchFileException
 import java.nio.file.Path
-import kotlin.io.path.createDirectories
-import kotlin.io.path.exists
-import kotlin.io.path.extension
-import kotlin.io.path.isDirectory
+import java.util.*
+import kotlin.io.path.*
+
+private val NOT_EXISTING_PATH = Path.of("/" + UUID.randomUUID().toString() + "/" + UUID.randomUUID().toString())
 
 /**
  * Files migrate only from source to optimized root and never backwards.
@@ -195,14 +192,22 @@ class MediaOptimizationManager(
                     return find
                 }
             }
+            throw NoSuchFileException("Path does not exist $path")
         }
 
         when (rootName) {
             "thumbnails" -> {
-                val thumbnailPath = thumbnailsMediaSubtree.resolve(path)
+                if (!sourceMediaSubtree.resolve(path).isRegularFile()) {
+                    return NOT_EXISTING_PATH
+                }
+                val thumbnailPath = sourceMediaSubtree.resolve(path)
+                    .parent
+                    .resolve(DATA_DIR_NAME)
+                    .resolve("thumbnails")
+                    .resolve(path.name)
                 if (!thumbnailPath.exists()) {
-                    runCatching { createThumbnail(path) }
-                        .onFailure { it.printStackTrace() }
+                    runCatching { createThumbnail(sourceMediaSubtree.resolve(path), thumbnailPath) }
+                        .onFailure { LOG.error("Could not create thumbnail", it) }
                 }
                 return thumbnailPath
             }
@@ -230,26 +235,22 @@ class MediaOptimizationManager(
         }
     }
 
-    private fun createThumbnail(path: Path) {
-        val thumbnailPath = thumbnailsMediaSubtree.resolve(path)
-
-        if (thumbnailPath.exists()) {
-            return
-        }
-
-        if (path.extension.lowercase() !in listOf("jpg", "jpeg", "png")) {
-            return
-        }
-
-        val sourceImage = find("source,optimized", path)
+    private fun createThumbnail(sourceAbsolutePath: Path, thumbnailAbsolutePath: Path) {
+        val sourceImage = sourceAbsolutePath
             .also {
                 if (!it.exists()) {
-                    throw FileNotFoundException("No source or optimized image for file $path")
+                    throw FileNotFoundException("No image")
                 }
             }
-        thumbnailPath.parent.createDirectories()
-        mediaOptimizer.createThumbnail(sourceImage, thumbnailPath)
+        thumbnailAbsolutePath.parent.createDirectories()
+        mediaOptimizer.createThumbnail(sourceImage, thumbnailAbsolutePath)
     }
+
+    private fun getThumbnailPath(path: Path): Path = sourceMediaSubtree.resolve(path)
+        .parent
+        .resolve(DATA_DIR_NAME)
+        .resolve("thumbnails")
+        .resolve(path.name)
 
 }
 

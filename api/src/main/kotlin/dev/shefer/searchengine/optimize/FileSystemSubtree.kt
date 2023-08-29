@@ -4,10 +4,9 @@ import dev.shefer.searchengine.optimize.exceptions.IllegalFileAccessException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.stream.Collectors
-import kotlin.io.path.exists
-import kotlin.io.path.fileSize
-import kotlin.io.path.isDirectory
-import kotlin.io.path.isRegularFile
+import kotlin.io.path.*
+
+val DATA_DIR_NAME = ".moafs"
 
 class FileSystemSubtree(
     private val root: Path
@@ -43,6 +42,7 @@ class FileSystemSubtree(
 
         return Files.list(absolutePath)
             .filter { it.isDirectory() }
+            .filter {it.name != DATA_DIR_NAME }
             .map { root.relativize(it) }
             .collect(Collectors.toSet())
     }
@@ -59,7 +59,7 @@ class FileSystemSubtree(
      */
     fun resolve(path: Path): Path {
         val result = root.resolve(path).normalize()
-        if (!result.startsWith(root)) {
+        if (!result.startsWith(root) || result.contains(Path.of(DATA_DIR_NAME))) {
             throw IllegalFileAccessException("Path is out of media root folder: $path")
         }
         return result
