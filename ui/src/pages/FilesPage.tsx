@@ -23,6 +23,35 @@ import { useQuery } from "@tanstack/react-query";
 import mime from "mime";
 import Inspections from "./Inspections";
 
+function MediaView(
+    {
+        fileName,
+        filePath
+    }: {
+        fileName: string,
+        filePath: string
+    }
+) {
+    let openedMediaType = !!fileName ? mime.getType(fileName) : null
+
+    if (openedMediaType?.includes("video/")) {
+        return <video
+            src={`/api/files/show/?rootName=source,optimized&path=${filePath}/${fileName}#t=0.1`}
+            controls={true}
+            autoPlay={true}
+            loop={true}
+        />;
+    }
+
+    return openedMediaType?.includes("image/")
+        ? <ImageView
+            // TODO use only files from corresponding root. here is the temp fix to ui not fail
+            image1Url={`/api/files/show/?rootName=source,optimized&path=${filePath}/${fileName}`}
+            image2Url={`/api/files/show/?rootName=optimized,source&path=${filePath}/${fileName}`}
+        />
+        : null;
+
+}
 
 function FilesPage() {
     let [stats, setStats] = useState<{ [key: string]: any }>({});
@@ -119,7 +148,6 @@ function FilesPage() {
         // return fileApiService.delete();
     }
 
-    let openedMediaType = !!openedMedia ? mime.getType(openedMedia) : null;
 
     return <div>
         {(!!openedMedia) ? (
@@ -127,22 +155,22 @@ function FilesPage() {
                 isVisible={!!openedMedia}
                 actionClose={() => closeMedia()}
             >
-                {
-                    openedMediaType?.includes("video/")
-                        ? <video
-                            src={`/api/files/show/?rootName=source,optimized&path=${filePath}/${openedMedia}`}
-                            controls={true}
-                            autoPlay={true}
-                            loop={true}
-                        />
-                        : openedMediaType?.includes("image/")
-                            ? <ImageView
-                                // TODO use only files from corresponding root. here is the temp fix to ui not fail
-                                image1Url={`/api/files/show/?rootName=source,optimized&path=${filePath}/${openedMedia}`}
-                                image2Url={`/api/files/show/?rootName=optimized,source&path=${filePath}/${openedMedia}`}
-                            />
-                            : null
-                }
+
+                <MediaView fileName={openedMedia} filePath={filePath}/>
+
+                <div>
+                    <button onClick={() => {
+                        let index = imageFiles.map(it => it.source?.name).indexOf(openedMedia!!)
+                        let nextFileName = imageFiles[index + 1].source?.name
+                        if (nextFileName) {
+                            openMedia(nextFileName)
+                        } else {
+                            alert("This is last media")
+                        }
+                    }}>
+                        Next
+                    </button>
+                </div>
             </Sidebar>
         ) : null
         }
