@@ -127,11 +127,11 @@ function FilesPage() {
     }
 
     function openMedia(fileName: string) {
-        setSearchParams({...searchParams, open: fileName})
+        setSearchParams({ ...searchParams, open: fileName })
     }
 
     function closeMedia() {
-        let newParams = {...searchParams} as any;
+        let newParams = { ...searchParams } as any;
         delete newParams.open
         setSearchParams(newParams)
     }
