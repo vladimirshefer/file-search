@@ -36,12 +36,14 @@ function MediaView(
     let openedMediaType = !!fileName ? mime.getType(fileName) : null
 
     if (openedMediaType?.includes("video/")) {
-        return <video
-            src={`/api/files/show/?rootName=source,optimized&path=${filePath}/${fileName}#t=0.1`}
-            controls={true}
-            autoPlay={true}
-            loop={true}
-        />;
+        return <div className={"max-h-[75vh]"}>
+            <video className={"max-h-[75vh] min-h-[50vh]"}
+                src={`/api/files/show/?rootName=source,optimized&path=${filePath}/${fileName}#t=0.1`}
+                controls={true}
+                autoPlay={true}
+                loop={true}
+            />
+        </div>;
     }
 
     return openedMediaType?.includes("image/")
@@ -157,7 +159,7 @@ function FilesPage() {
                 isVisible={!!openedMedia}
                 actionClose={() => closeMedia()}
             >
-                <div className={"grid grid-cols-12"}>
+                <div className={"grid grid-cols-12 w-[75vw]"}>
                     <div className={"media_view_control col-span-2"}>
                         <button className={"w-full h-full"} onClick={() => {
                             let index = imageFiles.map(it => it.source?.name).indexOf(openedMedia!!)
@@ -175,7 +177,7 @@ function FilesPage() {
                         <MediaView fileName={openedMedia} filePath={filePath}/>
                     </div>
                     <div className={"col-span-2"}>
-                        <button  className={"w-full h-full"} onClick={() => {
+                        <button className={"w-full h-full"} onClick={() => {
                             let index = imageFiles.map(it => it.source?.name).indexOf(openedMedia!!)
                             let nextFileName = imageFiles[index + 1].source?.name
                             if (nextFileName) {
