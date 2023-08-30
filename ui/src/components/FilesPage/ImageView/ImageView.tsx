@@ -1,4 +1,4 @@
-import {useEffect, useId, useState} from "react";
+import { useEffect, useId, useState } from "react";
 import "./ImageView.css"
 import MultipleImageZoomer from "lib/image_zoom/image_zoomer";
 
@@ -31,7 +31,7 @@ export default function ImageView(
         return () => {
             imageZoomer.unmount();
         }
-    }, [sourceIdR, optimizedIdR, zoomSourceIdR, zoomOptimizedIdR])
+    }, [sourceIdR, optimizedIdR, zoomSourceIdR, zoomOptimizedIdR, image1Url, image2Url])
 
     function renderImage(id: string, src: string) {
         return <img id={id}
