@@ -206,7 +206,7 @@ class MediaOptimizationManager(
                     .parent
                     .resolve(DATA_DIR_NAME)
                     .resolve("thumbnails")
-                    .resolve(path.name)
+                    .resolve(path.name + ".thumbnail.jpg")
 
                 if (!thumbnailPath.exists()) {
                     val sourceAbsolutePath = sourceMediaSubtree.resolve(path)
@@ -215,9 +215,13 @@ class MediaOptimizationManager(
                             thumbnailsGenerator.canRun(sourceAbsolutePath)
                         }.getOrElse { false }
                     }
-                        ?: return NOT_EXISTING_PATH
-
-                    thumbnailsGenerator.run(sourceAbsolutePath, thumbnailPath)
+                        ?: throw NoSuchFileException("No thumbnail available for $path")
+                    runCatching {
+                        thumbnailPath.parent.createDirectories()
+                        thumbnailsGenerator.run(sourceAbsolutePath, thumbnailPath)
+                    }.onFailure { e ->
+                        LOG.error("Could not create thumbnail $path", e)
+                    }
                 }
                 return thumbnailPath
             }
