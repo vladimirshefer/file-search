@@ -157,21 +157,36 @@ function FilesPage() {
                 isVisible={!!openedMedia}
                 actionClose={() => closeMedia()}
             >
-
-                <MediaView fileName={openedMedia} filePath={filePath}/>
-
-                <div>
-                    <button onClick={() => {
-                        let index = imageFiles.map(it => it.source?.name).indexOf(openedMedia!!)
-                        let nextFileName = imageFiles[index + 1].source?.name
-                        if (nextFileName) {
-                            openMedia(nextFileName)
-                        } else {
-                            alert("This is last media")
-                        }
-                    }}>
-                        Next
-                    </button>
+                <div className={"grid grid-cols-12"}>
+                    <div className={"media_view_control col-span-2"}>
+                        <button className={"w-full h-full"} onClick={() => {
+                            let index = imageFiles.map(it => it.source?.name).indexOf(openedMedia!!)
+                            let nextFileName = imageFiles[index - 1].source?.name
+                            if (nextFileName) {
+                                openMedia(nextFileName)
+                            } else {
+                                alert("This is last media")
+                            }
+                        }}>
+                            prev
+                        </button>
+                    </div>
+                    <div className={"col-span-8"}>
+                        <MediaView fileName={openedMedia} filePath={filePath}/>
+                    </div>
+                    <div className={"col-span-2"}>
+                        <button  className={"w-full h-full"} onClick={() => {
+                            let index = imageFiles.map(it => it.source?.name).indexOf(openedMedia!!)
+                            let nextFileName = imageFiles[index + 1].source?.name
+                            if (nextFileName) {
+                                openMedia(nextFileName)
+                            } else {
+                                alert("This is last media")
+                            }
+                        }}>
+                            Next
+                        </button>
+                    </div>
                 </div>
             </Sidebar>
         ) : null
