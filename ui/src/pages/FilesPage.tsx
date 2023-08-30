@@ -4,6 +4,7 @@ import { BsGrid3X3 } from "react-icons/bs";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { GrOptimize } from "react-icons/gr";
 import { MdList } from "react-icons/md";
+import { AiOutlineSecurityScan } from "react-icons/ai";
 
 import "styles/FilesPage.css"
 import "components/toolbox/Toolbox.css"
@@ -55,12 +56,13 @@ function MediaView(
 
 function FilesPage() {
     let [stats, setStats] = useState<{ [key: string]: any }>({});
-    let {"*": filePath = ""} = useParams<string>()
+    let { "*": filePath = "" } = useParams<string>()
     let [pathSegments, setPathSegments] = useState<string[]>([])
     let navigate = useNavigate();
     let [selectedFiles, setSelectedFiles] = useState<string[]>([])
-    let [searchParams, setSearchParams] = useSearchParams();
-    let [stateView, switchView] = useState<ViewType>(ViewType.Grid);
+    let [searchParams, setSearchParams] = useSearchParams()
+    let [stateView, switchView] = useState<ViewType>(ViewType.Grid)
+    let [inspectionsOpen, setInspectionsOpen] = useState<boolean>(false)
 
     let {
         data: content,
@@ -190,6 +192,15 @@ function FilesPage() {
                         </button>}
                 </div>
                 <div className={"toolbar-item"}>
+                    <button onClick={() => {
+                        setInspectionsOpen(true)
+                    }}>
+                        <AiOutlineSecurityScan
+                            className={"toolbar-icon"}
+                            title={"Inspect files"}/>
+                    </button>
+                </div>
+                <div className={"toolbar-item"}>
                     <button onClick={initOptimizationForSelected}>
                         <GrOptimize
                             className={"toolbar-icon"}
@@ -212,7 +223,9 @@ function FilesPage() {
                 ? (<span>LOADING ERROR</span>)
                 : (
                     <>
-                        <Inspections filePath={filePath}/>
+                        <Sidebar isVisible={inspectionsOpen} actionClose={() => setInspectionsOpen(false)}>
+                            <Inspections filePath={filePath}/>
+                        </Sidebar>
                         <DragArea
                             setSelectedItems={setSelectedFiles}
                         >
