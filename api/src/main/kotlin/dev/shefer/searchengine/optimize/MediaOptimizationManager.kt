@@ -188,10 +188,12 @@ class MediaOptimizationManager(
     fun find(rootName: String, path: Path): Path {
         if (rootName.contains(',')) {
             rootName.split(',').forEach {
-                val find = find(it, path)
+                runCatching {
+                    val find = find(it, path)
 
-                if (find.exists()) {
-                    return find
+                    if (find.exists()) {
+                        return find
+                    }
                 }
             }
             throw NoSuchFileException("Path does not exist $path")
@@ -199,31 +201,7 @@ class MediaOptimizationManager(
 
         when (rootName) {
             "thumbnails" -> {
-                if (!sourceMediaSubtree.resolve(path).isRegularFile()) {
-                    return NOT_EXISTING_PATH
-                }
-                val thumbnailPath = sourceMediaSubtree.resolve(path)
-                    .parent
-                    .resolve(DATA_DIR_NAME)
-                    .resolve("thumbnails")
-                    .resolve(path.name + ".thumbnail.jpg")
-
-                if (!thumbnailPath.exists()) {
-                    val sourceAbsolutePath = sourceMediaSubtree.resolve(path)
-                    val thumbnailsGenerator = thumbnailsGenerators.find { thumbnailsGenerator ->
-                        runCatching {
-                            thumbnailsGenerator.canRun(sourceAbsolutePath)
-                        }.getOrElse { false }
-                    }
-                        ?: throw NoSuchFileException("No thumbnail available for $path")
-                    runCatching {
-                        thumbnailPath.parent.createDirectories()
-                        thumbnailsGenerator.run(sourceAbsolutePath, thumbnailPath)
-                    }.onFailure { e ->
-                        LOG.error("Could not create thumbnail $path", e)
-                    }
-                }
-                return thumbnailPath
+                return getOrCreateThumbnail(sourceMediaSubtree.resolve(path))
             }
 
             "optimized" -> {
@@ -247,6 +225,34 @@ class MediaOptimizationManager(
                 return sourceMediaSubtree.resolve(path)
             }
         }
+    }
+
+    private fun getOrCreateThumbnail(absolutePath: Path): Path {
+        if (!absolutePath.isRegularFile()) {
+            return NOT_EXISTING_PATH
+        }
+        val thumbnailPath = absolutePath
+            .parent
+            .resolve(DATA_DIR_NAME)
+            .resolve("thumbnails")
+            .resolve(absolutePath.name + ".thumbnail.jpg")
+
+        if (!thumbnailPath.exists()) {
+            val sourceAbsolutePath = absolutePath
+            val thumbnailsGenerator = thumbnailsGenerators.find { thumbnailsGenerator ->
+                runCatching {
+                    thumbnailsGenerator.canRun(sourceAbsolutePath)
+                }.getOrElse { false }
+            }
+                ?: throw NoSuchFileException("No thumbnail available")
+            runCatching {
+                thumbnailPath.parent.createDirectories()
+                thumbnailsGenerator.run(sourceAbsolutePath, thumbnailPath)
+            }.onFailure { e ->
+                LOG.error("Could not create thumbnail $absolutePath", e)
+            }
+        }
+        return thumbnailPath
     }
 
     private fun createThumbnail(sourceAbsolutePath: Path, thumbnailAbsolutePath: Path) {
