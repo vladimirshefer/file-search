@@ -26,9 +26,10 @@ export default function Sidebar(
             <RiCloseFill/>
         </button>
         <div className={"sidebar_background"}
-             onClick={actionClose}
+            onClick={actionClose}
         />
-        <div className={`sidebar_body bg-white overflow-hidden place-self-center w-full h-full grid place-content-center ${isVisible ? "" : "hidden"}`}>
+        <div
+            className={`sidebar_body bg-white overflow-hidden place-self-center w-full h-full grid place-content-center ${isVisible ? "" : "hidden"}`}>
             {children}
         </div>
     </div>
