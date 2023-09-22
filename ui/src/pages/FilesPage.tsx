@@ -12,12 +12,12 @@ import ConversionUtils from "utils/ConversionUtils";
 import { MediaInfo } from "lib/Api";
 import MediaCardGrid from "components/FilesPage/media/MediaCardGrid";
 import Breadcrumbs from "components/files/BreadCrumbs";
-import DirectoryCard from "components/FilesPage/directories/DirectoryCard";
+import ToggleableDirectoriesView from "components/FilesPage/directories/ToggleableDirectoriesView";
 import { Readme } from "components/files/Readme";
 import FilesList from "components/FilesPage/FilesList/FilesList";
 import fileApiService from "lib/service/FileApiService";
 import DragArea from "components/drag/DragArea";
-import Sidebar from "components/modal/Sidebar";
+import ModalWindow from "components/modal/ModalWindow";
 import ImageView from "components/FilesPage/ImageView/ImageView";
 import { ViewType } from 'enums/view';
 import { useQuery } from "@tanstack/react-query";
@@ -159,7 +159,7 @@ function FilesPage() {
 
     return <div>
         {(!!openedMedia) ? (
-            <Sidebar
+            <ModalWindow
                 isVisible={!!openedMedia}
                 actionClose={() => closeMedia()}
             >
@@ -194,7 +194,7 @@ function FilesPage() {
                         </button>
                     </div>
                 </div>
-            </Sidebar>
+            </ModalWindow>
         ) : null
         }
         <div className="toolbox flex">
@@ -244,17 +244,17 @@ function FilesPage() {
                 ? (<span>LOADING ERROR</span>)
                 : (
                     <>
-                        <Sidebar isVisible={inspectionsOpen} actionClose={() => setInspectionsOpen(false)}>
+                        <ModalWindow isVisible={inspectionsOpen} actionClose={() => setInspectionsOpen(false)}>
                             <Inspections filePath={filePath}/>
-                        </Sidebar>
+                        </ModalWindow>
                         <DragArea
                             setSelectedItems={setSelectedFiles}
                         >
-                            <DirectoryCard
+                            <ToggleableDirectoriesView
                                 directories={content?.directories || []}
                                 path={filePath}
                                 selectedDirectories={selectedFiles}
-                                actionOpen={(directoryName) => openSubdirectory(directoryName)}
+                                actionOpen={(directoryName: string) => openSubdirectory(directoryName)}
                                 isView={stateView}
                             />
                             <MediaCardGrid

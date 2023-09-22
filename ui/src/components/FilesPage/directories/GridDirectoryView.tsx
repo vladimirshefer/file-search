@@ -1,10 +1,12 @@
-import {useState} from "react";
+import { useState } from "react";
 import axios from "axios";
-import {Link, useNavigate} from "react-router-dom";
+import { Link } from "react-router-dom";
 import ConversionUtils from "utils/ConversionUtils";
 import "./DirectoryCardGrid.css"
+import { GoFileDirectory } from "react-icons/go";
+import { AiOutlineInfoCircle } from "react-icons/ai";
 
-export default function DirectoryCardGrid(
+export default function GridDirectoryView(
     {
         name,
         parent,
@@ -19,8 +21,6 @@ export default function DirectoryCardGrid(
 
     let [size, setSize] = useState<number | null>(null)
 
-    const navigate = useNavigate();
-
     async function requestSize() {
         let result = await axios.get("/api/files/size", {
             params: {
@@ -33,7 +33,9 @@ export default function DirectoryCardGrid(
 
     return <li
         key={name}
-        className={`directory-card drag-selectable ${isSelected ? "directory-card__selected" : ""}`}
+        className={`directory-card col-span-6 sm:col-span-4 md:col-span-3 lg:col-span-2 drag-selectable 
+                    overflow-hidden rounded-md 
+                    ${isSelected ? "bg-primary-200" : ""}`}
         data-selection-id={name}
         onDoubleClick={() =>
             actionOpen()
@@ -42,17 +44,19 @@ export default function DirectoryCardGrid(
     >
 
         <div className="directory-card_main-line">
-            <div className={"directory-card_icon"}>
-                <svg
-                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}
-                    stroke="currentColor" className="w-6 h-6">
-                    <path strokeLinecap="round" strokeLinejoin="round"
-                          d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"/>
-                </svg>
+            <div className={"directory-card_icon text-lg"}>
+                <GoFileDirectory className={"text-lg"}/>
             </div>
-            <span className={"directory-card_name"}>
+            <span className={"truncate mx-2 cursor-default"}>
                 {name}
             </span>
+            <button className={"text-lg"}
+                onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log("Directory info requested");
+                }}
+            ><AiOutlineInfoCircle/></button>
         </div>
         <div className={"directory-card_status-line"}>
                 <span

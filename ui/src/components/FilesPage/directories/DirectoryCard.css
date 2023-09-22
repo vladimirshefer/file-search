@@ -1,19 +1,9 @@
-.directory-card-grid {
-    @apply grid;
-    @apply grid-cols-12;
-}
 
 .directory-card-grid_header {
-    @apply col-span-12;
     display: flex;
     font-weight: 500;
     padding: 0.7em;
     margin-bottom: 10px;
-}
-
-.directory-card-list {
-    @apply grid;
-    @apply col-span-6;
 }
 
 .directory-card-list:last-child {

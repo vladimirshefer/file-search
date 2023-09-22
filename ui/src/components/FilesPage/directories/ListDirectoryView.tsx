@@ -3,8 +3,9 @@ import axios from "axios";
 import ConversionUtils from "utils/ConversionUtils";
 import "./DirectoryCardList.css";
 import { Link, useNavigate } from "react-router-dom";
+import { GoFileDirectory } from "react-icons/go";
 
-export default function DirectoryCardGrid(
+export default function ListDirectoryView(
     {
         name,
         parent,
@@ -32,10 +33,11 @@ export default function DirectoryCardGrid(
 
     return <>
         <li key={name}
-            className={`directory-list-info grid grid-cols-2 drag-selectable 
-            ds-selectable ${isSelected ? "directory-list-info__selected" : ""}`}
+            className={`directory-list-info col-span-12 grid grid-cols-2 drag-selectable shadow
+            ${isSelected ? "bg-primary-200" : ""}`}
             data-selection-id={name}>
             <Link
+                draggable={false}
                 to={"./" + name}
                 relative={"path"}
                 title={name}
@@ -43,28 +45,34 @@ export default function DirectoryCardGrid(
                     navigate("./" + name)
                 }}
             >
-                <div className="directory-list-info-card_main-line">
-                    <div className={"directory-list-card_icon m-3"}>
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}
-                            stroke="currentColor" className="w-6 h-6">
-                            <path strokeLinecap="round" strokeLinejoin="round"
-                                d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
-                        </svg>
+                <div className="flex content-center items-center">
+                    <div className={"mx-3 my-1"}>
+                        <div className={"directory-card_icon text-lg"}>
+                            <GoFileDirectory className={"text-lg"}/>
+                        </div>
                     </div>
                     <span className={"directory-list-info-card_name"}>
                         {name}
                     </span>
                 </div>
             </Link>
-            <div className={"directory-list-info-card_status-line"}>
+            <div className={`bg-primary-300 p-1
+                flex justify-center 
+                items-center content-center justify-self-end 
+                col-span-2 md:col-span-3 lg:col-span-1
+                cursor-pointer
+                rounded-md
+                text-sm
+            `}>
                 <span
                     className={"directory-list-card_status-item directory-card_size"}
                     onClick={(e) => {
                         e.preventDefault()
+                        e.stopPropagation()
                     }}
                     onDoubleClick={(e) => {
                         e.preventDefault();
+                        e.stopPropagation()
                         requestSize(name)
                     }}
                 >

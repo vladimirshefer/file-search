@@ -1,25 +1,10 @@
 .directory-card {
     border: 1px solid #ddd;
-    @apply mx-1;
-    @apply mb-2;
-    @apply col-span-6;
-    @apply sm:col-span-4;
-    @apply md:col-span-3;
-    @apply lg:col-span-2;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     @apply rounded-md;
-    @apply font-medium;
     @apply shadow;
-}
-
-.directory-card__selected {
-    @apply bg-primary-200;
-}
-
-.directory-card a {
-    text-decoration: inherit;
 }
 
 .directory-card_main-line {
@@ -30,16 +15,10 @@
 
 .directory-card_status-line {
     display: flex;
-    justify-content: end;
+    justify-content: flex-end;
     overflow: hidden;
     margin: 0;
     user-select: none;
-}
-
-.directory-card_name {
-    @apply truncate;
-    margin: 0 10px;
-    cursor: default;
 }
 
 .directory-card_status-item {

@@ -1,10 +1,10 @@
 import { MediaDirectoryInfo } from "lib/Api";
-import DirectoryCardGrid from "components/FilesPage/directories/DirectoryCardGrid";
-import DirectoryCardList from "components/FilesPage/directories/DirectoryCardList";
+import GridDirectoryView from "components/FilesPage/directories/GridDirectoryView";
+import ListDirectoryView from "components/FilesPage/directories/ListDirectoryView";
 import { ViewType } from 'enums/view';
 import "./DirectoryCard.css"
 
-export default function DirectoryCard(
+export default function ToggleableDirectoriesView(
     {
         directories,
         path,
@@ -21,13 +21,13 @@ export default function DirectoryCard(
 ) {
 
     return <>
-        <ul className={isView === ViewType.Grid ? "directory-card-grid" : "directory-card-list"}>
-            <p className={isView === ViewType.Grid ?  "directory-card-grid_header" : "directory-card-list_header"}>
+        <ul className={`grid grid-cols-12 p-3 gap-2`}>
+            <p className={`col-span-12 p-3 text-lg font-bold`}>
                 Directories ({directories.length})
             </p>
             {isView === ViewType.Grid ?
                 directories.map((directory) =>
-                    <DirectoryCardGrid
+                    <GridDirectoryView
                         name={directory.name}
                         parent={path}
                         key={directory.name}
@@ -35,7 +35,7 @@ export default function DirectoryCard(
                         actionOpen={() => actionOpen(directory.name)}
                     />
                 ) : directories.map((directory) =>
-                    <DirectoryCardList
+                    <ListDirectoryView
                         name={directory.name}
                         parent={path}
                         key={directory.name}
