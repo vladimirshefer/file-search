@@ -31,14 +31,7 @@ vim ./conf/buildAgent.properties # Set temcity server address
 ./bin/agent.sh start
 ```
 
-### Install NGINX
+### Install NGINX for local delevelopment
 ```bash
-apt install nginx
-vim /etc/nginx/sites-available/moafs.nginx.conf # insert contents of moafs.nginx.conf
-ln /etc/nginx/sites-available/moafs.nginx.conf /etc/nginx/sites-enabled/moafs.nginx.conf
-ln -sf ./deploy/moafs.nginx.conf /etc/nginx/sites-enabled/moafs.nginx.conf
-
-nginx -t
-service nginx start
-nginx -s reload
+sudo ./local/local_nginx_setup.sh
 ```
