@@ -71,7 +71,7 @@ function Inspections(
 
     let inspectionsList = useMemo<any[]>(() => inspectionsRequested ? inspections || [] : [], [inspections, inspectionsRequested])
 
-    return <div className={"bg-white p-3 w-full h-full"}>
+    return <div className={"bg-white p-3 w-full h-full overflow-scroll"}>
         <h3 className={"text-lg"}>
             Inspections
         </h3>
