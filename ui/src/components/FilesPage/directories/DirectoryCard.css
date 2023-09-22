@@ -1,0 +1,19 @@
+
+.directory-card-grid_header {
+    display: flex;
+    font-weight: 500;
+    padding: 0.7em;
+    margin-bottom: 10px;
+}
+
+.directory-card-list:last-child {
+    padding-bottom: 40px;
+}
+
+.directory-card-list .directory-card-list_header {
+    grid-column: span 2;
+    display: flex;
+    font-weight: 500;
+    padding: 0.7em;
+    margin-bottom: 10px;
+}

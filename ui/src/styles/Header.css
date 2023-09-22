@@ -1,0 +1,28 @@
+.header {
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+}
+
+.header_logo {
+    padding: 0.5em 1em;
+    min-width: 3em;
+    display: flex;
+    justify-content: space-around;
+}
+
+.header_logo_text {
+    font-size: 1.1em;
+}
+
+.header_nav-item {
+    min-width: 5em;
+    @apply text-center;
+    color: black;
+    padding: 5px;
+    margin: 0 5px;
+    @apply text-inherit;
+    @apply rounded-md;
+    @apply hover:shadow hover:shadow-default-500;
+}

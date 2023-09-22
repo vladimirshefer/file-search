@@ -1,0 +1,53 @@
+:root {
+    --process-inprogress-bg-animation-width: 40px;
+    --process-inprogress-bg-animation-color-1: #f8e9db;
+    --process-inprogress-bg-animation-color-2: #fff5ed;
+}
+.process-loading-background {
+    left: calc(0px - var(--process-inprogress-bg-animation-width) * 4);
+
+    background: repeating-linear-gradient(
+            135deg,
+            var(--process-inprogress-bg-animation-color-1) 2px,
+            var(--process-inprogress-bg-animation-color-2) 3px,
+            var(--process-inprogress-bg-animation-color-2) calc(var(--process-inprogress-bg-animation-width)/2),
+            var(--process-inprogress-bg-animation-color-1) calc(var(--process-inprogress-bg-animation-width)/2 + 1px),
+            var(--process-inprogress-bg-animation-color-1) var(--process-inprogress-bg-animation-width)
+    );
+
+    animation-name: PROCESS_LOADING_BG_KEYFRAMES;
+    animation-duration: 3s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+@keyframes PROCESS_LOADING_BG_KEYFRAMES {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(calc(var(--process-inprogress-bg-animation-width) * 4));
+    }
+}
+
+.background-wrapper {
+    height: auto;
+    position: relative;
+    overflow: hidden;
+}
+
+.background-wrapper_background {
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: -1;
+    position: absolute;
+}
+
+.terminal {
+    font-family: "Courier New", monospace;
+}
+
+details summary {
+    cursor: pointer;
+}

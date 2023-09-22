@@ -1,0 +1,14 @@
+.media-card-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    max-width: 100%;
+    list-style: none;
+    grid-gap: 0.7em;
+    padding: 1em;
+    @apply text-default-600;
+    @apply font-medium;
+}
+
+.media-card-grid_header {
+    grid-column: span 12;
+}
