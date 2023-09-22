@@ -1,5 +1,6 @@
 import "./index.css"
 import "components/toolbox/Toolbox.css"
+import { Fragment } from "react";
 
 export default function Breadcrumbs(
     {
@@ -11,12 +12,13 @@ export default function Breadcrumbs(
     }) {
 
     return <ul className={"flex ml-3"}>
-        {names.map((name, index) => <>
-                <li key={name}>
+        {names.map((name, index) => <Fragment key={name}>
+                <li>
                     <button
                         className="breadcrumb"
                         onClick={e => {
                             e.preventDefault();
+                            e.stopPropagation()
                             selectFn(index)
                         }}
                         title={name}
@@ -24,11 +26,10 @@ export default function Breadcrumbs(
                         {name}
                     </button>
                 </li>
-                <li className={"last:hidden mx-1"}
-                    key={name + "_delimiter"}>
+                <li className={"last:hidden mx-1"}>
                     {"/"}
                 </li>
-            </>
+            </Fragment>
         )}
     </ul>
 }
