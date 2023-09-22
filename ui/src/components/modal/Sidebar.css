@@ -4,15 +4,9 @@
 }
 
 .sidebar_body {
-    position: fixed;
-    @apply bg-white;
     z-index: 50;
-}
-
-.sidebar_body__right {
-    height: 100vh;
-    right: 0;
-    top: 0;
+    @apply p-3;
+    @apply rounded-md;
 }
 
 .sidebar_background {
@@ -22,5 +16,12 @@
     right: 0;
     top: 0;
     width: 100vw;
-    background-color: rgba(0,0,0,0.5);
+    @apply bg-black/50;
+}
+
+.sidebar_close-button {
+    z-index: 55;
+    position: fixed;
+    right:0;
+    top: 0;
 }

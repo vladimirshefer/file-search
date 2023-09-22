@@ -32,7 +32,8 @@ export default function DirectoryCardGrid(
 
     return <>
         <li key={name}
-            className={`directory-list-info grid grid-cols-2 drag-selectable ds-selectable ${isSelected ? "directory-list-info__selected" : ""}`}
+            className={`directory-list-info grid grid-cols-2 drag-selectable 
+            ds-selectable ${isSelected ? "directory-list-info__selected" : ""}`}
             data-selection-id={name}>
             <Link
                 to={"./" + name}

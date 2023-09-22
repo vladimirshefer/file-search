@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { BsGrid3X3 } from "react-icons/bs";
+import { BsGrid3X2Gap } from "react-icons/bs";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { GrOptimize } from "react-icons/gr";
-import { MdList } from "react-icons/md";
+import { MdOutlineList } from "react-icons/md";
 import { AiOutlineSecurityScan } from "react-icons/ai";
 
 import "styles/FilesPage.css"
@@ -36,7 +36,7 @@ function MediaView(
     let openedMediaType = !!fileName ? mime.getType(fileName) : null
 
     if (openedMediaType?.includes("video/")) {
-        return <div className={"max-h-[75vh]"}>
+        return <div className={"w-full h-full"}>
             <video className={"max-h-[75vh] min-h-[50vh]"}
                 src={`/api/files/show/?rootName=source,optimized&path=${filePath}/${fileName}#t=0.1`}
                 controls={true}
@@ -46,12 +46,16 @@ function MediaView(
         </div>;
     }
 
-    return openedMediaType?.includes("image/")
-        ? <ImageView
+    function getImageCompareView() {
+        return <ImageView
             // TODO use only files from corresponding root. here is the temp fix to ui not fail
             image1Url={`/api/files/show/?rootName=source,optimized&path=${filePath}/${fileName}`}
             image2Url={`/api/files/show/?rootName=optimized,source&path=${filePath}/${fileName}`}
-        />
+        />;
+    }
+
+    return openedMediaType?.includes("image/")
+        ? getImageCompareView()
         : null;
 
 }
@@ -159,8 +163,8 @@ function FilesPage() {
                 isVisible={!!openedMedia}
                 actionClose={() => closeMedia()}
             >
-                <div className={"grid grid-cols-12 w-[75vw]"}>
-                    <div className={"media_view_control col-span-2"}>
+                <div className={"grid grid-cols-12 w-full h-full"}>
+                    <div className={"col-span-2"}>
                         <button className={"w-full h-full"} onClick={() => {
                             let index = imageFiles.map(it => it.source?.name).indexOf(openedMedia!!)
                             let nextFileName = imageFiles[index - 1].source?.name
@@ -170,10 +174,10 @@ function FilesPage() {
                                 alert("This is last media")
                             }
                         }}>
-                            prev
+                            Prev
                         </button>
                     </div>
-                    <div className={"col-span-8"}>
+                    <div className={"col-span-8 place-content-center"}>
                         <MediaView fileName={openedMedia} filePath={filePath}/>
                     </div>
                     <div className={"col-span-2"}>
@@ -202,10 +206,10 @@ function FilesPage() {
                 <div className={"toolbar-item"}>
                     {stateView === ViewType.Grid ?
                         <button onClick={() => switchView(ViewType.List)}>
-                            <BsGrid3X3 className={"toolbar-icon"} title={"Grid"}/>
+                            <BsGrid3X2Gap className={"toolbar-icon"} title={"Grid"}/>
                         </button>
                         : <button onClick={() => switchView(ViewType.Grid)}>
-                            <MdList className={"toolbar-icon"} title={"List"}/>
+                            <MdOutlineList className={"toolbar-icon"} title={"List"}/>
                         </button>}
                 </div>
                 <div className={"toolbar-item"}>
